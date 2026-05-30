@@ -40,7 +40,7 @@ export default function CaptureClientButton({ lighterId, isLoggedIn, alreadyOwns
                     try {
                         const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
                         const geoData = await geoRes.json();
-                        city = geoData.address?.city || geoData.address?.town || geoData.address?.village || "Unknown";
+                        city = geoData.address?.city || geoData.address?.town || geoData.address?.village || geoData.address?.municipality || geoData.address?.county || geoData.address?.state || geoData.address?.country || "Unknown";
                     } catch (e) {
                         console.error("Geocoding failed", e);
                     }
