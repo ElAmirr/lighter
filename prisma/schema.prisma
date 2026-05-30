@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String             @id @default(uuid())
+  username         String             @unique
+  email            String             @unique
+  password_hash    String
+  avatar_url       String?
+  created_at       DateTime           @default(now())
+  
+  lighters         Lighter[]          @relation("CurrentOwner")
+  history_entries  OwnershipHistory[] @relation("PreviousOwner")
+  scans            Scan[]
+}
+
+model Lighter {
+  id               String             @id @default(uuid())
+  name             String
+  collection       String
+  rarity           String
+  image_url        String?
+  current_owner_id String?
+  scan_count       Int                @default(0)
+  created_at       DateTime           @default(now())
+
+  current_owner    User?              @relation("CurrentOwner", fields: [current_owner_id], references: [id])
+  history_entries  OwnershipHistory[]
+  scans            Scan[]
+}
+
+model OwnershipHistory {
+  id               String             @id @default(uuid())
+  lighter_id       String
+  owner_id         String
+  captured_at      DateTime           @default(now())
+  latitude         Float?
+  longitude        Float?
+  city_name        String             @default("Unknown")
+
+  lighter          Lighter            @relation(fields: [lighter_id], references: [id])
+  owner            User               @relation("PreviousOwner", fields: [owner_id], references: [id])
+}
+
+model Scan {
+  id               String             @id @default(uuid())
+  lighter_id       String
+  user_id          String?
+  scanned_at       DateTime           @default(now())
+  latitude         Float?
+  longitude        Float?
+
+  lighter          Lighter            @relation(fields: [lighter_id], references: [id])
+  user             User?              @relation(fields: [user_id], references: [id])
+}

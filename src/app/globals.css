@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-davay-bg: #F8F7F4;
+  --color-davay-card: #FFFFFF;
+  --color-davay-primary: #D85A30;
+  --color-davay-primary-light: #FEF8F6;
+  
+  --color-davay-text: #1A1A1A;
+  --color-davay-muted: #888888;
+  --color-davay-hint: #BBBBBB;
+
+  /* Edition Backgrounds */
+  --color-edition-tunis: #FDF0EA;
+  --color-edition-sfax: #EAF3DE;
+  --color-edition-sahel: #E6F1FB;
+  --color-edition-meme: #FBEAF0;
+  --color-edition-carthage: #EEEDFE;
+  --color-edition-default: #EFEDE8;
+  
+  /* Edition Accents */
+  --color-accent-tunis: #D85A30;
+  --color-accent-sfax: #3B6D11;
+  --color-accent-sahel: #185FA5;
+  --color-accent-meme: #993556;
+  --color-accent-carthage: #534AB7;
+  --color-accent-generic: #888888;
+  
+  /* Rarity Text */
+  --color-rarity-common-text: #5F5E5A;
+  --color-rarity-uncommon-text: #3B6D11;
+  --color-rarity-rare-text: #185FA5;
+  --color-rarity-epic-text: #534AB7;
+  --color-rarity-legendary-text: #993C1D;
+
+  /* Rarity Backgrounds */
+  --color-rarity-common: #EFEDE8;
+  --color-rarity-uncommon: #EAF3DE;
+  --color-rarity-rare: #E6F1FB;
+  --color-rarity-epic: #EEEDFE;
+  --color-rarity-legendary: #FAECE7;
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  background-color: var(--color-davay-bg);
+  color: var(--color-davay-text);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  background-color: var(--color-davay-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Base resets required for the aesthetic */
+* {
+  box-sizing: border-box;
+}
