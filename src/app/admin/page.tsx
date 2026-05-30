@@ -9,6 +9,9 @@ export default function AdminPage() {
 
     const [name, setName] = useState('');
     const [collection, setCollection] = useState('Tunis');
+    const [customCollections, setCustomCollections] = useState<string[]>(['Tunis', 'Sfax', 'Sahel', 'Meme', 'Carthage', 'Default']);
+    const [newCollectionName, setNewCollectionName] = useState('');
+    const [isAddingCollection, setIsAddingCollection] = useState(false);
     const [rarity, setRarity] = useState('Common');
 
     const [lighters, setLighters] = useState<any[]>([]);
@@ -92,7 +95,7 @@ export default function AdminPage() {
 
     return (
         <div className="fixed inset-0 z-[9999] w-screen h-screen overflow-y-auto bg-gray-50 p-6 flex flex-col font-sans">
-            <h1 className="text-3xl font-black mb-8 text-orange-600">DAVAY ARCHITECTURE</h1>
+            <h1 className="text-3xl font-black mb-8 text-orange-600">DAVAY ADMIN</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
@@ -106,15 +109,22 @@ export default function AdminPage() {
                         </div>
                         <div className="flex gap-4">
                             <div className="flex-1">
-                                <label className="text-xs font-bold text-gray-500 uppercase">Collection</label>
-                                <select value={collection} onChange={e => setCollection(e.target.value)} className="w-full mt-1 p-3 border rounded-lg bg-white">
-                                    <option>Tunis</option>
-                                    <option>Sfax</option>
-                                    <option>Sahel</option>
-                                    <option>Meme</option>
-                                    <option>Carthage</option>
-                                    <option>Default</option>
-                                </select>
+                                <label className="text-xs font-bold text-gray-500 uppercase flex justify-between">
+                                    <span>Collection</span>
+                                    <button type="button" onClick={() => setIsAddingCollection(!isAddingCollection)} className="text-orange-500 hover:underline">
+                                        {isAddingCollection ? 'Cancel' : '+ Add'}
+                                    </button>
+                                </label>
+                                {isAddingCollection ? (
+                                    <div className="flex mt-1">
+                                        <input type="text" value={newCollectionName} onChange={e => setNewCollectionName(e.target.value)} className="w-full p-3 border border-gray-300 rounded-l-lg outline-none focus:border-black" placeholder="Custom" />
+                                        <button type="button" onClick={() => { if (newCollectionName) { setCustomCollections([...customCollections, newCollectionName]); setCollection(newCollectionName); setNewCollectionName(''); setIsAddingCollection(false); } }} className="bg-black text-white px-4 rounded-r-lg font-bold">Add</button>
+                                    </div>
+                                ) : (
+                                    <select value={collection} onChange={e => setCollection(e.target.value)} className="w-full mt-1 p-3 border rounded-lg bg-white">
+                                        {customCollections.map(c => <option key={c} value={c}>{c}</option>)}
+                                    </select>
+                                )}
                             </div>
                             <div className="flex-1">
                                 <label className="text-xs font-bold text-gray-500 uppercase">Rarity</label>

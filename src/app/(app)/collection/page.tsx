@@ -34,7 +34,10 @@ export default async function CollectionPage() {
         } : undefined
     });
 
-    const categories = ['Tunis', 'Sfax', 'Sahel', 'Meme', 'Carthage', 'Default'];
+    const allLighters = await prisma.lighter.findMany({ select: { collection: true } });
+    const defaultCategories = ['Tunis', 'Sfax', 'Sahel', 'Meme', 'Carthage', 'Default'];
+    const dbCategories = Array.from(new Set(allLighters.map(l => l.collection)));
+    const categories = Array.from(new Set([...defaultCategories, ...dbCategories]));
 
     return (
         <>
