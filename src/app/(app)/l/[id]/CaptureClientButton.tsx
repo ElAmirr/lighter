@@ -70,15 +70,16 @@ export default function CaptureClientButton({ lighterId, isLoggedIn, alreadyOwns
             });
 
             if (!res.ok) {
-                throw new Error("Failed capture");
+                const body = await res.json().catch(() => ({}));
+                throw new Error(body.detail || body.error || `HTTP ${res.status}`);
             }
 
             setCityName(city);
             setSuccess(true);
             router.refresh();
 
-        } catch (e) {
-            alert("Error capturing lighter.");
+        } catch (e: any) {
+            alert("Error capturing lighter: " + (e?.message || e));
             setLoading(false);
         }
     };
