@@ -22,7 +22,7 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    if (isPublicPath && token && path !== '/') {
+    if (isPublicPath && token && path !== '/' && path !== '/admin') {
         return NextResponse.redirect(new URL('/home', request.url));
     }
 

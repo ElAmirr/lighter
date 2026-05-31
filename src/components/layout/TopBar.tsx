@@ -29,7 +29,10 @@ export default function TopBar({ rightIcon = 'bell', rightLabel }: TopBarProps) 
                 ) : null}
 
                 <button
-                    onClick={() => { document.cookie = "token=; max-age=0; path=/"; window.location.href = '/login'; }}
+                    onClick={async () => {
+                        await fetch('/api/auth/logout', { method: 'POST' });
+                        window.location.href = '/login';
+                    }}
                     className="p-1 hover:text-red-500 transition-colors ml-2"
                     aria-label="Logout"
                     title="Logout"

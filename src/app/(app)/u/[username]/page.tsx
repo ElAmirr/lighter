@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { PrismaClient } from '@prisma/client';
 import TopBar from '@/components/layout/TopBar';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Settings, Zap, Flame, MapPin, Star, Crown, Globe, Circle, Droplet, Leaf } from 'lucide-react';
 import { cookies } from 'next/headers';
@@ -40,9 +40,9 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
     }
 
     if (username === 'me' && currentUsername) {
-        username = currentUsername;
+        return redirect(`/u/${currentUsername}`);
     } else if (username === 'me' && !currentUsername) {
-        return notFound();
+        return redirect('/login');
     }
 
     const user = await prisma.user.findUnique({
