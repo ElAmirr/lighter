@@ -68,7 +68,9 @@ async function main() {
                         create: { name: l.rarity }
                     }
                 },
-                current_owner_id: user.id
+                current_owner: {
+                    connect: { id: user.id }
+                }
             }
         })
     }
