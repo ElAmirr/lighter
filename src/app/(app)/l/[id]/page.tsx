@@ -23,12 +23,6 @@ function getEditionStyles(collection: string) {
 
 function getRarityStyle(rarity: string) {
     switch (rarity) {
-        case 'Common': return 'bg-[var(--color-rarity-common)] text-[var(--color-rarity-common-text)]';
-        case 'Uncommon': return 'bg-[var(--color-rarity-uncommon)] text-[var(--color-rarity-uncommon-text)]';
-        case 'Rare': return 'bg-[var(--color-rarity-rare)] text-[var(--color-rarity-rare-text)]';
-        case 'Epic': return 'bg-[var(--color-rarity-epic)] text-[var(--color-rarity-epic-text)]';
-        case 'Legendary': return 'bg-[var(--color-rarity-legendary)] text-[var(--color-rarity-legendary-text)]';
-        default: return 'bg-gray-100 text-gray-500';
         case 'Common': return { bg: 'bg-[var(--color-rarity-common)]', text: 'text-[var(--color-rarity-common-text)]' };
         case 'Uncommon': return { bg: 'bg-[var(--color-rarity-uncommon)]', text: 'text-[var(--color-rarity-uncommon-text)]' };
         case 'Rare': return { bg: 'bg-[var(--color-rarity-rare)]', text: 'text-[var(--color-rarity-rare-text)]' };
