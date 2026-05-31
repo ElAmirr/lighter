@@ -21,15 +21,15 @@ export async function GET(request: Request) {
             orderBy: { created_at: 'desc' }
         });
 
+        const collections = await prisma.collection.findMany();
+        const rarities = await prisma.rarity.findMany();
+
         const users = await prisma.user.findMany({
             include: {
                 history_entries: { select: { id: true } } // just to compute length
             },
             orderBy: { created_at: 'desc' }
         });
-
-        const collections = await prisma.collection.findMany();
-        const rarities = await prisma.rarity.findMany();
 
         return NextResponse.json({ lighters, users, collections, rarities });
     } catch (error) {

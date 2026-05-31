@@ -48,9 +48,7 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
     const user = await prisma.user.findUnique({
         where: { username },
         include: {
-            lighters: {
-                include: { collection: true, rarity: true }
-            },
+            lighters: { include: { collection: true, rarity: true } },
             history_entries: {
                 include: { lighter: { include: { collection: true, rarity: true } } }
             },
@@ -88,8 +86,8 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
     const has10Captures = totalCaptures >= 10;
     const has3Cities = distinctCities >= 3;
     const has10Cities = distinctCities >= 10;
-    const hasRare = user.history_entries.some(h => h.lighter.rarity === 'Rare' || h.lighter.rarity === 'Epic' || h.lighter.rarity === 'Legendary');
-    const hasLegendary = user.history_entries.some(h => h.lighter.rarity === 'Legendary');
+    const hasRare = user.history_entries.some(h => ['Rare', 'Epic', 'Legendary'].includes(h.lighter.rarity?.name || ''));
+    const hasLegendary = user.history_entries.some(h => h.lighter.rarity?.name === 'Legendary');
 
     return (
         <>
@@ -201,13 +199,7 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
                                 return (
                                     <Link href={`/l/${lighter.id}`} key={lighter.id} className="flex flex-col items-center group">
                                         <div className={`w-full aspect-square rounded-2xl flex items-center justify-center mb-1.5 shadow-sm border border-transparent group-hover:border-[var(--color-davay-primary)]/30 transition-all ${bg}`}>
-                                            {lighter.image_url ? (
-                                                <img src={lighter.image_url} className="w-12 h-12 rounded object-cover shadow-sm" />
-                                            ) : lighter.collection?.image_url ? (
-                                                <img src={lighter.collection.image_url} className="w-10 h-10 rounded-full object-cover shadow-sm opacity-90" />
-                                            ) : (
-                                                <Icon size={28} className={text} />
-                                            )}
+                                            <Icon size={28} className={text} />
                                         </div>
                                         <span className="text-[10px] font-bold text-[var(--color-davay-text)] max-w-full truncate px-1 text-center leading-tight">{lighter.name}</span>
                                         <span className="text-[9px] font-bold text-[var(--color-davay-muted)]">#{lighter.id.slice(0, 3)}</span>

@@ -32,13 +32,13 @@ export default async function CollectionPage() {
         where: currentUser ? {
             history_entries: { some: { owner_id: currentUser } }
         } : undefined,
-        include: {
-            collection: true,
-            rarity: true
-        }
+        include: { collection: true, rarity: true }
     });
 
-    const allCollections = await prisma.collection.findMany();
+    const allLighters = await prisma.lighter.findMany({ select: { collection: true } });
+    const defaultCategories = ['Tunis', 'Sfax', 'Sahel', 'Meme', 'Carthage', 'Default'];
+    const dbCategories = Array.from(new Set(allLighters.map(l => l.collection.name)));
+    const categories = Array.from(new Set([...defaultCategories, ...dbCategories]));
 
     return (
         <>
@@ -46,21 +46,16 @@ export default async function CollectionPage() {
             <div className="flex flex-col p-4 gap-6 pb-10">
                 <h1 className="text-2xl font-bold tracking-tight mb-2">My Discoveries</h1>
 
-                {allCollections.map(collectionModel => {
-                    const categoryLighters = lighters.filter(l => l.collection_id === collectionModel.id);
-                    const { bg, text, icon: Icon } = getEditionStyles(collectionModel.name);
+                {categories.map(category => {
+                    const categoryLighters = lighters.filter(l => l.collection?.name === category);
+                    const { bg, text, icon: Icon } = getEditionStyles(category);
 
                     if (categoryLighters.length === 0) return null;
 
                     return (
-                        <div key={collectionModel.id} className="mb-4">
+                        <div key={category} className="mb-4">
                             <h2 className={`text-xs font-bold tracking-widest uppercase mb-3 flex items-center gap-2 ${text}`}>
-                                {collectionModel.image_url ? (
-                                    <img src={collectionModel.image_url} className="w-4 h-4 rounded-full object-cover" />
-                                ) : (
-                                    <Icon size={14} />
-                                )}
-                                {collectionModel.name} COLLECTION ({categoryLighters.length})
+                                <Icon size={14} /> {category} COLLECTION ({categoryLighters.length})
                             </h2>
 
                             <div className="grid grid-cols-2 gap-3">
@@ -68,19 +63,9 @@ export default async function CollectionPage() {
                                     <Link href={`/l/${lighter.id}`} key={lighter.id} className={`flex flex-col p-3 rounded-2xl shadow-sm border border-black/5 active:scale-95 transition-transform ${bg}`}>
                                         <div className="flex justify-between items-start mb-2">
                                             <span className="text-[10px] font-bold opacity-50 mix-blend-darken">#{lighter.id.slice(0, 3)}</span>
-                                            <span className="text-[9px] font-bold uppercase tracking-wider bg-white/40 mix-blend-darken px-1.5 py-0.5 rounded-sm">{lighter.rarity?.name || 'Common'}</span>
+                                            <span className="text-[9px] font-bold uppercase tracking-wider bg-white/40 mix-blend-darken px-1.5 py-0.5 rounded-sm">{lighter.rarity?.name}</span>
                                         </div>
-
-                                        <div className="my-2 flex justify-center">
-                                            {lighter.image_url ? (
-                                                <img src={lighter.image_url} className="w-12 h-12 rounded object-cover shadow-sm" />
-                                            ) : collectionModel.image_url ? (
-                                                <img src={collectionModel.image_url} className="w-10 h-10 rounded-full object-cover shadow-sm opacity-90" />
-                                            ) : (
-                                                <Icon size={32} className={`opacity-80 ${text}`} />
-                                            )}
-                                        </div>
-
+                                        <Icon size={32} className={`my-2 opacity-80 ${text}`} />
                                         <span className="font-bold text-sm leading-snug mt-1 opacity-90 mix-blend-darken">{lighter.name}</span>
                                     </Link>
                                 ))}

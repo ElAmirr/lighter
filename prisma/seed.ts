@@ -23,54 +23,44 @@ async function main() {
         },
     })
 
+    // Create Collections
+    const collectionsData = ['Tunis', 'Sfax', 'Sahel', 'Meme', 'Carthage', 'Default'];
+    const collections: any = {};
+    for (const name of collectionsData) {
+        collections[name] = await prisma.collection.upsert({
+            where: { name },
+            update: {},
+            create: { name }
+        });
+    }
+
+    // Create Rarities
+    const raritiesData = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary'];
+    const rarities: any = {};
+    for (const name of raritiesData) {
+        rarities[name] = await prisma.rarity.upsert({
+            where: { name },
+            update: {},
+            create: { name }
+        });
+    }
+
     // Create standard lighters based on the spec
-    const lighters = [
-        {
-            name: 'Tunis Edition #01',
-            collection: 'Tunis',
-            rarity: 'Common'
-        },
-        {
-            name: 'Sfax Olive #041',
-            collection: 'Sfax',
-            rarity: 'Uncommon'
-        },
-        {
-            name: 'Meme #023',
-            collection: 'Meme',
-            rarity: 'Rare'
-        },
-        {
-            name: 'Carthage Glory',
-            collection: 'Carthage',
-            rarity: 'Epic'
-        },
-        {
-            name: 'Golden Flame',
-            collection: 'Default',
-            rarity: 'Legendary'
-        }
+    const lightersData = [
+        { name: 'Tunis Edition #01', collection: 'Tunis', rarity: 'Common' },
+        { name: 'Sfax Olive #041', collection: 'Sfax', rarity: 'Uncommon' },
+        { name: 'Meme #023', collection: 'Meme', rarity: 'Rare' },
+        { name: 'Carthage Glory', collection: 'Carthage', rarity: 'Epic' },
+        { name: 'Golden Flame', collection: 'Default', rarity: 'Legendary' }
     ]
 
-    for (const l of lighters) {
+    for (const l of lightersData) {
         await prisma.lighter.create({
             data: {
                 name: l.name,
-                collection: {
-                    connectOrCreate: {
-                        where: { name: l.collection },
-                        create: { name: l.collection }
-                    }
-                },
-                rarity: {
-                    connectOrCreate: {
-                        where: { name: l.rarity },
-                        create: { name: l.rarity }
-                    }
-                },
-                current_owner: {
-                    connect: { id: user.id }
-                }
+                collection_id: collections[l.collection].id,
+                rarity_id: rarities[l.rarity].id,
+                current_owner_id: user.id
             }
         })
     }

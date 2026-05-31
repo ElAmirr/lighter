@@ -21,16 +21,16 @@ model User {
 }
 
 model Collection {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  image_url   String?
-  lighters    Lighter[]
+  id        String    @id @default(uuid())
+  name      String    @unique
+  image_url String?
+  lighters  Lighter[]
 }
 
 model Rarity {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  lighters    Lighter[]
+  id       String    @id @default(uuid())
+  name     String    @unique
+  lighters Lighter[]
 }
 
 model Lighter {

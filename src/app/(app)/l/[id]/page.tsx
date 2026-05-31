@@ -29,6 +29,12 @@ function getRarityStyle(rarity: string) {
         case 'Epic': return 'bg-[var(--color-rarity-epic)] text-[var(--color-rarity-epic-text)]';
         case 'Legendary': return 'bg-[var(--color-rarity-legendary)] text-[var(--color-rarity-legendary-text)]';
         default: return 'bg-gray-100 text-gray-500';
+        case 'Common': return { bg: 'bg-[var(--color-rarity-common)]', text: 'text-[var(--color-rarity-common-text)]' };
+        case 'Uncommon': return { bg: 'bg-[var(--color-rarity-uncommon)]', text: 'text-[var(--color-rarity-uncommon-text)]' };
+        case 'Rare': return { bg: 'bg-[var(--color-rarity-rare)]', text: 'text-[var(--color-rarity-rare-text)]' };
+        case 'Epic': return { bg: 'bg-[var(--color-rarity-epic)]', text: 'text-[var(--color-rarity-epic-text)]' };
+        case 'Legendary': return { bg: 'bg-[var(--color-rarity-legendary)]', text: 'text-[var(--color-rarity-legendary-text)]' };
+        default: return { bg: 'bg-gray-100', text: 'text-gray-500' };
     }
 }
 
@@ -37,22 +43,17 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
     const lighter = await prisma.lighter.findUnique({
         where: { id: resolvedParams.id },
         include: {
-            collection: true,
-            rarity: true,
             current_owner: true,
             history_entries: {
                 orderBy: { captured_at: 'desc' },
                 include: { owner: true }
-            }
+            },
+            collection: true,
+            rarity: true
         }
     });
 
     if (!lighter) return notFound();
-
-    // Every time loaded, increment scan count if not an API? The prompt specifies "Every time /l/:id is loaded, increment scan_count in lighters table."
-    // But wait, server components running on GET shouldn't ideally mutate if we have Next.js caching unless we do it in a Server Action or Route Handler.
-    // Actually, we can just do a background fetch in the client to register a "view scan", or do it here.
-    // If we do it here, Next.js will complain about mutating in a render. We will do it in a small Client component using useEffect.
 
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -62,7 +63,7 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
         if (payload) currentUser = payload.userId;
     }
 
-    const { bg, text, icon: Icon } = getEditionStyles(lighter.collection?.name || 'Default');
+    const editionConf = getEditionStyles(lighter.collection?.name || 'Default');
     const rarityStyle = getRarityStyle(lighter.rarity?.name || 'Common');
 
     // Calculate distinct cities
@@ -75,28 +76,17 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
             <TopBar rightLabel={`davay.tn/l/${lighter.id.slice(0, 6)}`} />
             <div className="flex flex-col flex-1 pb-10">
                 {/* Edition Card */}
-                <div className={`w-full h-72 flex flex-col items-center justify-center relative p-6 shadow-sm border-b border-[var(--color-davay-hint)]/20 ${bg}`}>
+                <div className={`w-full h-72 flex flex-col items-center justify-center relative p-6 shadow-sm border-b border-[var(--color-davay-hint)]/20 ${editionConf.bg}`}>
                     <div className="absolute top-4 right-4 text-[10px] uppercase font-bold tracking-widest opacity-60 mix-blend-multiply">
                         GEN 1
                     </div>
-                    {lighter.image_url ? (
-                        <div className="w-32 h-32 mb-4 rounded-xl border border-white shadow-xl overflow-hidden relative">
-                            <img src={lighter.image_url} className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-xl pointer-events-none"></div>
-                        </div>
-                    ) : lighter.collection?.image_url ? (
-                        <div className="w-28 h-28 mb-4 rounded-full border-4 border-white/50 shadow-lg overflow-hidden relative opacity-90 transition-transform">
-                            <img src={lighter.collection.image_url} className="w-full h-full object-cover" />
-                        </div>
-                    ) : (
-                        <Icon size={100} className={`mb-4 opacity-90 ${text}`} strokeWidth={1} />
-                    )}
-                    <div className={`font-bold tracking-[0.2em] uppercase text-sm ${text} mix-blend-multiply opacity-80`}>
-                        {lighter.collection?.name || 'Unknown'} COLLECTION
+                    <editionConf.icon size={100} className={`mb-4 opacity-90 ${editionConf.text}`} strokeWidth={1} />
+                    <div className={`font-bold tracking-[0.2em] uppercase text-sm ${editionConf.text} mix-blend-multiply opacity-80`}>
+                        {lighter.collection?.name} COLLECTION
                     </div>
                     <div className="absolute bottom-4 left-4 flex gap-2">
-                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${rarityStyle}`}>
-                            {lighter.rarity?.name || 'Common'}
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${rarityStyle.bg} ${rarityStyle.text}`}>
+                            {lighter.rarity?.name}
                         </span>
                         <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/40 text-black/70 mix-blend-darken">
                             #{lighter.id.slice(0, 3)}
@@ -122,12 +112,16 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
                             <div className="text-xl font-extrabold text-[--color-davay-primary]">{lighter.history_entries.length === 0 ? 1 : new Set(lighter.history_entries.map(h => h.owner_id)).size}</div>
                         </div>
                         <div className="flex-1 bg-[--color-davay-bg] py-3 rounded-xl border border-[--color-davay-hint]/20 text-center">
-                            <div className="text-[10px] font-bold tracking-wider text-[--color-davay-muted] uppercase mb-0.5">Scans</div>
-                            <div className="text-xl font-extrabold text-[--color-davay-primary]">{lighter.scan_count}</div>
+                            <div className="flex flex-col">
+                                <span className="text-xs font-bold text-gray-500 mb-1 border-b pb-1">COLLECTION</span>
+                                <span className={`text-sm font-bold capitalize ${editionConf.text}`}>{lighter.collection?.name}</span>
+                            </div>
                         </div>
                         <div className="flex-1 bg-[--color-davay-bg] py-3 rounded-xl border border-[--color-davay-hint]/20 text-center">
-                            <div className="text-[10px] font-bold tracking-wider text-[--color-davay-muted] uppercase mb-0.5">Cities</div>
-                            <div className="text-xl font-extrabold text-[--color-davay-primary]">{cities.length === 0 ? 1 : cities.length}</div>
+                            <div className="flex flex-col">
+                                <span className="text-xs font-bold text-gray-500 mb-1 border-b pb-1">RARITY</span>
+                                <span className={`text-[10px] font-black uppercase tracking-widest py-1 px-1.5 rounded-sm line-clamp-1 truncate ${rarityStyle.bg} ${rarityStyle.text}`}>{lighter.rarity?.name}</span>
+                            </div>
                         </div>
                     </div>
 
