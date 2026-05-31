@@ -56,8 +56,18 @@ async function main() {
         await prisma.lighter.create({
             data: {
                 name: l.name,
-                collection: l.collection,
-                rarity: l.rarity,
+                collection: {
+                    connectOrCreate: {
+                        where: { name: l.collection },
+                        create: { name: l.collection }
+                    }
+                },
+                rarity: {
+                    connectOrCreate: {
+                        where: { name: l.rarity },
+                        create: { name: l.rarity }
+                    }
+                },
                 current_owner_id: user.id
             }
         })
