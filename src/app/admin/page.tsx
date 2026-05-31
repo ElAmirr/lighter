@@ -113,7 +113,7 @@ export default function AdminPage() {
             if (res.ok) { resetCollectionForm(); fetchData(); }
         } finally { setLoading(false); }
     };
-    const editCollection = (c: any) => { setEditCollectionId(c.id); setCName(c.name); setCImage(''); };
+    const editCollection = (c: any) => { setEditCollectionId(c.id); setCName(c.name); setCImage(c.image_url || ''); };
     const deleteCollection = async (id: string) => {
         if (!confirm('Are you sure you want to delete this collection?')) return;
         await fetch('/api/admin/collections', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'davay_admin_2026', action: 'delete', id }) });
@@ -170,9 +170,16 @@ export default function AdminPage() {
                     </div>
                     <form onSubmit={createOrUpdateCollection} className="flex flex-col gap-3 mb-4 p-3 bg-gray-50 rounded-xl">
                         <input type="text" value={cName} onChange={e => setCName(e.target.value)} placeholder="Collection Name (e.g. Tunis)" className="p-2 border rounded" required />
-                        <label className="text-xs font-bold text-gray-500">Collection Logo / Image {editCollectionId ? '(optional new)' : ''}</label>
+                        <label className="text-xs font-bold text-gray-500">
+                            Collection Logo / Image {editCollectionId ? '— click to replace' : ''}
+                        </label>
+                        {cImage && (
+                            <div className="relative self-start">
+                                <img src={cImage} className="h-14 w-14 object-cover border rounded-lg bg-white p-1" />
+                                {editCollectionId && <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[9px] font-bold px-1 rounded">Current</span>}
+                            </div>
+                        )}
                         <input type="file" onChange={e => handleImageChange(e, setCImage)} accept="image/*" className="text-xs" />
-                        {cImage && <img src={cImage} className="h-10 object-contain self-start border bg-white p-1" />}
                         <button disabled={loading} type="submit" className="bg-orange-500 text-white font-bold p-2 rounded">
                             {editCollectionId ? 'Update Collection' : 'Add Collection'}
                         </button>

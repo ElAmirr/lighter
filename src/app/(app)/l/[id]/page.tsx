@@ -65,24 +65,33 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
 
     const alreadyOwns = lighter.current_owner_id === currentUser;
 
+    const heroImage = lighter.image_url || lighter.collection?.image_url || null;
+
     return (
         <>
             <TopBar rightLabel={`davay.tn/l/${lighter.id.slice(0, 6)}`} />
             <div className="flex flex-col flex-1 pb-10">
                 {/* Edition Card */}
-                <div className={`w-full h-72 flex flex-col items-center justify-center relative p-6 shadow-sm border-b border-[var(--color-davay-hint)]/20 ${editionConf.bg}`}>
-                    <div className="absolute top-4 right-4 text-[10px] uppercase font-bold tracking-widest opacity-60 mix-blend-multiply">
-                        GEN 1
-                    </div>
-                    <editionConf.icon size={100} className={`mb-4 opacity-90 ${editionConf.text}`} strokeWidth={1} />
-                    <div className={`font-bold tracking-[0.2em] uppercase text-sm ${editionConf.text} mix-blend-multiply opacity-80`}>
+                <div className={`w-full h-72 flex flex-col items-center justify-center relative overflow-hidden shadow-sm border-b border-[var(--color-davay-hint)]/20 ${heroImage ? '' : editionConf.bg} p-6`}>
+                    {heroImage ? (
+                        <>
+                            <img src={heroImage} alt={lighter.name} className="absolute inset-0 w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/30" />
+                        </>
+                    ) : (
+                        <editionConf.icon size={100} className={`mb-4 opacity-90 ${editionConf.text}`} strokeWidth={1} />
+                    )}
+                    <div className={`relative z-10 font-bold tracking-[0.2em] uppercase text-sm ${heroImage ? 'text-white drop-shadow' : `${editionConf.text} mix-blend-multiply opacity-80`}`}>
                         {lighter.collection?.name} COLLECTION
                     </div>
-                    <div className="absolute bottom-4 left-4 flex gap-2">
+                    <div className="absolute top-4 right-4 text-[10px] uppercase font-bold tracking-widest opacity-70 z-10 text-white drop-shadow">
+                        GEN 1
+                    </div>
+                    <div className="absolute bottom-4 left-4 flex gap-2 z-10">
                         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${rarityStyle.bg} ${rarityStyle.text}`}>
                             {lighter.rarity?.name}
                         </span>
-                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/40 text-black/70 mix-blend-darken">
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/40 text-white">
                             #{lighter.id.slice(0, 3)}
                         </span>
                     </div>
