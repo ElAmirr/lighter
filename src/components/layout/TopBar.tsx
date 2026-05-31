@@ -1,4 +1,4 @@
-import { Bell, Settings } from 'lucide-react';
+import { Bell, Settings, LogOut } from 'lucide-react';
 import Link from 'next/link';
 
 interface TopBarProps {
@@ -13,7 +13,7 @@ export default function TopBar({ rightIcon = 'bell', rightLabel }: TopBarProps) 
                 DA<span className="text-[var(--color-davay-primary)]">V</span>AY
             </Link>
 
-            <div className="flex items-center text-[var(--color-davay-muted)]">
+            <div className="flex items-center gap-2 text-[var(--color-davay-muted)]">
                 {rightLabel ? (
                     <span className="text-sm font-medium">{rightLabel}</span>
                 ) : rightIcon === 'bell' ? (
@@ -25,6 +25,11 @@ export default function TopBar({ rightIcon = 'bell', rightLabel }: TopBarProps) 
                         <Settings size={24} />
                     </button>
                 ) : null}
+
+                {/* Logout Button provided natively as regular anchor to trigger GET /api/auth/logout */}
+                <a href="/api/auth/logout" aria-label="Logout" className="p-1 hover:text-[var(--color-davay-primary)] transition-colors">
+                    <LogOut size={20} />
+                </a>
             </div>
         </header>
     );

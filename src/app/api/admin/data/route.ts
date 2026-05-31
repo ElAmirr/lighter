@@ -14,7 +14,9 @@ export async function GET(request: Request) {
 
         const lighters = await prisma.lighter.findMany({
             include: {
-                current_owner: { select: { username: true } }
+                current_owner: { select: { username: true } },
+                collection: true,
+                rarity: true
             },
             orderBy: { created_at: 'desc' }
         });
@@ -26,7 +28,10 @@ export async function GET(request: Request) {
             orderBy: { created_at: 'desc' }
         });
 
-        return NextResponse.json({ lighters, users });
+        const collections = await prisma.collection.findMany();
+        const rarities = await prisma.rarity.findMany();
+
+        return NextResponse.json({ lighters, users, collections, rarities });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

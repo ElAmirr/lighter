@@ -37,6 +37,8 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
     const lighter = await prisma.lighter.findUnique({
         where: { id: resolvedParams.id },
         include: {
+            collection: true,
+            rarity: true,
             current_owner: true,
             history_entries: {
                 orderBy: { captured_at: 'desc' },
@@ -60,8 +62,8 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
         if (payload) currentUser = payload.userId;
     }
 
-    const { bg, text, icon: Icon } = getEditionStyles(lighter.collection);
-    const rarityStyle = getRarityStyle(lighter.rarity);
+    const { bg, text, icon: Icon } = getEditionStyles(lighter.collection?.name || 'Default');
+    const rarityStyle = getRarityStyle(lighter.rarity?.name || 'Common');
 
     // Calculate distinct cities
     const cities = Array.from(new Set(lighter.history_entries.map(h => h.city_name)));
@@ -77,13 +79,24 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
                     <div className="absolute top-4 right-4 text-[10px] uppercase font-bold tracking-widest opacity-60 mix-blend-multiply">
                         GEN 1
                     </div>
-                    <Icon size={100} className={`mb-4 opacity-90 ${text}`} strokeWidth={1} />
+                    {lighter.image_url ? (
+                        <div className="w-32 h-32 mb-4 rounded-xl border border-white shadow-xl overflow-hidden relative">
+                            <img src={lighter.image_url} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-xl pointer-events-none"></div>
+                        </div>
+                    ) : lighter.collection?.image_url ? (
+                        <div className="w-28 h-28 mb-4 rounded-full border-4 border-white/50 shadow-lg overflow-hidden relative opacity-90 transition-transform">
+                            <img src={lighter.collection.image_url} className="w-full h-full object-cover" />
+                        </div>
+                    ) : (
+                        <Icon size={100} className={`mb-4 opacity-90 ${text}`} strokeWidth={1} />
+                    )}
                     <div className={`font-bold tracking-[0.2em] uppercase text-sm ${text} mix-blend-multiply opacity-80`}>
-                        {lighter.collection} COLLECTION
+                        {lighter.collection?.name || 'Unknown'} COLLECTION
                     </div>
                     <div className="absolute bottom-4 left-4 flex gap-2">
                         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${rarityStyle}`}>
-                            {lighter.rarity}
+                            {lighter.rarity?.name || 'Common'}
                         </span>
                         <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/40 text-black/70 mix-blend-darken">
                             #{lighter.id.slice(0, 3)}
