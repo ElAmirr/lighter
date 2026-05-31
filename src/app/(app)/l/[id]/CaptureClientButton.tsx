@@ -25,40 +25,48 @@ export default function CaptureClientButton({ lighterId, isLoggedIn, alreadyOwns
         setLoading(true);
 
         if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost') {
-            alert("🔒 Your phone's GPS is blocked by Apple/Google because you are accessing this server via HTTP (not HTTPS). Your capture will be logged without coordinates.");
             submitCapture(null, null, "Unknown");
             return;
         }
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    let city = "Unknown";
-
-                    try {
-                        const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-                        const geoData = await geoRes.json();
-                        city = geoData.address?.city || geoData.address?.town || geoData.address?.village || geoData.address?.municipality || geoData.address?.county || geoData.address?.state || geoData.address?.country || "Unknown";
-                    } catch (e) {
-                        console.error("Geocoding failed", e);
-                    }
-
-                    submitCapture(lat, lon, city);
-                },
-                (error) => {
-                    console.error("Location error", error);
-                    if (error.code === error.PERMISSION_DENIED) {
-                        alert("Location Permission Denied. Logging capture without coordinates.");
-                    }
-                    submitCapture(null, null, "Unknown");
-                },
-                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-            );
-        } else {
+        if (!navigator.geolocation) {
             submitCapture(null, null, "Unknown");
+            return;
         }
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                let city = "Unknown";
+
+                try {
+                    const geoRes = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=en`,
+                        { headers: { 'User-Agent': 'DAVAY-App/1.0' } }
+                    );
+                    const geoData = await geoRes.json();
+                    city = geoData.address?.city
+                        || geoData.address?.town
+                        || geoData.address?.village
+                        || geoData.address?.municipality
+                        || geoData.address?.county
+                        || geoData.address?.state
+                        || geoData.address?.country
+                        || "Unknown";
+                } catch (e) {
+                    console.error("Geocoding failed", e);
+                    // Still have coords even if city lookup failed
+                }
+
+                submitCapture(lat, lon, city);
+            },
+            (error) => {
+                console.error("Location error", error.code, error.message);
+                submitCapture(null, null, "Unknown");
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
+        );
     };
 
     const submitCapture = async (lat: number | null, lon: number | null, city: string) => {
