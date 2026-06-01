@@ -74,12 +74,6 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
     rankings.sort((a, b) => b.score - a.score);
     const globalRank = rankings.findIndex(r => r.id === user.id) + 1;
 
-    // Recent events (combine captures and losses)
-    // Loss = another user captured a lighter we owned previously. We don't have a direct table for losses.
-    // We can just show captures.
-    const activity = user.history_entries
-        .sort((a, b) => b.captured_at.getTime() - a.captured_at.getTime())
-        .slice(0, 10);
 
     // Achievements
     const hasFirstCapture = totalCaptures >= 1;
@@ -211,27 +205,68 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
                 </div>
 
                 {/* Recent Activity */}
-                <div className="mt-2">
-                    <h2 className="text-sm font-bold tracking-widest text-[var(--color-davay-text)] mb-3 px-1">ACTIVITY</h2>
-                    <div className="flex flex-col gap-3">
-                        {activity.map(entry => (
-                            <div key={entry.id} className="flex gap-3 px-1 items-start">
-                                <div className="w-2 h-2 mt-1.5 rounded-full bg-[var(--color-davay-primary)] shrink-0"></div>
-                                <div className="flex flex-col py-0.5">
-                                    <p className="text-sm font-medium leading-snug">
-                                        Captured <span className="font-bold">#{entry.lighter_id.slice(0, 3)} {entry.lighter.name}</span> in {entry.city_name}
-                                    </p>
-                                    <p className="text-[10px] font-bold text-gray-400 mt-0.5 uppercase tracking-wider">{formatDistanceToNow(entry.captured_at, { addSuffix: true })}</p>
-                                </div>
-                            </div>
-                        ))}
-                        {activity.length === 0 && (
-                            <p className="text-xs text-gray-400 font-medium px-1">No activity yet.</p>
-                        )}
-                    </div>
-                </div>
+                <RecentActivity username={username} />
 
             </div>
         </>
     );
 }
+
+async function RecentActivity({ username }: { username: string }) {
+    let events: Array<{ type: string; text: string; timestamp: string }> = [];
+    try {
+        const prismaLocal = new PrismaClient();
+        const user = await prismaLocal.user.findUnique({ where: { username } });
+        if (user) {
+            const captures = await prismaLocal.ownershipHistory.findMany({
+                where: { owner_id: user.id },
+                orderBy: { captured_at: 'desc' },
+                take: 20,
+                include: { lighter: { include: { collection: true } } }
+            });
+            const lightersEver = await prismaLocal.lighter.findMany({
+                where: { history_entries: { some: { owner_id: user.id } } },
+                include: { history_entries: { orderBy: { captured_at: 'asc' }, include: { owner: true } } }
+            });
+            const evts: Array<{ type: string; text: string; timestamp: Date }> = [];
+            for (const c of captures) {
+                evts.push({ type: 'capture', text: `Captured #${c.lighter_id.slice(0, 3)} ${c.lighter.name}`, timestamp: c.captured_at });
+            }
+            for (const l of lightersEver) {
+                const entries = l.history_entries;
+                for (let i = 0; i < entries.length - 1; i++) {
+                    if (entries[i].owner_id === user.id && entries[i + 1].owner_id !== user.id) {
+                        evts.push({ type: 'lost', text: `Lost #${l.id.slice(0, 3)} ${l.name} to ${entries[i + 1].owner.username}`, timestamp: entries[i + 1].captured_at });
+                    }
+                }
+            }
+            evts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+            events = evts.slice(0, 10).map(e => ({ ...e, timestamp: e.timestamp.toISOString() }));
+        }
+    } catch { }
+
+    const dotColor: Record<string, string> = {
+        capture: '#D85A30',
+        lost: '#888',
+        achievement: '#534AB7',
+    };
+
+    return (
+        <div className="mt-2 pb-20">
+            <h2 className="text-sm font-bold tracking-widest text-[var(--color-davay-text)] mb-3 px-1">RECENT ACTIVITY</h2>
+            <div className="flex flex-col gap-2">
+                {events.length === 0 && (
+                    <p className="text-xs text-gray-400 font-medium px-1">No activity yet.</p>
+                )}
+                {events.map((event, idx) => (
+                    <div key={idx} className="flex items-center gap-3 bg-white rounded-2xl p-3 border border-[var(--color-davay-hint)]/20 shadow-sm">
+                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: dotColor[event.type] ?? '#888', flexShrink: 0 }} />
+                        <p className="text-sm font-medium flex-1 leading-snug">{event.text}</p>
+                        <span className="text-[10px] text-gray-400 font-bold whitespace-nowrap">{formatDistanceToNow(new Date(event.timestamp), { addSuffix: true })}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+

@@ -3,6 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+function getOrdinal(n: number) {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
 interface CaptureClientButtonProps {
     lighterId: string;
     isLoggedIn: boolean;
@@ -17,64 +23,31 @@ export default function CaptureClientButton({ lighterId, isLoggedIn, alreadyOwns
     const [cityName, setCityName] = useState('');
 
     const handleCapture = async () => {
-        if (!isLoggedIn) {
-            router.push('/login');
-            return;
-        }
-
+        if (!isLoggedIn) { router.push('/login'); return; }
         setLoading(true);
 
-        if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost') {
-            submitCapture(null, null, "Unknown");
-            return;
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    await submitCapture(pos.coords.latitude, pos.coords.longitude);
+                },
+                async () => {
+                    // Denied or error — still capture without coords
+                    await submitCapture(null, null);
+                },
+                { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
+            );
+        } else {
+            await submitCapture(null, null);
         }
-
-        if (!navigator.geolocation) {
-            submitCapture(null, null, "Unknown");
-            return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-                let city = "Unknown";
-
-                try {
-                    const geoRes = await fetch(
-                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=en`,
-                        { headers: { 'User-Agent': 'DAVAY-App/1.0' } }
-                    );
-                    const geoData = await geoRes.json();
-                    city = geoData.address?.city
-                        || geoData.address?.town
-                        || geoData.address?.village
-                        || geoData.address?.municipality
-                        || geoData.address?.county
-                        || geoData.address?.state
-                        || geoData.address?.country
-                        || "Unknown";
-                } catch (e) {
-                    console.error("Geocoding failed", e);
-                    // Still have coords even if city lookup failed
-                }
-
-                submitCapture(lat, lon, city);
-            },
-            (error) => {
-                console.error("Location error", error.code, error.message);
-                submitCapture(null, null, "Unknown");
-            },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
-        );
     };
 
-    const submitCapture = async (lat: number | null, lon: number | null, city: string) => {
+    const submitCapture = async (lat: number | null, lon: number | null) => {
         try {
             const res = await fetch('/api/capture', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ lighter_id: lighterId, latitude: lat, longitude: lon, city_name: city })
+                body: JSON.stringify({ lighter_id: lighterId, latitude: lat, longitude: lon })
             });
 
             if (!res.ok) {
@@ -82,10 +55,10 @@ export default function CaptureClientButton({ lighterId, isLoggedIn, alreadyOwns
                 throw new Error(body.detail || body.error || `HTTP ${res.status}`);
             }
 
-            setCityName(city);
+            const data = await res.json();
+            setCityName(data.city_name || 'Unknown');
             setSuccess(true);
             router.refresh();
-
         } catch (e: any) {
             alert("Error capturing lighter: " + (e?.message || e));
             setLoading(false);
@@ -97,7 +70,7 @@ export default function CaptureClientButton({ lighterId, isLoggedIn, alreadyOwns
             <div className="flex flex-col items-center justify-center p-6 bg-green-50 border border-green-200 rounded-2xl w-full">
                 <div className="text-3xl mb-2">🔥</div>
                 <h3 className="font-bold text-lg text-green-800">You captured #{lighterId.slice(0, 3)}!</h3>
-                <p className="text-green-700 text-sm font-medium">You are the {ownerIndex}th owner</p>
+                <p className="text-green-700 text-sm font-medium">You are the {getOrdinal(ownerIndex)} owner</p>
                 <p className="text-green-700/80 text-xs mt-1">Captured in {cityName}</p>
                 <button onClick={() => setSuccess(false)} className="mt-4 px-6 py-2 bg-green-600 text-white font-bold rounded-xl active:scale-95 transition-transform text-sm">
                     View Lighter
