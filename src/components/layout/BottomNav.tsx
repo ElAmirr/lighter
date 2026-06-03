@@ -7,6 +7,7 @@ import clsx from 'clsx';
 
 export default function BottomNav() {
     const pathname = usePathname() || '/home';
+    const isScanActive = pathname.startsWith('/scan');
 
     const tabs = [
         { name: 'Home', href: '/home', icon: Home },
@@ -17,7 +18,8 @@ export default function BottomNav() {
     ];
 
     return (
-        <nav className="fixed bottom-0 w-full max-w-[390px] bg-[var(--color-davay-card)] border-t border-[var(--color-davay-hint)]/30 px-2 py-2 flex justify-between items-end pb-safe z-50">
+        <nav style={{ background: 'var(--nav-bg)', borderTop: '1px solid var(--border)' }}
+            className="fixed bottom-0 w-full max-w-[390px] px-2 py-2 flex justify-between items-end pb-safe z-50">
             {tabs.map((tab) => {
                 const isActive = pathname.startsWith(tab.href) || (tab.href === '/u/me' && pathname.startsWith('/u/'));
                 const Icon = tab.icon;
@@ -25,10 +27,14 @@ export default function BottomNav() {
                 if (tab.isCenter) {
                     return (
                         <Link key={tab.name} href={tab.href} className="flex flex-col items-center justify-center flex-1 -mt-6">
-                            <div className="bg-[var(--color-davay-primary)] text-white p-3 rounded-full shadow-lg shadow-[var(--color-davay-primary)]/40 mb-1 active:scale-95 transition-transform">
+                            <div className={clsx(
+                                "bg-[var(--accent)] text-white p-3 rounded-full shadow-lg shadow-[var(--accent)]/40 mb-1 active:scale-95 transition-transform",
+                                !isScanActive && "scan-bounce-anim"
+                            )}
+                                style={{ animation: isScanActive ? 'none' : 'scan-bounce 2.5s infinite ease-in-out' }}>
                                 <Icon size={28} />
                             </div>
-                            <span className="text-[10px] font-semibold text-[var(--color-davay-primary)]">
+                            <span style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 600 }}>
                                 {tab.name}
                             </span>
                         </Link>
@@ -39,15 +45,19 @@ export default function BottomNav() {
                     <Link key={tab.name} href={tab.href} className="flex flex-col items-center justify-center flex-1 py-1">
                         <Icon
                             size={24}
-                            className={clsx(
-                                "mb-1 transition-colors",
-                                isActive ? "text-[var(--color-davay-primary)]" : "text-[#CCCCCC]"
-                            )}
+                            style={{
+                                color: isActive ? 'var(--accent)' : 'var(--text-3)',
+                                transform: isActive ? 'scale(1.15)' : 'scale(1)',
+                                transition: 'transform 200ms ease, color 200ms ease',
+                                marginBottom: 4,
+                            }}
                         />
-                        <span className={clsx(
-                            "text-[10px] font-medium transition-colors",
-                            isActive ? "text-[var(--color-davay-primary)]" : "text-[#CCCCCC]"
-                        )}>
+                        <span style={{
+                            fontSize: 10,
+                            fontWeight: 600,
+                            color: isActive ? 'var(--accent)' : 'var(--text-3)',
+                            transition: 'color 200ms ease',
+                        }}>
                             {tab.name}
                         </span>
                     </Link>

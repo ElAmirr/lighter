@@ -60,7 +60,9 @@ export default async function CollectionPage() {
 
                             <div className="grid grid-cols-2 gap-3">
                                 {categoryLighters.map(lighter => (
-                                    <Link href={`/l/${lighter.id}`} key={lighter.id} className={`flex flex-col p-3 rounded-2xl shadow-sm border border-black/5 active:scale-95 transition-transform ${bg}`}>
+                                    <Link href={`/l/${lighter.id}`} key={lighter.id}
+                                        className={`flex flex-col p-3 rounded-2xl shadow-sm border border-black/5 active:scale-[1.02] transition-transform ${bg}`}
+                                        style={{ overflow: 'hidden', isolation: 'isolate', transform: 'translateZ(0)' }}>
                                         <div className="flex justify-between items-start mb-2">
                                             <span className="text-[10px] font-bold opacity-50 mix-blend-darken">#{lighter.id.slice(0, 3)}</span>
                                             <span className="text-[9px] font-bold uppercase tracking-wider bg-white/40 mix-blend-darken px-1.5 py-0.5 rounded-sm">{lighter.rarity?.name}</span>
@@ -75,8 +77,10 @@ export default async function CollectionPage() {
                 })}
 
                 {lighters.length === 0 && (
-                    <div className="p-8 text-center bg-gray-50 border border-dashed border-gray-200 rounded-3xl mt-4 text-gray-400 font-medium">
-                        You haven't discovered any lighters yet. Start scanning!
+                    <div style={{ textAlign: 'center', padding: '48px 24px', marginTop: 16 }}>
+                        <div style={{ fontSize: 40, marginBottom: 12 }}>📦</div>
+                        <div style={{ fontWeight: 800, fontSize: 18, color: 'var(--text-1)', marginBottom: 6 }}>Your vault is empty</div>
+                        <div style={{ fontSize: 14, color: 'var(--text-2)' }}>Find a DAVAY lighter and make it yours</div>
                     </div>
                 )}
 

@@ -84,57 +84,70 @@ export default async function LeaderboardPage({
                 <LeaderboardTabs activeTab={activeTab} />
 
                 {/* Podium section */}
-                <div className="bg-white rounded-2xl p-4 shadow-sm border border-[var(--color-davay-hint)]/20 mt-6 pt-10">
-                    <div className="flex items-end justify-center h-48 gap-3">
-                        {/* #2 */}
-                        {top2 && (
-                            <div className="flex flex-col items-center flex-1">
-                                <Link href={`/u/${top2.username}`} className="flex flex-col items-center">
-                                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-bold text-[var(--color-davay-primary)] border-2 border-white shadow-sm -mb-3 z-10 text-sm">
-                                        {top2.username.substring(0, 2).toUpperCase()}
-                                    </div>
-                                    <div className="w-full bg-[#f3f3f3] h-24 rounded-t-xl flex flex-col items-center justify-start pt-6 border border-b-0 border-[#eaeaea]">
-                                        <span className="font-bold text-gray-800 text-xs">#2</span>
-                                        <span className="font-bold text-[var(--color-davay-primary)] mt-1">{top2.score}</span>
-                                    </div>
-                                </Link>
-                            </div>
-                        )}
-
-                        {/* #1 */}
-                        {top1 && (
-                            <div className="flex flex-col items-center flex-[1.2]">
-                                <Link href={`/u/${top1.username}`} className="flex flex-col items-center">
-                                    <div className="w-16 h-16 bg-[var(--color-davay-text)] rounded-full flex items-center justify-center font-bold text-[var(--color-davay-primary)] border-[3px] border-white shadow-md relative -mb-4 z-10">
-                                        <div className="absolute -top-5 text-[var(--color-davay-primary)] drop-shadow-md">
-                                            <Crown fill="currentColor" size={24} />
+                <div className="bg-[var(--bg-card)] rounded-2xl p-4 shadow-sm border border-[var(--border)] mt-6 pt-10">
+                    {entries.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '32px 16px' }}>
+                            <div style={{ fontSize: 36, marginBottom: 10 }}>🏆</div>
+                            <div style={{ fontWeight: 800, fontSize: 17, color: 'var(--text-1)', marginBottom: 6 }}>The throne is empty</div>
+                            <div style={{ fontSize: 13, color: 'var(--text-2)' }}>First capture takes #1. That could be you.</div>
+                        </div>
+                    ) : (
+                        <div className="flex items-end justify-center h-48 gap-3">
+                            {/* #2 */}
+                            {top2 && (
+                                <div className="flex flex-col items-center flex-1">
+                                    <Link href={`/u/${top2.username}`} className="flex flex-col items-center w-full">
+                                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-bold text-[var(--accent)] border-2 border-white shadow-sm -mb-3 z-10 text-sm">
+                                            {top2.username.substring(0, 2).toUpperCase()}
                                         </div>
-                                        {top1.username.substring(0, 2).toUpperCase()}
-                                    </div>
-                                    <div className="w-full bg-[var(--color-davay-primary)] text-white h-32 rounded-t-xl flex flex-col items-center justify-start pt-8 pb-2 shadow-[0_-4px_12px_rgba(216,90,48,0.2)] border border-b-0 border-[#c44e26]">
-                                        <span className="font-bold text-xs opacity-90">#1</span>
-                                        <span className="text-xl font-bold mt-1">{top1.score}</span>
-                                        <span className="text-[10px] uppercase tracking-wider font-semibold truncate w-full text-center px-1 mt-auto pb-1 opacity-90">{top1.username}</span>
-                                    </div>
-                                </Link>
-                            </div>
-                        )}
+                                        <div className="w-full bg-[var(--bg-sub)] h-24 rounded-t-xl flex flex-col items-center justify-start pt-6 border border-b-0 border-[var(--border)]"
+                                            style={{ transformOrigin: 'bottom', animation: 'podium-grow 500ms ease-out 0ms forwards' }}>
+                                            <span className="font-bold text-[var(--text-1)] text-xs">#2</span>
+                                            <span className="font-bold text-[var(--accent)] mt-1">{top2.score}</span>
+                                            <span className="text-[9px] font-semibold text-[var(--text-2)] mt-1 px-1 text-center truncate w-full">{top2.username}</span>
+                                        </div>
+                                    </Link>
+                                </div>
+                            )}
 
-                        {/* #3 */}
-                        {top3 && (
-                            <div className="flex flex-col items-center flex-1">
-                                <Link href={`/u/${top3.username}`} className="flex flex-col items-center">
-                                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-bold text-[var(--color-davay-text)] border-2 border-white shadow-sm -mb-3 z-10 text-sm">
-                                        {top3.username.substring(0, 2).toUpperCase()}
-                                    </div>
-                                    <div className="w-full bg-[#f3f3f3] h-20 rounded-t-xl flex flex-col items-center justify-start pt-6 border border-b-0 border-[#eaeaea]">
-                                        <span className="font-bold text-gray-800 text-xs">#3</span>
-                                        <span className="font-bold text-[var(--color-davay-primary)] mt-1">{top3.score}</span>
-                                    </div>
-                                </Link>
-                            </div>
-                        )}
-                    </div>
+                            {/* #1 */}
+                            {top1 && (
+                                <div className="flex flex-col items-center flex-[1.2]">
+                                    <Link href={`/u/${top1.username}`} className="flex flex-col items-center w-full">
+                                        <div className="w-16 h-16 bg-[var(--text-1)] rounded-full flex items-center justify-center font-bold text-[var(--accent)] border-[3px] border-white shadow-md relative -mb-4 z-10">
+                                            <div className="absolute -top-5 text-[var(--accent)] drop-shadow-md">
+                                                <Crown fill="currentColor" size={24} />
+                                            </div>
+                                            {top1.username.substring(0, 2).toUpperCase()}
+                                        </div>
+                                        <div className="w-full bg-[var(--accent)] text-white h-32 rounded-t-xl flex flex-col items-center justify-start pt-8 pb-2 shadow-[0_-4px_12px_rgba(216,90,48,0.2)] border border-b-0 border-[#c44e26]"
+                                            style={{ transformOrigin: 'bottom', animation: 'podium-grow 500ms ease-out 300ms both' }}>
+                                            <span className="font-bold text-xs opacity-90">#1</span>
+                                            <span className="text-xl font-bold mt-1">{top1.score}</span>
+                                            <span className="text-[10px] uppercase tracking-wider font-semibold truncate w-full text-center px-1 mt-auto pb-1 opacity-90">{top1.username}</span>
+                                        </div>
+                                    </Link>
+                                </div>
+                            )}
+
+                            {/* #3 */}
+                            {top3 && (
+                                <div className="flex flex-col items-center flex-1">
+                                    <Link href={`/u/${top3.username}`} className="flex flex-col items-center w-full">
+                                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-bold text-[var(--text-1)] border-2 border-white shadow-sm -mb-3 z-10 text-sm">
+                                            {top3.username.substring(0, 2).toUpperCase()}
+                                        </div>
+                                        <div className="w-full bg-[var(--bg-sub)] h-20 rounded-t-xl flex flex-col items-center justify-start pt-6 border border-b-0 border-[var(--border)]"
+                                            style={{ transformOrigin: 'bottom', animation: 'podium-grow 500ms ease-out 150ms both' }}>
+                                            <span className="font-bold text-[var(--text-1)] text-xs">#3</span>
+                                            <span className="font-bold text-[var(--accent)] mt-1">{top3.score}</span>
+                                            <span className="text-[9px] font-semibold text-[var(--text-2)] mt-1 px-1 text-center truncate w-full">{top3.username}</span>
+                                        </div>
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Your rank bar */}

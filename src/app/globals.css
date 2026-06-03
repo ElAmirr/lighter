@@ -1,23 +1,22 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-davay-bg: #F8F7F4;
-  --color-davay-card: #FFFFFF;
-  --color-davay-primary: #D85A30;
+  --color-davay-bg: var(--bg);
+  --color-davay-card: var(--bg-card);
+  --color-davay-primary: var(--accent);
   --color-davay-primary-light: #FEF8F6;
-  
-  --color-davay-text: #1A1A1A;
-  --color-davay-muted: #888888;
-  --color-davay-hint: #BBBBBB;
+  --color-davay-text: var(--text-1);
+  --color-davay-muted: var(--text-2);
+  --color-davay-hint: var(--text-3);
 
   /* Edition Backgrounds */
-  --color-edition-tunis: #FDF0EA;
-  --color-edition-sfax: #EAF3DE;
-  --color-edition-sahel: #E6F1FB;
-  --color-edition-meme: #FBEAF0;
+  --color-edition-tunis: var(--edition-tunis);
+  --color-edition-sfax: var(--edition-sfax);
+  --color-edition-sahel: var(--edition-sahel);
+  --color-edition-meme: var(--edition-meme);
   --color-edition-carthage: #EEEDFE;
-  --color-edition-default: #EFEDE8;
-  
+  --color-edition-default: var(--bg-sub);
+
   /* Edition Accents */
   --color-accent-tunis: #D85A30;
   --color-accent-sfax: #3B6D11;
@@ -25,38 +24,349 @@
   --color-accent-meme: #993556;
   --color-accent-carthage: #534AB7;
   --color-accent-generic: #888888;
-  
-  /* Rarity Text */
-  --color-rarity-common-text: #5F5E5A;
-  --color-rarity-uncommon-text: #3B6D11;
-  --color-rarity-rare-text: #185FA5;
-  --color-rarity-epic-text: #534AB7;
-  --color-rarity-legendary-text: #993C1D;
 
-  /* Rarity Backgrounds */
-  --color-rarity-common: #EFEDE8;
-  --color-rarity-uncommon: #EAF3DE;
-  --color-rarity-rare: #E6F1FB;
-  --color-rarity-epic: #EEEDFE;
-  --color-rarity-legendary: #FAECE7;
+  /* Rarity */
+  --color-rarity-common-text: var(--rarity-common-text);
+  --color-rarity-uncommon-text: var(--rarity-uncommon-text);
+  --color-rarity-rare-text: var(--rarity-rare-text);
+  --color-rarity-epic-text: var(--rarity-epic-text);
+  --color-rarity-legendary-text: var(--rarity-legendary-text);
+  --color-rarity-common: var(--rarity-common-bg);
+  --color-rarity-uncommon: var(--rarity-uncommon-bg);
+  --color-rarity-rare: var(--rarity-rare-bg);
+  --color-rarity-epic: var(--rarity-epic-bg);
+  --color-rarity-legendary: var(--rarity-legendary-bg);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+/* ── Light Mode (default) ───────────────────────────────── */
 :root {
-  background-color: var(--color-davay-bg);
-  color: var(--color-davay-text);
+  --bg: #F8F7F4;
+  --bg-card: #FFFFFF;
+  --bg-sub: #EFEDE8;
+  --border: #E5E3DE;
+  --text-1: #1A1A1A;
+  --text-2: #888888;
+  --text-3: #BBBBBB;
+  --nav-bg: #FFFFFF;
+  --accent: #D85A30;
+
+  /* Edition backgrounds — light */
+  --edition-tunis: #FDF0EA;
+  --edition-sfax: #EAF3DE;
+  --edition-sahel: #E6F1FB;
+  --edition-meme: #FBEAF0;
+  --edition-default: #EFEDE8;
+
+  /* Rarity badges — light */
+  --rarity-legendary-bg: #FAECE7;
+  --rarity-legendary-text: #993C1D;
+  --rarity-epic-bg: #EEEDFE;
+  --rarity-epic-text: #534AB7;
+  --rarity-rare-bg: #E6F1FB;
+  --rarity-rare-text: #185FA5;
+  --rarity-uncommon-bg: #EAF3DE;
+  --rarity-uncommon-text: #3B6D11;
+  --rarity-common-bg: #EFEDE8;
+  --rarity-common-text: #5F5E5A;
+}
+
+/* ── Dark Mode ──────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0F0F0F;
+    --bg-card: #1A1A1A;
+    --bg-sub: #222222;
+    --border: #272727;
+    --text-1: #EFEFEF;
+    --text-2: #555555;
+    --text-3: #333333;
+    --nav-bg: #141414;
+    --accent: #D85A30;
+
+    --edition-tunis: #1E1510;
+    --edition-sfax: #141E14;
+    --edition-sahel: #10161E;
+    --edition-meme: #1E1018;
+    --edition-default: #181818;
+
+    --rarity-legendary-bg: #2A1510;
+    --rarity-legendary-text: #D85A30;
+    --rarity-epic-bg: #1A1A2E;
+    --rarity-epic-text: #7986CB;
+    --rarity-rare-bg: #1A1E2A;
+    --rarity-rare-text: #64B5F6;
+    --rarity-uncommon-bg: #1A2A1A;
+    --rarity-uncommon-text: #4CAF50;
+    --rarity-common-bg: #222222;
+    --rarity-common-text: #888888;
+  }
+}
+
+/* ── Base ───────────────────────────────────────────────── */
+:root {
+  background-color: var(--bg);
+  color: var(--text-1);
 }
 
 body {
   margin: 0;
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  background-color: var(--color-davay-bg);
+  background-color: var(--bg);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Base resets required for the aesthetic */
 * {
   box-sizing: border-box;
+}
+
+/* ── Keyframes ──────────────────────────────────────────── */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse-dot {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+}
+
+@keyframes davay-pulse {
+
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scan-bounce {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.07);
+  }
+}
+
+@keyframes fade-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes rarity-shake {
+
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+
+  25% {
+    transform: scale(1.05) rotate(-2deg);
+  }
+
+  75% {
+    transform: scale(1.05) rotate(2deg);
+  }
+}
+
+@keyframes rarity-epic-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(83, 74, 183, 0);
+  }
+
+  50% {
+    box-shadow: 0 0 18px 4px rgba(83, 74, 183, 0.45);
+  }
+}
+
+@keyframes rarity-legendary-bounce {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+
+  80% {
+    transform: scale(0.96);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateY(-80px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-out {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(-80px);
+    opacity: 0;
+  }
+}
+
+@keyframes podium-grow {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes count-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Skeleton ────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg,
+      var(--bg-sub) 25%,
+      var(--bg-card) 50%,
+      var(--bg-sub) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 8px;
+}
+
+/* ── Rarity badge entrance classes ──────────────────────── */
+.rarity-badge {
+  opacity: 0;
+  transform: scale(0.5);
+  animation-delay: 600ms;
+  animation-duration: 300ms;
+  animation-fill-mode: forwards;
+  animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.rarity-common {
+  animation-name: fade-scale-in;
+}
+
+.rarity-uncommon {
+  animation-name: fade-scale-in;
+}
+
+.rarity-rare {
+  animation-name: rarity-shake;
+  animation-iteration-count: 1;
+  animation-duration: 450ms;
+}
+
+.rarity-epic {
+  animation-name: rarity-epic-glow;
+  animation-iteration-count: 2;
+  animation-duration: 600ms;
+  animation-delay: 600ms;
+}
+
+.rarity-legendary {
+  animation-name: rarity-legendary-bounce;
+  animation-duration: 700ms;
+}
+
+/* ── Achievement Toast ───────────────────────────────────── */
+.achievement-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #D85A30;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: 14px;
+  z-index: 9999;
+  white-space: nowrap;
+  box-shadow: 0 4px 24px rgba(216, 90, 48, 0.4);
+  animation: toast-in 300ms ease forwards, toast-out 300ms ease 2.5s forwards;
+}
+
+/* ── Nav active tab ─────────────────────────────────────── */
+.nav-tab-active {
+  transform: scale(1.15);
+  transition: transform 200ms ease;
+}
+
+.nav-tab-icon {
+  transition: transform 200ms ease, color 200ms ease;
+}
+
+/* ── Collection card press ──────────────────────────────── */
+.card-pressable:active {
+  transform: scale(1.02);
+  transition: transform 150ms ease;
 }
