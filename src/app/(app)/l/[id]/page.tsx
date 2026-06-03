@@ -73,7 +73,7 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
             <div className="flex flex-col flex-1 pb-10">
 
                 {/* Edition Card */}
-                <div className={`w-full h-72 flex flex-col items-center justify-center relative overflow-hidden shadow-sm border-b border-[var(--color-davay-hint)]/20 ${heroImage ? '' : editionConf.bg} p-6`}>
+                <div className={`w-full h-72 flex flex-col items-center justify-center relative overflow-hidden shadow-sm border-b border-[var(--border)] ${heroImage ? '' : editionConf.bg} p-6`}>
                     {heroImage ? (
                         <>
                             <img src={heroImage} alt={lighter.name} className="absolute inset-0 w-full h-full object-cover" />
@@ -82,17 +82,17 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
                     ) : (
                         <editionConf.icon size={100} className={`mb-4 opacity-90 ${editionConf.text}`} strokeWidth={1} />
                     )}
-                    <div className={`relative z-10 font-bold tracking-[0.2em] uppercase text-sm ${heroImage ? 'text-white drop-shadow' : `${editionConf.text} mix-blend-multiply opacity-80`}`}>
+                    <div className={`relative z-10 font-bold tracking-[0.2em] uppercase text-sm ${heroImage ? 'text-white drop-shadow' : `${editionConf.text} opacity-90`}`}>
                         {lighter.collection?.name} COLLECTION
                     </div>
-                    <div className="absolute top-4 right-4 text-[10px] uppercase font-bold tracking-widest opacity-70 z-10 text-white drop-shadow">
+                    <div className={`absolute top-4 right-4 text-[10px] uppercase font-bold tracking-widest z-10 ${heroImage ? 'text-white drop-shadow opacity-70' : 'text-[var(--text-2)] opacity-80'}`}>
                         GEN 1
                     </div>
                     <div className="absolute bottom-4 left-4 flex gap-2 z-10">
                         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full rarity-badge rarity-${(lighter.rarity?.name || 'Common').toLowerCase()} ${rarityStyle.bg} ${rarityStyle.text}`}>
                             {lighter.rarity?.name}
                         </span>
-                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/40 text-white">
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${heroImage ? 'bg-white/40 text-white' : 'bg-[var(--text-1)]/10 text-[var(--text-1)]'}`}>
                             #{lighter.id.slice(0, 3)}
                         </span>
                     </div>

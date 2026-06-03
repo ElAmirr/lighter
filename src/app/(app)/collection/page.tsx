@@ -61,14 +61,14 @@ export default async function CollectionPage() {
                             <div className="grid grid-cols-2 gap-3">
                                 {categoryLighters.map(lighter => (
                                     <Link href={`/l/${lighter.id}`} key={lighter.id}
-                                        className={`flex flex-col p-3 rounded-2xl shadow-sm border border-black/5 active:scale-[1.02] transition-transform ${bg}`}
+                                        className={`flex flex-col p-3 rounded-2xl shadow-sm border border-[var(--border)] active:scale-[1.02] transition-transform ${bg}`}
                                         style={{ overflow: 'hidden', isolation: 'isolate', transform: 'translateZ(0)' }}>
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-[10px] font-bold opacity-50 mix-blend-darken">#{lighter.id.slice(0, 3)}</span>
-                                            <span className="text-[9px] font-bold uppercase tracking-wider bg-white/40 mix-blend-darken px-1.5 py-0.5 rounded-sm">{lighter.rarity?.name}</span>
+                                            <span className="text-[10px] font-bold opacity-50">#{lighter.id.slice(0, 3)}</span>
+                                            <span className="text-[9px] font-bold uppercase tracking-wider bg-[var(--text-1)]/10 px-1.5 py-0.5 rounded-sm">{lighter.rarity?.name}</span>
                                         </div>
                                         <Icon size={32} className={`my-2 opacity-80 ${text}`} />
-                                        <span className="font-bold text-sm leading-snug mt-1 opacity-90 mix-blend-darken">{lighter.name}</span>
+                                        <span className="font-bold text-sm leading-snug mt-1 opacity-90 text-[var(--text-1)]">{lighter.name}</span>
                                     </Link>
                                 ))}
                             </div>
