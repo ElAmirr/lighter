@@ -117,13 +117,13 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
                         </div>
                         <div className="flex-1 bg-[--color-davay-bg] py-3 rounded-xl border border-[--color-davay-hint]/20 text-center">
                             <div className="flex flex-col">
-                                <span className="text-xs font-bold text-gray-500 mb-1 border-b pb-1">COLLECTION</span>
+                                <span className="text-xs font-bold text-[var(--text-3)] mb-1 border-b pb-1">COLLECTION</span>
                                 <span className={`text-sm font-bold capitalize ${editionConf.text}`}>{lighter.collection?.name}</span>
                             </div>
                         </div>
                         <div className="flex-1 bg-[--color-davay-bg] py-3 rounded-xl border border-[--color-davay-hint]/20 text-center">
                             <div className="flex flex-col">
-                                <span className="text-xs font-bold text-gray-500 mb-1 border-b pb-1">RARITY</span>
+                                <span className="text-xs font-bold text-[var(--text-3)] mb-1 border-b pb-1">RARITY</span>
                                 <span className={`text-[10px] font-black uppercase tracking-widest py-1 px-1.5 rounded-sm line-clamp-1 truncate ${rarityStyle.bg} ${rarityStyle.text}`}>{lighter.rarity?.name}</span>
                             </div>
                         </div>
@@ -151,18 +151,18 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
                             {lighter.history_entries.slice(0, 4).map((history, idx) => (
                                 <div key={history.id} className="flex items-start gap-4 relative">
                                     {idx === 0 ? (
-                                        <div className="w-10 h-10 rounded-full bg-[var(--color-davay-primary-light)] flex items-center justify-center font-bold text-xs text-[var(--color-davay-primary)] border-2 border-[var(--color-davay-primary)] z-10 shrink-0 shadow-sm shadow-[var(--color-davay-primary)]/20">
+                                        <div className="w-10 h-10 rounded-full bg-[var(--accent)]/10 flex items-center justify-center font-bold text-xs text-[var(--accent)] border-2 border-[var(--accent)] z-10 shrink-0 shadow-sm shadow-[var(--accent)]/20">
                                             {history.owner.username.substring(0, 2).toUpperCase()}
                                         </div>
                                     ) : (
-                                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-xs text-gray-500 border-2 border-white z-10 shrink-0 shadow-sm">
+                                        <div className="w-10 h-10 rounded-full bg-[var(--bg-sub)] flex items-center justify-center font-bold text-xs text-[var(--text-2)] border-2 border-[var(--bg-card)] z-10 shrink-0 shadow-sm">
                                             {history.owner.username.substring(0, 2).toUpperCase()}
                                         </div>
                                     )}
                                     <div className="flex flex-col justify-center min-h-[40px]">
                                         <div className="flex items-center gap-2">
-                                            <span className={`font-bold ${idx === 0 ? 'text-[var(--color-davay-text)]' : 'text-gray-600'}`}>{history.owner.username}</span>
-                                            {idx === 0 && <span className="text-[9px] font-bold uppercase tracking-wider bg-[var(--color-davay-primary)] text-white px-1.5 py-0.5 rounded-sm">Now</span>}
+                                            <span className={`font-bold ${idx === 0 ? 'text-[var(--text-1)]' : 'text-[var(--text-2)]'}`}>{history.owner.username}</span>
+                                            {idx === 0 && <span className="text-[9px] font-bold uppercase tracking-wider bg-[var(--accent)] text-white px-1.5 py-0.5 rounded-sm">Now</span>}
                                         </div>
                                         <div className="text-xs text-[var(--color-davay-muted)] font-medium mt-0.5">
                                             {format(history.captured_at, 'MMM d, yyyy')}

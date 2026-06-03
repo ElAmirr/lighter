@@ -89,7 +89,7 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
             <div className="flex flex-col p-4 gap-6 pb-12">
 
                 {/* Profile Header */}
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-[var(--color-davay-hint)]/20 flex flex-col items-center">
+                <div className="bg-[var(--bg-card)] p-6 rounded-3xl shadow-sm border border-[var(--border)] flex flex-col items-center">
                     <div className="relative mb-3">
                         <div className="w-20 h-20 bg-[var(--color-rarity-legendary)] text-[var(--color-rarity-legendary-text)] rounded-full flex items-center justify-center font-extrabold text-2xl shadow-inner border border-white">
                             {user.username.substring(0, 2).toUpperCase()}
@@ -104,21 +104,21 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
 
                     {/* Stats strip */}
                     <div className="flex w-full mt-6 gap-2">
-                        <div className="flex flex-col items-center flex-1 bg-gray-50 py-2 rounded-xl">
+                        <div className="flex flex-col items-center flex-1 bg-[var(--bg-sub)] py-2 rounded-xl">
                             <span className="text-lg font-bold text-[var(--color-davay-primary)]">{totalCaptures}</span>
-                            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Captures</span>
+                            <span className="text-[9px] font-bold text-[var(--text-2)] uppercase tracking-widest">Captures</span>
                         </div>
-                        <div className="flex flex-col items-center flex-1 bg-gray-50 py-2 rounded-xl">
+                        <div className="flex flex-col items-center flex-1 bg-[var(--bg-sub)] py-2 rounded-xl">
                             <span className="text-lg font-bold text-[var(--color-davay-primary)]">{currentlyOwned}</span>
-                            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Owned</span>
+                            <span className="text-[9px] font-bold text-[var(--text-2)] uppercase tracking-widest">Owned</span>
                         </div>
-                        <div className="flex flex-col items-center flex-1 bg-gray-50 py-2 rounded-xl">
+                        <div className="flex flex-col items-center flex-1 bg-[var(--bg-sub)] py-2 rounded-xl">
                             <span className="text-lg font-bold text-[var(--color-davay-primary)]">{scansTriggered}</span>
-                            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Scans</span>
+                            <span className="text-[9px] font-bold text-[var(--text-2)] uppercase tracking-widest">Scans</span>
                         </div>
-                        <div className="flex flex-col items-center flex-1 bg-gray-50 py-2 rounded-xl">
+                        <div className="flex flex-col items-center flex-1 bg-[var(--bg-sub)] py-2 rounded-xl">
                             <span className="text-lg font-bold text-[var(--color-davay-primary)]">{distinctCities}</span>
-                            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Cities</span>
+                            <span className="text-[9px] font-bold text-[var(--text-2)] uppercase tracking-widest">Cities</span>
                         </div>
                     </div>
                 </div>
@@ -128,28 +128,28 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
                     <h2 className="text-sm font-bold tracking-widest text-[var(--color-davay-text)] mb-3 px-1">ACHIEVEMENTS</h2>
                     <div className="grid grid-cols-3 gap-3">
                         {/* First Capture */}
-                        <div className={clsx("flex flex-col items-center bg-white p-3 rounded-2xl border border-gray-100 shadow-sm", !hasFirstCapture && "opacity-40 grayscale")}>
+                        <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !hasFirstCapture && "opacity-40 grayscale")}>
                             <div className="w-10 h-10 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mb-2">
                                 <Zap size={20} />
                             </div>
                             <span className="text-[10px] font-bold text-center leading-tight">First<br />Capture</span>
                         </div>
 
-                        <div className={clsx("flex flex-col items-center bg-white p-3 rounded-2xl border border-gray-100 shadow-sm", !has10Captures && "opacity-40 grayscale")}>
+                        <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !has10Captures && "opacity-40 grayscale")}>
                             <div className="w-10 h-10 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-2">
                                 <Flame size={20} />
                             </div>
                             <span className="text-[10px] font-bold text-center leading-tight">10<br />Captures</span>
                         </div>
 
-                        <div className={clsx("flex flex-col items-center bg-white p-3 rounded-2xl border border-gray-100 shadow-sm", !has3Cities && "opacity-40 grayscale")}>
+                        <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !has3Cities && "opacity-40 grayscale")}>
                             <div className="w-10 h-10 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mb-2">
                                 <MapPin size={20} />
                             </div>
                             <span className="text-[10px] font-bold text-center leading-tight">3<br />Cities</span>
                         </div>
 
-                        <div className={clsx("flex flex-col items-center bg-white p-3 rounded-2xl border border-gray-100 shadow-sm", !hasRare && "opacity-40 grayscale")}>
+                        <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !hasRare && "opacity-40 grayscale")}>
                             <div className="w-10 h-10 bg-purple-100 text-purple-500 rounded-full flex items-center justify-center mb-2">
                                 <Star size={20} />
                             </div>
@@ -157,7 +157,7 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
                         </div>
 
                         {(hasLegendary || isOwnProfile) && (
-                            <div className={clsx("flex flex-col items-center bg-white p-3 rounded-2xl border border-gray-100 shadow-sm", !hasLegendary && "opacity-40 grayscale")}>
+                            <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !hasLegendary && "opacity-40 grayscale")}>
                                 <div className="w-10 h-10 bg-yellow-100 text-[var(--color-davay-primary)] rounded-full flex items-center justify-center mb-2">
                                     <Crown size={20} />
                                 </div>
@@ -166,7 +166,7 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
                         )}
 
                         {(has10Cities || isOwnProfile) && (
-                            <div className={clsx("flex flex-col items-center bg-white p-3 rounded-2xl border border-gray-100 shadow-sm", !has10Cities && "opacity-40 grayscale")}>
+                            <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !has10Cities && "opacity-40 grayscale")}>
                                 <div className="w-10 h-10 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mb-2">
                                     <Globe size={20} />
                                 </div>
@@ -180,10 +180,10 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
                 <div>
                     <h2 className="text-sm font-bold tracking-widest text-[var(--color-davay-text)] mb-3 px-1 mt-2 flex justify-between items-end">
                         <span>VAULT</span>
-                        <span className="text-[10px] text-gray-400 font-bold">{currentlyOwned} ITEMS</span>
+                        <span className="text-[10px] text-[var(--text-3)] font-bold">{currentlyOwned} ITEMS</span>
                     </h2>
                     {user.lighters.length === 0 ? (
-                        <div className="bg-gray-50 border border-gray-200 border-dashed rounded-2xl p-6 flex items-center justify-center text-xs font-semibold text-gray-400">
+                        <div className="bg-[var(--bg-sub)] border border-[var(--border)] border-dashed rounded-2xl p-6 flex items-center justify-center text-xs font-semibold text-[var(--text-3)]">
                             Empty vault
                         </div>
                     ) : (
@@ -256,13 +256,13 @@ async function RecentActivity({ username }: { username: string }) {
             <h2 className="text-sm font-bold tracking-widest text-[var(--color-davay-text)] mb-3 px-1">RECENT ACTIVITY</h2>
             <div className="flex flex-col gap-2">
                 {events.length === 0 && (
-                    <p className="text-xs text-gray-400 font-medium px-1">No activity yet.</p>
+                    <p className="text-xs text-[var(--text-3)] font-medium px-1">No activity yet.</p>
                 )}
                 {events.map((event, idx) => (
-                    <div key={idx} className="flex items-center gap-3 bg-white rounded-2xl p-3 border border-[var(--color-davay-hint)]/20 shadow-sm">
+                    <div key={idx} className="flex items-center gap-3 bg-[var(--bg-card)] rounded-2xl p-3 border border-[var(--border)] shadow-sm">
                         <div style={{ width: 10, height: 10, borderRadius: '50%', background: dotColor[event.type] ?? '#888', flexShrink: 0 }} />
-                        <p className="text-sm font-medium flex-1 leading-snug">{event.text}</p>
-                        <span className="text-[10px] text-gray-400 font-bold whitespace-nowrap">{formatDistanceToNow(new Date(event.timestamp), { addSuffix: true })}</span>
+                        <p className="text-sm font-medium flex-1 leading-snug text-[var(--text-1)]">{event.text}</p>
+                        <span className="text-[10px] text-[var(--text-3)] font-bold whitespace-nowrap">{formatDistanceToNow(new Date(event.timestamp), { addSuffix: true })}</span>
                     </div>
                 ))}
             </div>

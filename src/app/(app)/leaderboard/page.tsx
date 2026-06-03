@@ -97,7 +97,7 @@ export default async function LeaderboardPage({
                             {top2 && (
                                 <div className="flex flex-col items-center flex-1">
                                     <Link href={`/u/${top2.username}`} className="flex flex-col items-center w-full">
-                                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-bold text-[var(--accent)] border-2 border-white shadow-sm -mb-3 z-10 text-sm">
+                                        <div className="w-12 h-12 bg-[var(--bg-sub)] rounded-full flex items-center justify-center font-bold text-[var(--accent)] border-2 border-[var(--bg-card)] shadow-sm -mb-3 z-10 text-sm">
                                             {top2.username.substring(0, 2).toUpperCase()}
                                         </div>
                                         <div className="w-full bg-[var(--bg-sub)] h-24 rounded-t-xl flex flex-col items-center justify-start pt-6 border border-b-0 border-[var(--border)]"
@@ -114,7 +114,7 @@ export default async function LeaderboardPage({
                             {top1 && (
                                 <div className="flex flex-col items-center flex-[1.2]">
                                     <Link href={`/u/${top1.username}`} className="flex flex-col items-center w-full">
-                                        <div className="w-16 h-16 bg-[var(--text-1)] rounded-full flex items-center justify-center font-bold text-[var(--accent)] border-[3px] border-white shadow-md relative -mb-4 z-10">
+                                        <div className="w-16 h-16 bg-[var(--text-1)] rounded-full flex items-center justify-center font-bold text-[var(--accent)] border-[3px] border-[var(--bg-card)] shadow-md relative -mb-4 z-10">
                                             <div className="absolute -top-5 text-[var(--accent)] drop-shadow-md">
                                                 <Crown fill="currentColor" size={24} />
                                             </div>
@@ -134,7 +134,7 @@ export default async function LeaderboardPage({
                             {top3 && (
                                 <div className="flex flex-col items-center flex-1">
                                     <Link href={`/u/${top3.username}`} className="flex flex-col items-center w-full">
-                                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-bold text-[var(--text-1)] border-2 border-white shadow-sm -mb-3 z-10 text-sm">
+                                        <div className="w-12 h-12 bg-[var(--bg-sub)] rounded-full flex items-center justify-center font-bold text-[var(--text-1)] border-2 border-[var(--bg-card)] shadow-sm -mb-3 z-10 text-sm">
                                             {top3.username.substring(0, 2).toUpperCase()}
                                         </div>
                                         <div className="w-full bg-[var(--bg-sub)] h-20 rounded-t-xl flex flex-col items-center justify-start pt-6 border border-b-0 border-[var(--border)]"
@@ -152,13 +152,13 @@ export default async function LeaderboardPage({
 
                 {/* Your rank bar */}
                 {myRankIndex >= 0 && (
-                    <div className="bg-[var(--color-davay-primary-light)] border border-[var(--color-davay-primary)] rounded-xl p-3 flex justify-between items-center mt-4">
+                    <div className="bg-[var(--accent)]/10 border border-[var(--accent)] rounded-xl p-3 flex justify-between items-center mt-4">
                         <div className="flex items-center gap-3">
-                            <span className="font-bold text-[var(--color-davay-primary)] w-5 text-center">#{myRank}</span>
-                            <div className="w-8 h-8 rounded-full bg-[var(--color-davay-primary)]/10 text-[var(--color-davay-primary)] flex items-center justify-center font-bold text-[10px]">YOU</div>
-                            <span className="font-bold text-sm">Your rank</span>
+                            <span className="font-bold text-[var(--accent)] w-5 text-center">#{myRank}</span>
+                            <div className="w-8 h-8 rounded-full bg-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center font-bold text-[10px]">YOU</div>
+                            <span className="font-bold text-sm text-[var(--text-1)]">Your rank</span>
                         </div>
-                        <div className="font-bold text-[var(--color-davay-primary)]">{myScore} {activeTab}</div>
+                        <div className="font-bold text-[var(--accent)]">{myScore} {activeTab}</div>
                     </div>
                 )}
 
@@ -169,15 +169,15 @@ export default async function LeaderboardPage({
                         const isMe = entry.id === currentUser;
 
                         return (
-                            <Link href={`/u/${entry.username}`} key={entry.id} className={`flex items-center justify-between p-3 rounded-xl bg-white border ${isMe ? 'border-[var(--color-davay-primary)] shadow-sm shadow-[var(--color-davay-primary)]/10' : 'border-[var(--color-davay-hint)]/20'}`}>
+                            <Link href={`/u/${entry.username}`} key={entry.id} className={`flex items-center justify-between p-3 rounded-xl bg-[var(--bg-card)] border ${isMe ? 'border-[var(--accent)] shadow-sm shadow-[var(--accent)]/10' : 'border-[var(--border)]'}`}>
                                 <div className="flex items-center gap-3">
-                                    <span className="font-bold text-[#aaa] w-5 text-center text-sm">{rank}</span>
-                                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-xs text-gray-600">
+                                    <span className="font-bold text-[var(--text-3)] w-5 text-center text-sm">{rank}</span>
+                                    <div className="w-10 h-10 rounded-full bg-[var(--bg-sub)] flex items-center justify-center font-bold text-xs text-[var(--text-2)]">
                                         {entry.username.substring(0, 2).toUpperCase()}
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="font-bold text-sm">{entry.username}</span>
-                                        {isMe && <span className="text-[10px] text-[var(--color-davay-primary)] font-bold uppercase tracking-wider">You</span>}
+                                        <span className="font-bold text-sm text-[var(--text-1)]">{entry.username}</span>
+                                        {isMe && <span className="text-[10px] text-[var(--accent)] font-bold uppercase tracking-wider">You</span>}
                                     </div>
                                 </div>
                                 <div className="font-bold text-sm">
