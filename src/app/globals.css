@@ -48,8 +48,8 @@
   --bg-sub: #EFEDE8;
   --border: #E5E3DE;
   --text-1: #1A1A1A;
-  --text-2: #888888;
-  --text-3: #BBBBBB;
+  --text-2: #666666;
+  --text-3: #888888;
   --nav-bg: #FFFFFF;
   --accent: #D85A30;
 
@@ -81,8 +81,8 @@
     --bg-sub: #222222;
     --border: #272727;
     --text-1: #EFEFEF;
-    --text-2: #555555;
-    --text-3: #333333;
+    --text-2: #A0A0A0;
+    --text-3: #707070;
     --nav-bg: #141414;
     --accent: #D85A30;
 
@@ -95,13 +95,13 @@
     --rarity-legendary-bg: #2A1510;
     --rarity-legendary-text: #D85A30;
     --rarity-epic-bg: #1A1A2E;
-    --rarity-epic-text: #7986CB;
+    --rarity-epic-text: #9FA8DA;
     --rarity-rare-bg: #1A1E2A;
-    --rarity-rare-text: #64B5F6;
+    --rarity-rare-text: #90CAF9;
     --rarity-uncommon-bg: #1A2A1A;
-    --rarity-uncommon-text: #4CAF50;
+    --rarity-uncommon-text: #81C784;
     --rarity-common-bg: #222222;
-    --rarity-common-text: #888888;
+    --rarity-common-text: #B0B0B0;
   }
 }
 
