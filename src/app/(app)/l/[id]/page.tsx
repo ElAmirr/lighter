@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import TopBar from '@/components/layout/TopBar';
 import { notFound } from 'next/navigation';
 import CaptureClientButton from './CaptureClientButton';
-import { format } from 'date-fns';
+import { format, formatDistance } from 'date-fns';
 import { Flame, Leaf, Droplet, Star, Circle, MapPin } from 'lucide-react';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/jwt';
@@ -60,7 +60,12 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
     const rarityStyle = getRarityStyle(lighter.rarity?.name || 'Common');
 
     // Calculate distinct cities
-    const cities = Array.from(new Set(lighter.history_entries.map(h => h.city_name)));
+    const cities = Array.from(new Set(lighter.history_entries.filter(h => h.city_name).map(h => h.city_name)));
+    const distinctOwners = lighter.history_entries.length === 0 ? 0 : new Set(lighter.history_entries.map(h => h.owner_id)).size;
+    const totalScans = lighter.scan_count ?? 0;
+    const firstCapture = lighter.history_entries.length > 0
+        ? lighter.history_entries.reduce((a, b) => a.captured_at < b.captured_at ? a : b).captured_at
+        : null;
 
     const alreadyOwns = lighter.current_owner_id === currentUser;
 
@@ -85,7 +90,9 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
                         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full rarity-badge rarity-${(lighter.rarity?.name || 'Common').toLowerCase()} ${rarityStyle.bg} ${rarityStyle.text}`}>
                             {lighter.rarity?.name}
                         </span>
-                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${heroImage ? 'bg-white/40 text-white' : 'bg-[var(--text-1)]/10 text-[var(--text-1)]'}`}>{lighter.collection?.name}</span>
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${heroImage ? 'bg-white/40 text-white' : 'bg-[var(--text-1)]/10 text-[var(--text-1)]'}`}>
+                            {lighter.collection?.name}
+                        </span>
                         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${heroImage ? 'bg-white/40 text-white' : 'bg-[var(--text-1)]/10 text-[var(--text-1)]'}`}>
                             #{lighter.id.slice(0, 3)}
                         </span>
@@ -121,35 +128,38 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
                         )}
                     </div>
 
-                    <div className="flex gap-2 w-full">
-                        <div className="flex-1 bg-[--color-davay-bg] py-3 rounded-xl border border-[--color-davay-hint]/20 text-center">
-                            <div className="text-[10px] font-bold tracking-wider text-[--color-davay-muted] uppercase mb-0.5">Owners</div>
-                            <div className="text-xl font-extrabold text-[--color-davay-primary]">{lighter.history_entries.length === 0 ? 1 : new Set(lighter.history_entries.map(h => h.owner_id)).size}</div>
+                    {/* 4-stat grid */}
+                    <div className="grid grid-cols-4 gap-2 w-full">
+                        <div className="bg-[--color-davay-bg] py-3 rounded-xl border border-[--color-davay-hint]/20 text-center">
+                            <div className="text-[10px] font-bold tracking-wider text-[var(--text-3)] uppercase mb-0.5">Owners</div>
+                            <div className="text-xl font-extrabold text-[--color-davay-primary]">{distinctOwners}</div>
                         </div>
-                        <div className="flex-1 bg-[--color-davay-bg] py-3 rounded-xl border border-[--color-davay-hint]/20 text-center">
-                            <div className="flex flex-col">
-                                <span className="text-xs font-bold text-[var(--text-3)] mb-1 border-b pb-1">COLLECTION</span>
-                                <span className={`text-sm font-bold capitalize ${editionConf.text}`}>{lighter.collection?.name}</span>
-                            </div>
+                        <div className="bg-[--color-davay-bg] py-3 rounded-xl border border-[--color-davay-hint]/20 text-center">
+                            <div className="text-[10px] font-bold tracking-wider text-[var(--text-3)] uppercase mb-0.5">Cities</div>
+                            <div className="text-xl font-extrabold text-[--color-davay-primary]">{cities.length}</div>
                         </div>
-                        <div className="flex-1 bg-[--color-davay-bg] py-3 rounded-xl border border-[--color-davay-hint]/20 text-center">
-                            <div className="flex flex-col">
-                                <span className="text-xs font-bold text-[var(--text-3)] mb-1 border-b pb-1">RARITY</span>
-                                <span className={`text-[10px] font-black uppercase tracking-widest py-1 px-1.5 rounded-sm line-clamp-1 truncate ${rarityStyle.bg} ${rarityStyle.text}`}>{lighter.rarity?.name}</span>
+                        <div className="bg-[--color-davay-bg] py-3 rounded-xl border border-[--color-davay-hint]/20 text-center">
+                            <div className="text-[10px] font-bold tracking-wider text-[var(--text-3)] uppercase mb-0.5">Scans</div>
+                            <div className="text-xl font-extrabold text-[--color-davay-primary]">{totalScans}</div>
+                        </div>
+                        <div className="bg-[--color-davay-bg] py-3 rounded-xl border border-[--color-davay-hint]/20 text-center">
+                            <div className="text-[10px] font-bold tracking-wider text-[var(--text-3)] uppercase mb-0.5">Alive</div>
+                            <div className="text-[11px] font-extrabold text-[--color-davay-primary] leading-tight px-1">
+                                {firstCapture ? formatDistance(new Date(firstCapture), new Date(), { addSuffix: false }) : '—'}
                             </div>
                         </div>
                     </div>
 
-                    {/* Cities pills */}
+                    {/* City pills */}
                     {cities.length > 0 && (
                         <div className="flex flex-wrap gap-2">
-                            {cities.slice(0, 4).map((city, idx) => (
+                            {cities.slice(0, 5).map((city, idx) => (
                                 <div key={idx} className="flex items-center gap-1.5 px-3 py-1.5 bg-[--color-davay-bg] rounded-full text-xs font-semibold text-[--color-davay-text] border border-[--color-davay-hint]/30">
                                     <MapPin size={12} className="text-[--color-davay-primary]" />
                                     {city}
                                 </div>
                             ))}
-                            {cities.length > 4 && <div className="text-sm text-[--color-davay-muted] font-medium flex items-center">+{cities.length - 4} more</div>}
+                            {cities.length > 5 && <div className="text-sm text-[--color-davay-muted] font-medium flex items-center">+{cities.length - 5} more</div>}
                         </div>
                     )}
 
