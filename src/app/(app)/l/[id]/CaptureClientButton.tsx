@@ -40,7 +40,7 @@ function useCountUp(target: number, duration = 1200, start = false) {
 }
 
 // ── Confetti launcher ─────────────────────────────────────
-async function launchConfetti(isFirst = false) {
+async function launchConfetti(isFirst = false, isRevenge = false) {
     if (typeof window === 'undefined') return;
     try {
         const confettiModule = await import('https://cdn.skypack.dev/canvas-confetti@1.6.0' as any);
@@ -51,6 +51,9 @@ async function launchConfetti(isFirst = false) {
             setTimeout(() => confetti({ particleCount: 80, spread: 120, origin: { y: 0.3 }, colors: ['#FFD700', '#FFA500', '#FFFACD', '#FF6347'] }), 200);
             setTimeout(() => confetti({ particleCount: 60, spread: 80, angle: 60, origin: { x: 0, y: 0.5 }, colors: ['#FFD700', '#FFA500'] }), 400);
             setTimeout(() => confetti({ particleCount: 60, spread: 80, angle: 120, origin: { x: 1, y: 0.5 }, colors: ['#FFD700', '#FF8C00'] }), 400);
+        } else if (isRevenge) {
+            // Bloody red revenge burst
+            confetti({ particleCount: 150, spread: 100, origin: { y: 0.4 }, colors: ['#FF0000', '#8B0000', '#FF4500', '#1A0000'] });
         } else {
             confetti({
                 particleCount: 120, spread: 90,
@@ -156,6 +159,10 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [showTaunt, setShowTaunt] = useState(false);
+    const [challengeMsg, setChallengeMsg] = useState('');
+    const [stolenFrom, setStolenFrom] = useState<string | null>(null);
+    const [isRevenge, setIsRevenge] = useState(false);
     const [cityName, setCityName] = useState('');
     const [finalOwner, setFinalOwner] = useState(ownerIndex);
     const animVal = useCountUp(finalOwner, 1200, success);
@@ -164,8 +171,14 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
 
     const handleCapture = async () => {
         if (!isLoggedIn) { router.push('/login'); return; }
-        setLoading(true);
 
+        // Show taunt input before actually submitting
+        if (!showTaunt) {
+            setShowTaunt(true);
+            return;
+        }
+
+        setLoading(true);
         const doSubmit = (lat: number | null, lon: number | null) =>
             submitCapture(lat, lon);
 
@@ -185,7 +198,12 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
             const res = await fetch('/api/capture', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ lighter_id: lighterId, latitude: lat, longitude: lon }),
+                body: JSON.stringify({
+                    lighter_id: lighterId,
+                    latitude: lat,
+                    longitude: lon,
+                    challenge_message: challengeMsg.trim() || undefined
+                }),
             });
             if (!res.ok) {
                 const body = await res.json().catch(() => ({}));
@@ -193,10 +211,14 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
             }
             const data = await res.json();
             setCityName(data.city_name || 'Unknown');
-            setFinalOwner(data.capture ? ownerIndex : ownerIndex);
+            setStolenFrom(data.stolen_from);
+            setIsRevenge(data.is_revenge);
+            setFinalOwner(data.capture ? ownerIndex + 1 : ownerIndex);
+
             setSuccess(true);
             router.refresh();
-            setTimeout(() => launchConfetti(ownerIndex === 0), 200);
+            // Fire confetti based on origin or revenge
+            setTimeout(() => launchConfetti(ownerIndex === 0, data.is_revenge), 200);
         } catch (e: any) {
             alert("Something broke. Try again — the lighter isn't going anywhere.\n\n" + (e?.message || e));
             setLoading(false);
@@ -301,9 +323,19 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                 <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-1)', marginBottom: 6 }}>
                     owner
                 </div>
-                <div style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 24 }}>
+                <div style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 12 }}>
                     Captured in <strong>{cityName}</strong>
                 </div>
+
+                {stolenFrom && (
+                    <div style={{
+                        background: 'rgba(216,90,48,0.1)', border: '1px solid rgba(216,90,48,0.2)',
+                        color: '#D85A30', padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                        marginBottom: 24
+                    }}>
+                        Stolen from {stolenFrom} ⚔️
+                    </div>
+                )}
                 <div style={{ fontSize: 16, fontWeight: 800, color: '#D85A30', marginBottom: 4 }}>
                     {lighterName}
                 </div>
@@ -355,36 +387,52 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
     }
 
     return (
-        <button
-            onClick={handleCapture}
-            disabled={loading}
-            style={{
-                width: '100%', marginTop: 16, padding: '18px 0',
-                background: 'var(--accent)', color: 'white',
-                fontWeight: 700, fontSize: 16, borderRadius: 16, border: 'none',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.75 : 1,
-                boxShadow: '0 4px 24px rgba(216,90,48,0.25)',
-                transition: 'transform 100ms ease, opacity 200ms',
-                transform: 'scale(1)',
-            }}
-            onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.97)')}
-            onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
-            onTouchStart={e => (e.currentTarget.style.transform = 'scale(0.97)')}
-            onTouchEnd={e => (e.currentTarget.style.transform = 'scale(1)')}
-        >
-            {loading ? (
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <span style={{
-                        width: 16, height: 16, borderRadius: '50%',
-                        border: '2px solid rgba(255,255,255,0.3)',
-                        borderTopColor: 'white',
-                        display: 'inline-block',
-                        animation: 'spin 0.7s linear infinite',
-                    }} />
-                    Connecting to the streets...
-                </span>
-            ) : isLoggedIn ? 'Capture this lighter' : 'Login to claim this lighter'}
-        </button>
+        <div style={{ width: '100%', marginTop: 16 }}>
+            {showTaunt ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
+                    <input
+                        type="text"
+                        placeholder="Drop a taunt for the previous owner... (optional)"
+                        value={challengeMsg}
+                        onChange={e => setChallengeMsg(e.target.value)}
+                        maxLength={100}
+                        autoFocus
+                        style={{
+                            width: '100%', padding: '16px', borderRadius: 16,
+                            background: 'var(--bg-sub)', color: 'var(--text-1)',
+                            border: '1px solid var(--border)', fontSize: 14, outline: 'none'
+                        }}
+                    />
+                    <button
+                        onClick={handleCapture}
+                        disabled={loading}
+                        style={{
+                            width: '100%', padding: '16px 0',
+                            background: 'var(--accent)', color: 'white',
+                            fontWeight: 700, fontSize: 16, borderRadius: 16, border: 'none',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            opacity: loading ? 0.75 : 1,
+                            boxShadow: '0 4px 24px rgba(216,90,48,0.25)',
+                        }}
+                    >
+                        {loading ? 'Connecting to streets...' : 'Claim it'}
+                    </button>
+                </div>
+            ) : (
+                <button
+                    onClick={handleCapture}
+                    style={{
+                        width: '100%', padding: '18px 0',
+                        background: 'var(--accent)', color: 'white',
+                        fontWeight: 700, fontSize: 16, borderRadius: 16, border: 'none',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 24px rgba(216,90,48,0.25)',
+                        transition: 'transform 100ms ease',
+                    }}
+                >
+                    {isLoggedIn ? 'Capture this lighter' : 'Login to claim this lighter'}
+                </button>
+            )}
+        </div>
     );
 }

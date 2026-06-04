@@ -169,32 +169,68 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
                         <div className="flex flex-col gap-4 relative">
                             <div className="absolute left-5 top-5 bottom-5 w-px bg-[var(--color-davay-hint)]/30 border-l border-dashed border-[var(--border)]"></div>
 
-                            {lighter.history_entries.slice(0, 4).map((history, idx) => (
-                                <div key={history.id} className="flex items-start gap-4 relative">
-                                    {idx === 0 ? (
-                                        <div className="w-10 h-10 rounded-full bg-[var(--accent)]/10 flex items-center justify-center font-bold text-xs text-[var(--accent)] border-2 border-[var(--accent)] z-10 shrink-0 shadow-sm shadow-[var(--accent)]/20">
-                                            {history.owner.username.substring(0, 2).toUpperCase()}
-                                        </div>
-                                    ) : (
-                                        <div className="w-10 h-10 rounded-full bg-[var(--bg-sub)] flex items-center justify-center font-bold text-xs text-[var(--text-2)] border-2 border-[var(--bg-card)] z-10 shrink-0 shadow-sm">
-                                            {history.owner.username.substring(0, 2).toUpperCase()}
-                                        </div>
-                                    )}
-                                    <div className="flex flex-col justify-center min-h-[40px]">
-                                        <div className="flex items-center gap-2">
-                                            <span className={`font-bold ${idx === 0 ? 'text-[var(--text-1)]' : 'text-[var(--text-2)]'}`}>{history.owner.username}</span>
-                                            {idx === 0 && <span className="text-[9px] font-bold uppercase tracking-wider bg-[var(--accent)] text-white px-1.5 py-0.5 rounded-sm">Now</span>}
-                                        </div>
-                                        <div className="text-xs text-[var(--color-davay-muted)] font-medium mt-0.5">
-                                            {format(history.captured_at, 'MMM d, yyyy')}
+                            {lighter.history_entries.slice(0, 4).map((history, idx, arr) => {
+                                const prevEntry = idx + 1 < lighter.history_entries.length ? lighter.history_entries[idx + 1] : null;
+                                return (
+                                    <div key={history.id} className="flex items-start gap-4 relative">
+                                        {idx === 0 ? (
+                                            <div className="w-10 h-10 rounded-full bg-[var(--accent)]/10 flex items-center justify-center font-bold text-xs text-[var(--accent)] border-2 border-[var(--accent)] z-10 shrink-0 shadow-sm shadow-[var(--accent)]/20">
+                                                {history.owner.username.substring(0, 2).toUpperCase()}
+                                            </div>
+                                        ) : (
+                                            <div className="w-10 h-10 rounded-full bg-[var(--bg-sub)] flex items-center justify-center font-bold text-xs text-[var(--text-2)] border-2 border-[var(--bg-card)] z-10 shrink-0 shadow-sm">
+                                                {history.owner.username.substring(0, 2).toUpperCase()}
+                                            </div>
+                                        )}
+                                        <div className="flex flex-col justify-center min-h-[40px] w-full pr-2">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className={`font-bold ${idx === 0 ? 'text-[var(--text-1)]' : 'text-[var(--text-2)]'}`}>{history.owner.username}</span>
+                                                {idx === 0 && <span className="text-[9px] font-bold uppercase tracking-wider bg-[var(--accent)] text-white px-1.5 py-0.5 rounded-sm">Now</span>}
+
+                                                {prevEntry && (
+                                                    <span className="text-[10px] bg-red-500/10 text-red-500 border border-red-500/20 px-1.5 py-0.5 rounded flex items-center gap-1 font-bold">
+                                                        ⚔️ from {prevEntry.owner.username}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="text-xs text-[var(--color-davay-muted)] font-medium mt-0.5">
+                                                {format(history.captured_at, 'MMM d, yyyy')} • {history.city_name}
+                                            </div>
+
+                                            {/* Challenge Message / Taunt */}
+                                            {history.challenge_message && (
+                                                <div className="mt-2 text-xs text-[var(--text-1)] bg-[var(--bg-sub)] p-2 rounded-lg rounded-tl-none border-l-2 border-[var(--color-davay-primary)] opacity-90 italic">
+                                                    "{history.challenge_message}"
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                )
+                            })}
 
                             {lighter.history_entries.length > 4 && (
-                                <div className="pl-14 text-xs font-bold text-[var(--color-davay-hint)] uppercase tracking-wider mt-2">
+                                <div className="pl-14 text-xs font-bold text-[var(--color-davay-hint)] uppercase tracking-wider mt-2 mb-2">
                                     + {lighter.history_entries.length - 4} PREVIOUS OWNERS
+                                </div>
+                            )}
+
+                            {/* ORIGIN Block (Very First Owner) */}
+                            {lighter.history_entries.length > 0 && (
+                                <div className="flex items-start gap-4 relative mt-2 pt-2 border-t border-[var(--border)] border-dashed">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center font-bold text-xs text-white border-2 border-yellow-200 z-10 shrink-0 shadow-md shadow-yellow-500/20">
+                                        👑
+                                    </div>
+                                    <div className="flex flex-col justify-center min-h-[40px]">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold text-yellow-500">
+                                                {lighter.history_entries[lighter.history_entries.length - 1].owner.username}
+                                            </span>
+                                            <span className="text-[9px] font-bold uppercase tracking-wider bg-yellow-500/20 text-yellow-600 border border-yellow-500/30 px-1.5 py-0.5 rounded bg-amber-500/10">ORIGIN</span>
+                                        </div>
+                                        <div className="text-[11px] text-[var(--color-davay-muted)] font-medium mt-0.5">
+                                            First to buy it from the shop
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                         </div>
