@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import TopBar from '@/components/layout/TopBar';
 import { notFound } from 'next/navigation';
 import CaptureClientButton from './CaptureClientButton';
@@ -8,7 +8,6 @@ import { Flame, Leaf, Droplet, Star, Circle, MapPin } from 'lucide-react';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/jwt';
 
-const prisma = new PrismaClient();
 
 function getEditionStyles(collection: string) {
     switch (collection) {

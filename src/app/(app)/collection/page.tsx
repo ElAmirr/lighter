@@ -1,11 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import TopBar from '@/components/layout/TopBar';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/jwt';
 import { Flame, Leaf, Droplet, Star, Circle } from 'lucide-react';
 import Link from 'next/link';
 
-const prisma = new PrismaClient();
 
 function getEditionStyles(collection: string) {
     switch (collection) {

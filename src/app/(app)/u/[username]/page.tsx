@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import TopBar from '@/components/layout/TopBar';
 import { notFound, redirect } from 'next/navigation';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -9,7 +9,6 @@ import { verifyToken } from '@/lib/jwt';
 import Link from 'next/link';
 import clsx from 'clsx';
 
-const prisma = new PrismaClient();
 
 function getEditionStyles(collection: string) {
     switch (collection) {
@@ -215,16 +214,16 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
 async function RecentActivity({ username }: { username: string }) {
     let events: Array<{ type: string; text: string; timestamp: string }> = [];
     try {
-        const prismaLocal = new PrismaClient();
-        const user = await prismaLocal.user.findUnique({ where: { username } });
+        
+        const user = await prisma.user.findUnique({ where: { username } });
         if (user) {
-            const captures = await prismaLocal.ownershipHistory.findMany({
+            const captures = await prisma.ownershipHistory.findMany({
                 where: { owner_id: user.id },
                 orderBy: { captured_at: 'desc' },
                 take: 20,
                 include: { lighter: { include: { collection: true } } }
             });
-            const lightersEver = await prismaLocal.lighter.findMany({
+            const lightersEver = await prisma.lighter.findMany({
                 where: { history_entries: { some: { owner_id: user.id } } },
                 include: { history_entries: { orderBy: { captured_at: 'asc' }, include: { owner: true } } }
             });

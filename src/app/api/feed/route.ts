@@ -1,13 +1,16 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
-
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
+        const todayOnly = req.nextUrl.searchParams.get('today') === 'true';
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
         const history = await prisma.ownershipHistory.findMany({
             orderBy: { captured_at: 'desc' },
-            take: 20,
+            take: 50,
+            where: todayOnly ? { captured_at: { gte: todayStart } } : undefined,
             include: {
                 owner: { select: { username: true } },
                 lighter: {
@@ -16,12 +19,11 @@ export async function GET() {
             }
         });
 
-        const feed = await Promise.all(history.map(async (h) => {
-            // Count how many times this lighter was owned before this event
-            const ownerNumber = await prisma.ownershipHistory.count({
-                where: { lighter_id: h.lighter_id, captured_at: { lte: h.captured_at } }
-            });
-
+        const rankMap = new Map<string, number>();
+        const feed = history.map((h) => {
+            const key = h.lighter_id;
+            const rank = (rankMap.get(key) ?? 0) + 1;
+            rankMap.set(key, rank);
             return {
                 id: h.id,
                 username: h.owner.username,
@@ -29,17 +31,18 @@ export async function GET() {
                 lighter_name: h.lighter.name,
                 collection: h.lighter.collection?.name || 'Default',
                 rarity: h.lighter.rarity?.name || 'Common',
-                owner_number: ownerNumber,
+                owner_number: rank,
                 scan_count: h.lighter.scan_count,
                 city_name: h.city_name,
                 captured_at: h.captured_at,
                 lighter_image: h.lighter.image_url || h.lighter.collection?.image_url || null,
             };
-        }));
+        });
 
         return NextResponse.json(feed);
     } catch (error: any) {
         console.error(error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json([], { status: 500 });
     }
 }
+

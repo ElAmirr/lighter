@@ -147,17 +147,20 @@ export default function HomePage() {
     const [hot, setHot] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [newIds, setNewIds] = useState<Set<string>>(new Set());
+    const [loadingMsg, setLoadingMsg] = useState(loadingMessages[0]);
     const latestIdRef = useRef<string | null>(null);
-    const loadingMsg = useRef(loadingMessages[Math.floor(Math.random() * loadingMessages.length)]);
 
     const loadFeed = async (prepend = false) => {
         try {
-            const [feedRes, hotRes] = await Promise.all([fetch('/api/feed'), fetch('/api/hot-today')]);
+            const [feedRes, hotRes] = await Promise.all([fetch('/api/feed?today=true'), fetch('/api/hot-today')]);
             const [feedData, hotData] = await Promise.all([feedRes.json(), hotRes.json()]);
 
-            if (prepend && latestIdRef.current && Array.isArray(feedData)) {
-                const latestIdx = feedData.findIndex((f: any) => f.id === latestIdRef.current);
-                const newItems = latestIdx > 0 ? feedData.slice(0, latestIdx) : [];
+            const safeFeed = Array.isArray(feedData) ? feedData : [];
+            const safeHot = Array.isArray(hotData) ? hotData : [];
+
+            if (prepend && latestIdRef.current && safeFeed.length > 0) {
+                const latestIdx = safeFeed.findIndex((f: any) => f.id === latestIdRef.current);
+                const newItems = latestIdx > 0 ? safeFeed.slice(0, latestIdx) : [];
                 if (newItems.length > 0) {
                     const newSet = new Set(newItems.map((i: any) => i.id));
                     setNewIds(newSet);
@@ -165,16 +168,18 @@ export default function HomePage() {
                     setTimeout(() => setNewIds(new Set()), 1000);
                 }
             } else {
-                setFeed(feedData || []);
+                setFeed(safeFeed);
             }
-            if (feedData?.length > 0) latestIdRef.current = feedData[0].id;
-            setHot(hotData || []);
+            if (safeFeed.length > 0) latestIdRef.current = safeFeed[0].id;
+            setHot(safeHot);
         } catch { }
         finally { setLoading(false); }
     };
 
     useEffect(() => {
-        const timer = setTimeout(() => loadFeed(false), 300); // min 300ms skeleton
+        // Set random loading message on client only (avoids SSR hydration mismatch)
+        setLoadingMsg(loadingMessages[Math.floor(Math.random() * loadingMessages.length)]);
+        const timer = setTimeout(() => loadFeed(false), 300);
         const interval = setInterval(() => loadFeed(true), 30000);
         return () => { clearTimeout(timer); clearInterval(interval); };
     }, []);
@@ -206,12 +211,12 @@ export default function HomePage() {
                     </div>
                 )}
 
-                {/* Live feed */}
-                <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>Live captures</p>
+                {/* Today's captures */}
+                <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>Today&apos;s captures</p>
 
                 {loading && (
                     <>
-                        <p style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 12, fontStyle: 'italic' }}>{loadingMsg.current}</p>
+                        <p style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 12, fontStyle: 'italic' }}>{loadingMsg}</p>
                         {[1, 2, 3, 4].map(i => <FeedCardSkeleton key={i} />)}
                     </>
                 )}

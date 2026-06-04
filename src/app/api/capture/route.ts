@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+
 import { getUserFromRequest } from '@/lib/jwt';
 import type { NextRequest } from 'next/server';
 
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 async function getCityFromCoords(lat: number, lon: number): Promise<string> {
     try {

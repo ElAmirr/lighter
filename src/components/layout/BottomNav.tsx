@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Trophy, ScanLine, Grid2X2, User } from 'lucide-react';
+import { Home, Trophy, ScanLine, Sword, User } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function BottomNav() {
@@ -13,7 +13,7 @@ export default function BottomNav() {
         { name: 'Home', href: '/home', icon: Home },
         { name: 'Ranks', href: '/leaderboard', icon: Trophy },
         { name: 'Scan', href: '/scan', icon: ScanLine, isCenter: true },
-        { name: 'Collection', href: '/collection', icon: Grid2X2 },
+        { name: 'War', href: '/war', icon: Sword },
         { name: 'Profile', href: '/u/me', icon: User },
     ];
 

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import TopBar from '@/components/layout/TopBar';
 import { Crown, Flame } from 'lucide-react';
 import Link from 'next/link';
@@ -6,7 +6,6 @@ import LeaderboardTabs from './LeaderboardTabs';
 import { getUserFromRequest } from '@/lib/jwt';
 import { cookies } from 'next/headers';
 
-const prisma = new PrismaClient();
 export const revalidate = 60; // 1 minute cache for leaderboard
 
 type LeaderboardEntry = {
@@ -100,7 +99,7 @@ export default async function LeaderboardPage({
                                         <div className="w-12 h-12 bg-[var(--bg-sub)] rounded-full flex items-center justify-center font-bold text-[var(--accent)] border-2 border-[var(--bg-card)] shadow-sm -mb-3 z-10 text-sm">
                                             {top2.username.substring(0, 2).toUpperCase()}
                                         </div>
-                                        <div className="w-full bg-[var(--bg-sub)] h-24 rounded-t-xl flex flex-col items-center justify-start pt-6 border border-b-0 border-[var(--border)]"
+                                        <div className="w-full bg-[var(--bg-sub)] h-28 rounded-t-xl flex flex-col items-center justify-start pt-6 border border-b-0 border-[var(--border)]"
                                             style={{ transformOrigin: 'bottom', animation: 'podium-grow 500ms ease-out 0ms forwards' }}>
                                             <span className="font-bold text-[var(--text-1)] text-xs">#2</span>
                                             <span className="font-bold text-[var(--accent)] mt-1">{top2.score}</span>
@@ -137,7 +136,7 @@ export default async function LeaderboardPage({
                                         <div className="w-12 h-12 bg-[var(--bg-sub)] rounded-full flex items-center justify-center font-bold text-[var(--text-1)] border-2 border-[var(--bg-card)] shadow-sm -mb-3 z-10 text-sm">
                                             {top3.username.substring(0, 2).toUpperCase()}
                                         </div>
-                                        <div className="w-full bg-[var(--bg-sub)] h-20 rounded-t-xl flex flex-col items-center justify-start pt-6 border border-b-0 border-[var(--border)]"
+                                        <div className="w-full bg-[var(--bg-sub)] h-24 rounded-t-xl flex flex-col items-center justify-start pt-6 border border-b-0 border-[var(--border)]"
                                             style={{ transformOrigin: 'bottom', animation: 'podium-grow 500ms ease-out 150ms both' }}>
                                             <span className="font-bold text-[var(--text-1)] text-xs">#3</span>
                                             <span className="font-bold text-[var(--accent)] mt-1">{top3.score}</span>
