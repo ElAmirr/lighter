@@ -17,7 +17,7 @@ export default function ScanPage() {
                 const urlObj = new URL(scannedUrl);
                 router.push(urlObj.pathname);
             } else {
-                setErrorString("Not a valid DAVAY Lighter QR code.");
+                setErrorString("QR code مش صالح - هذا ليس QR ديال ولاعة.");
             }
         }
     };
@@ -29,7 +29,7 @@ export default function ScanPage() {
 
                 <h1 className="text-2xl font-bold mb-2 tracking-tighter mt-4 text-center">Scan Lighter</h1>
                 <p className="text-center text-xs text-[var(--color-davay-hint)] max-w-[280px] leading-relaxed mb-6">
-                    Find a physical DAVAY lighter and point your camera here to capture it.
+                    قابل ولاعة هات شعول فيزيائية وسدد الكاميرا على QR ديالها.
                 </p>
 
                 {typeof window !== 'undefined' && window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && (

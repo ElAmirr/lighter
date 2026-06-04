@@ -188,8 +188,8 @@ export default function HomePage() {
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', background: 'var(--bg)', paddingBottom: 80 }}>
             {/* Header */}
             <div style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border)', padding: '14px 16px', position: 'sticky', top: 0, zIndex: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 18, fontWeight: 900, letterSpacing: '0.12em', color: 'var(--text-1)' }}>
-                    DA<span style={{ color: '#D85A30' }}>V</span>AY
+                <span style={{ fontSize: 22, fontWeight: 900, fontFamily: 'var(--font-arabic), serif', letterSpacing: '0.04em', color: 'var(--text-1)', direction: 'rtl' }}>
+                    هات <span style={{ color: '#D85A30' }}>شعول</span>
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--bg-sub)', borderRadius: 20, padding: '4px 10px' }}>
                     <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#D85A30', display: 'inline-block', animation: 'pulse-dot 1.5s infinite ease-in-out' }} />
@@ -224,7 +224,7 @@ export default function HomePage() {
                     <div style={{ textAlign: 'center', padding: '48px 24px' }}>
                         <div style={{ fontSize: 40, marginBottom: 12 }}>🔥</div>
                         <div style={{ fontWeight: 800, fontSize: 18, color: 'var(--text-1)', marginBottom: 6 }}>The streets are quiet... for now</div>
-                        <div style={{ fontSize: 14, color: 'var(--text-2)' }}>Be the first to capture a DAVAY lighter 🔥</div>
+                        <div style={{ fontSize: 14, color: 'var(--text-2)' }}>كون أول واحد يقبض ولاعة 🔥</div>
                     </div>
                 )}
                 {feed.map((item: any) => <FeedCard key={item.id} item={item} isNew={newIds.has(item.id)} />)}

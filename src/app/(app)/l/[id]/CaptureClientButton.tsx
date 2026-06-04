@@ -122,7 +122,7 @@ async function shareCapture(opts: Parameters<typeof generateShareCard>[0]) {
         const file = new File([blob], `davay-capture-${opts.lighterId.slice(0, 6)}.png`, { type: 'image/png' });
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
             try {
-                await navigator.share({ files: [file], title: `I captured ${opts.lighterName} on DAVAY!` });
+                await navigator.share({ files: [file], title: `قبضت ${opts.lighterName} على هات شعول!` });
                 return;
             } catch { }
         }

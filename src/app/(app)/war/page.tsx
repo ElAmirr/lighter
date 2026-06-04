@@ -61,17 +61,22 @@ function CapturedCard({ item }: { item: any }) {
     const rarity = getRarity(item.rarity);
     return (
         <Link href={`/l/${item.lighter_id}`}>
-            <div style={{ display: 'flex', gap: 12, padding: '12px 14px', background: 'var(--bg-card)', borderRadius: 16, marginBottom: 10, border: '1px solid var(--border)', alignItems: 'center', position: 'relative' }}>
-                <LighterThumb collection={item.collection} image={item.lighter_image} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontWeight: 700, fontSize: 14, margin: 0, color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.lighter_name}</p>
-                    <p style={{ fontSize: 11, color: 'var(--text-2)', margin: '2px 0 0' }}>
-                        {item.city_name} · {formatDistanceToNow(new Date(item.captured_at), { addSuffix: true })}
-                    </p>
+            <div style={{ display: 'flex', gap: 12, padding: '12px 14px', background: 'var(--bg-card)', borderRadius: 16, marginBottom: 10, border: '1px solid var(--border)', alignItems: 'center', position: 'relative', opacity: 0.9 }}>
+                {/* Red left stripe for stolen */}
+                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: '#30d846ff', borderRadius: '16px 0 0 16px' }} />
+
+                <div style={{ display: 'flex', gap: 12, padding: '12px 14px', background: 'var(--bg-card)', borderRadius: 16, marginBottom: 10, border: '1px solid var(--border)', alignItems: 'center', position: 'relative' }}>
+                    <LighterThumb collection={item.collection} image={item.lighter_image} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontWeight: 700, fontSize: 14, margin: 0, color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.lighter_name}</p>
+                        <p style={{ fontSize: 11, color: 'var(--text-2)', margin: '2px 0 0' }}>
+                            {item.city_name} · {formatDistanceToNow(new Date(item.captured_at), { addSuffix: true })}
+                        </p>
+                    </div>
+                    <span style={{ fontSize: 10, fontWeight: 700, background: rarity.bg, color: rarity.text, borderRadius: 20, padding: '2px 8px', textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0 }}>
+                        {item.rarity}
+                    </span>
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 700, background: rarity.bg, color: rarity.text, borderRadius: 20, padding: '2px 8px', textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0 }}>
-                    {item.rarity}
-                </span>
             </div>
         </Link>
     );
@@ -183,7 +188,7 @@ export default function WarPage() {
                         </div>
                         <div style={{ fontSize: 14, color: 'var(--text-2)' }}>
                             {activeTab === 'captured'
-                                ? 'Scan a DAVAY lighter and claim your first W 🔥'
+                                ? 'امسح QR ديال ولاعة وقبضها 🔥'
                                 : 'Your lighters are safe... for now 👀'}
                         </div>
                     </div>

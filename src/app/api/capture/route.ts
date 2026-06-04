@@ -9,7 +9,7 @@ async function getCityFromCoords(lat: number, lon: number): Promise<string> {
     try {
         const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
-            { headers: { 'User-Agent': 'DAVAY-App/1.0' }, next: { revalidate: 0 } }
+            { headers: { 'User-Agent': 'HatChaaoul-App/1.0' }, next: { revalidate: 0 } }
         );
         const data = await res.json();
         const addr = data.address || {};

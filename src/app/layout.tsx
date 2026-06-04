@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Lalezar } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
@@ -8,14 +8,21 @@ const interSans = Inter({
   subsets: ["latin"],
 });
 
+// Lalezar — bold Arabic display font, perfect for street/teen aesthetic
+const lalezar = Lalezar({
+  variable: "--font-arabic",
+  weight: "400",
+  subsets: ["arabic", "latin"],
+});
+
 export const metadata: Metadata = {
-  title: "DAVAY - Social Game",
-  description: "A collectible QR-code lighter social game for Tunisian street culture.",
+  title: "هات شعول - لعبة اجتماعية",
+  description: "لعبة اجتماعية للولاعات في الشوارع التونسية.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "DAVAY",
+    title: "هات شعول",
   },
 };
 
@@ -33,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${interSans.variable} h-full antialiased`}>
+    <html lang="ar" className={`${interSans.variable} ${lalezar.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col justify-start items-center bg-[var(--color-davay-bg)] text-[var(--color-davay-text)]">
         <div className="w-full max-w-[390px] min-h-screen bg-[var(--color-davay-bg)] flex flex-col relative overflow-x-hidden shadow-2xl shadow-black/5">
           {children}
@@ -45,3 +52,4 @@ export default function RootLayout({
     </html>
   );
 }
+
