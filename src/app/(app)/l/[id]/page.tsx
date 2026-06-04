@@ -75,22 +75,17 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
                 <div className={`w-full h-72 flex flex-col items-center justify-center relative overflow-hidden shadow-sm border-b border-[var(--border)] ${heroImage ? '' : editionConf.bg} p-6`}>
                     {heroImage ? (
                         <>
-                            <img src={heroImage} alt={lighter.name} className="absolute inset-0 w-full h-full object-cover" />
+                            <img src={heroImage} alt={lighter.name} className="absolute inset-0 w-full h-full object-contain" />
                             <div className="absolute inset-0 bg-black/30" />
                         </>
                     ) : (
                         <editionConf.icon size={100} className={`mb-4 opacity-90 ${editionConf.text}`} strokeWidth={1} />
                     )}
-                    <div className={`relative z-10 font-bold tracking-[0.2em] uppercase text-sm ${heroImage ? 'text-white drop-shadow' : `${editionConf.text} opacity-90`}`}>
-                        {lighter.collection?.name} COLLECTION
-                    </div>
-                    <div className={`absolute top-4 right-4 text-[10px] uppercase font-bold tracking-widest z-10 ${heroImage ? 'text-white drop-shadow opacity-70' : 'text-[var(--text-2)] opacity-80'}`}>
-                        GEN 1
-                    </div>
                     <div className="absolute bottom-4 left-4 flex gap-2 z-10">
                         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full rarity-badge rarity-${(lighter.rarity?.name || 'Common').toLowerCase()} ${rarityStyle.bg} ${rarityStyle.text}`}>
                             {lighter.rarity?.name}
                         </span>
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${heroImage ? 'bg-white/40 text-white' : 'bg-[var(--text-1)]/10 text-[var(--text-1)]'}`}>{lighter.collection?.name}</span>
                         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${heroImage ? 'bg-white/40 text-white' : 'bg-[var(--text-1)]/10 text-[var(--text-1)]'}`}>
                             #{lighter.id.slice(0, 3)}
                         </span>
@@ -107,6 +102,23 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
                         <p className="text-[var(--color-davay-muted)] font-medium mt-1">
                             Released {format(lighter.created_at, 'MMMM yyyy')}
                         </p>
+
+                        {/* ORIGIN badge — only shows when no one has owned it yet */}
+                        {lighter.history_entries.length === 0 && (
+                            <div style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 8,
+                                background: 'linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,165,0,0.08))',
+                                border: '1px solid rgba(255,215,0,0.5)',
+                                borderRadius: 20, padding: '8px 16px', marginTop: 12,
+                                boxShadow: '0 0 16px rgba(255,215,0,0.15)',
+                            }}>
+                                <span style={{ fontSize: 16 }}>👑</span>
+                                <div>
+                                    <div style={{ fontSize: 11, fontWeight: 900, color: '#FFD700', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Origin</div>
+                                    <div style={{ fontSize: 10, color: '#B8972A', fontWeight: 600 }}>Never been owned — be the first</div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex gap-2 w-full">

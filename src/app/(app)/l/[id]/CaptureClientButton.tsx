@@ -40,21 +40,25 @@ function useCountUp(target: number, duration = 1200, start = false) {
 }
 
 // ── Confetti launcher ─────────────────────────────────────
-async function launchConfetti() {
-    // Dynamically load canvas-confetti from CDN
+async function launchConfetti(isFirst = false) {
     if (typeof window === 'undefined') return;
     try {
         const confettiModule = await import('https://cdn.skypack.dev/canvas-confetti@1.6.0' as any);
         const confetti = confettiModule.default || confettiModule;
-        confetti({
-            particleCount: 120,
-            spread: 90,
-            origin: { y: 0.4 },
-            colors: ['#D85A30', '#F0997B', '#FAECE7', '#1A1A1A'],
-        });
-    } catch {
-        // Ignore if CDN not available
-    }
+        if (isFirst) {
+            // Massive gold burst for first owner
+            confetti({ particleCount: 80, spread: 60, origin: { y: 0.5 }, colors: ['#FFD700', '#FFA500', '#FFFACD', '#FF8C00'] });
+            setTimeout(() => confetti({ particleCount: 80, spread: 120, origin: { y: 0.3 }, colors: ['#FFD700', '#FFA500', '#FFFACD', '#FF6347'] }), 200);
+            setTimeout(() => confetti({ particleCount: 60, spread: 80, angle: 60, origin: { x: 0, y: 0.5 }, colors: ['#FFD700', '#FFA500'] }), 400);
+            setTimeout(() => confetti({ particleCount: 60, spread: 80, angle: 120, origin: { x: 1, y: 0.5 }, colors: ['#FFD700', '#FF8C00'] }), 400);
+        } else {
+            confetti({
+                particleCount: 120, spread: 90,
+                origin: { y: 0.4 },
+                colors: ['#D85A30', '#F0997B', '#FAECE7', '#1A1A1A'],
+            });
+        }
+    } catch { }
 }
 
 // ── Share card generator ──────────────────────────────────
@@ -192,15 +196,84 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
             setFinalOwner(data.capture ? ownerIndex : ownerIndex);
             setSuccess(true);
             router.refresh();
-            // Fire confetti after slight delay
-            setTimeout(launchConfetti, 200);
+            setTimeout(() => launchConfetti(ownerIndex === 0), 200);
         } catch (e: any) {
             alert("Something broke. Try again — the lighter isn't going anywhere.\n\n" + (e?.message || e));
             setLoading(false);
         }
     };
 
-    // ── Cinematic success screen ──────────────────────────
+    // ── ORIGIN screen (first-ever owner, straight from shop) ──
+    if (success && finalOwner === 1) {
+        return (
+            <div style={{
+                position: 'fixed', inset: 0, zIndex: 9990,
+                background: 'linear-gradient(160deg, #1A0F00 0%, #3D2000 50%, #1A0F00 100%)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                padding: '32px 24px', textAlign: 'center',
+                animation: 'fade-scale-in 300ms ease-out forwards',
+            }}>
+                {/* Crown glow */}
+                <div style={{ fontSize: 72, marginBottom: 8, filter: 'drop-shadow(0 0 24px #FFD700)' }}>👑</div>
+
+                <div style={{
+                    background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    fontSize: 13, fontWeight: 900, letterSpacing: '0.3em',
+                    textTransform: 'uppercase', marginBottom: 4,
+                }}>Origin Owner</div>
+
+                <div style={{ fontSize: 42, fontWeight: 900, color: '#FFD700', lineHeight: 1.1, margin: '12px 0 4px', textShadow: '0 0 40px #FFD70080' }}>
+                    #001
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: '#FFF8E6', marginBottom: 6 }}>First to ever hold this</div>
+
+                {/* Shop badge */}
+                <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    background: 'rgba(255,215,0,0.15)', border: '1px solid rgba(255,215,0,0.4)',
+                    borderRadius: 20, padding: '6px 16px', marginBottom: 20,
+                }}>
+                    <span style={{ fontSize: 14 }}>🏪</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#FFD700', letterSpacing: '0.06em' }}>STRAIGHT FROM THE SHOP</span>
+                </div>
+
+                <div style={{ fontSize: 17, fontWeight: 800, color: '#FFF8E6', marginBottom: 4 }}>{lighterName}</div>
+                <div style={{ fontSize: 12, color: '#A0896A', marginBottom: 6 }}>#{lighterId.slice(0, 6)}</div>
+                <div style={{ fontSize: 13, color: '#C4A96A', marginBottom: 36 }}>
+                    Captured in <strong style={{ color: '#FFD700' }}>{cityName}</strong>
+                </div>
+
+                {/* Share button */}
+                <button
+                    onClick={() => shareCapture({ ownerNumber: finalOwner, lighterName, lighterId, collection, cityName })}
+                    style={{
+                        width: '100%', maxWidth: 320, padding: '16px 0',
+                        background: 'linear-gradient(135deg, #FFD700, #FFA500)', color: '#1A0F00',
+                        fontWeight: 800, fontSize: 16, borderRadius: 16,
+                        border: 'none', cursor: 'pointer', marginBottom: 12,
+                        boxShadow: '0 4px 32px rgba(255,215,0,0.4)',
+                    }}
+                >
+                    🏆 Share — You&apos;re the OG
+                </button>
+                <button
+                    onClick={() => setSuccess(false)}
+                    style={{
+                        width: '100%', maxWidth: 320, padding: '14px 0',
+                        background: 'transparent', color: '#A0896A',
+                        fontWeight: 600, fontSize: 15, borderRadius: 16,
+                        border: '1px solid rgba(255,215,0,0.2)', cursor: 'pointer',
+                    }}
+                >
+                    View lighter
+                </button>
+            </div>
+        );
+    }
+
+    // ── Cinematic success screen (subsequent owners) ──────────────────────
     if (success) {
         return (
             <div style={{
