@@ -7,7 +7,10 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
     try {
-        const { username, email, password } = await request.json();
+        const body = await request.json();
+        const username = body.username?.trim();
+        const email = body.email?.trim().toLowerCase();
+        const password = body.password;
 
         if (!username || !email || !password) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 });

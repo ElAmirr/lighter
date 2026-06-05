@@ -23,7 +23,7 @@ function getEditionStyles(collection: string) {
 
 export default async function UserProfile({ params }: { params: Promise<{ username: string }> }) {
     const resolvedParams = await params;
-    let username = resolvedParams.username;
+    let username = decodeURIComponent(resolvedParams.username).trim();
 
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -214,7 +214,7 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
 async function RecentActivity({ username }: { username: string }) {
     let events: Array<{ type: string; text: string; timestamp: string }> = [];
     try {
-        
+
         const user = await prisma.user.findUnique({ where: { username } });
         if (user) {
             const captures = await prisma.ownershipHistory.findMany({
