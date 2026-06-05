@@ -6,11 +6,13 @@ import webpush from 'web-push';
 
 import { prisma } from '@/lib/prisma';
 
-webpush.setVapidDetails(
-    'mailto:amirr@davay.tn',
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY as string,
-    process.env.VAPID_PRIVATE_KEY as string
-);
+if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+    webpush.setVapidDetails(
+        'mailto:amirr@davay.tn',
+        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+        process.env.VAPID_PRIVATE_KEY
+    );
+}
 
 async function getCityFromCoords(lat: number, lon: number): Promise<string> {
     try {
