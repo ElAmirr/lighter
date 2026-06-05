@@ -17,7 +17,9 @@ model User {
   
   lighters         Lighter[]          @relation("CurrentOwner")
   history_entries  OwnershipHistory[] @relation("PreviousOwner")
+  stolen_entries   OwnershipHistory[] @relation("StolenFrom")
   scans            Scan[]
+  push_subscriptions PushSubscription[]
 }
 
 model Collection {
@@ -58,9 +60,12 @@ model OwnershipHistory {
   latitude         Float?
   longitude        Float?
   city_name        String             @default("Unknown")
+  message          String?
+  stolen_from_id   String?
 
   lighter          Lighter            @relation(fields: [lighter_id], references: [id])
   owner            User               @relation("PreviousOwner", fields: [owner_id], references: [id])
+  stolen_from      User?              @relation("StolenFrom", fields: [stolen_from_id], references: [id])
 }
 
 model Scan {
@@ -73,4 +78,15 @@ model Scan {
 
   lighter          Lighter            @relation(fields: [lighter_id], references: [id])
   user             User?              @relation(fields: [user_id], references: [id])
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  user_id   String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  created_at DateTime @default(now())
+
+  user      User     @relation(fields: [user_id], references: [id])
 }

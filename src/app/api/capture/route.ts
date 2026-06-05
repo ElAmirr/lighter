@@ -2,8 +2,15 @@ import { NextResponse } from 'next/server';
 
 import { getUserFromRequest } from '@/lib/jwt';
 import type { NextRequest } from 'next/server';
+import webpush from 'web-push';
 
 import { prisma } from '@/lib/prisma';
+
+webpush.setVapidDetails(
+    'mailto:amirr@davay.tn',
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY as string,
+    process.env.VAPID_PRIVATE_KEY as string
+);
 
 async function getCityFromCoords(lat: number, lon: number): Promise<string> {
     try {
@@ -26,7 +33,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { lighter_id, latitude, longitude } = await request.json();
+        const { lighter_id, latitude, longitude, message } = await request.json();
 
         if (!lighter_id) {
             return NextResponse.json({ error: 'lighter_id is required' }, { status: 400 });
@@ -47,18 +54,49 @@ export async function POST(request: NextRequest) {
             city_name = await getCityFromCoords(latitude, longitude);
         }
 
+        const stolen_from_id = lighter.current_owner_id;
+
         await prisma.lighter.update({
             where: { id: lighter_id },
             data: { current_owner_id: user.userId, scan_count: { increment: 1 } }
         });
 
         const history = await prisma.ownershipHistory.create({
-            data: { lighter_id, owner_id: user.userId, latitude, longitude, city_name }
+            data: { lighter_id, owner_id: user.userId, latitude, longitude, city_name, message, stolen_from_id }
         });
 
         await prisma.scan.create({
             data: { lighter_id, user_id: user.userId, latitude, longitude }
         });
+
+        // Send push notification if stolen
+        if (stolen_from_id && stolen_from_id !== user.userId) {
+            try {
+                const subs = await prisma.pushSubscription.findMany({ where: { user_id: stolen_from_id } });
+                const notificationPayload = JSON.stringify({
+                    title: '🚨 ولاعتك تسرقت!',
+                    body: `${user.username} قبض على ${lighter.name}`,
+                    url: `/l/${lighter_id}`
+                });
+
+                await Promise.all(subs.map(async (sub) => {
+                    const pushSubscription = {
+                        endpoint: sub.endpoint,
+                        keys: { p256dh: sub.p256dh, auth: sub.auth }
+                    };
+                    try {
+                        await webpush.sendNotification(pushSubscription, notificationPayload);
+                    } catch (err: any) {
+                        // If subscription is gone, delete it
+                        if (err?.statusCode === 410 || err?.statusCode === 404) {
+                            await prisma.pushSubscription.delete({ where: { id: sub.id } });
+                        }
+                    }
+                }));
+            } catch (err) {
+                console.error('Push notification failed:', err);
+            }
+        }
 
         return NextResponse.json({ success: true, capture: history, city_name });
     } catch (error: any) {

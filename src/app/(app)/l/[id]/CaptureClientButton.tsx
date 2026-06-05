@@ -156,6 +156,7 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [captureMessage, setCaptureMessage] = useState('');
     const [cityName, setCityName] = useState('');
     const [finalOwner, setFinalOwner] = useState(ownerIndex);
     const animVal = useCountUp(finalOwner, 1200, success);
@@ -185,7 +186,7 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
             const res = await fetch('/api/capture', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ lighter_id: lighterId, latitude: lat, longitude: lon }),
+                body: JSON.stringify({ lighter_id: lighterId, latitude: lat, longitude: lon, message: captureMessage.trim() || undefined }),
             });
             if (!res.ok) {
                 const body = await res.json().catch(() => ({}));
@@ -355,36 +356,56 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
     }
 
     return (
-        <button
-            onClick={handleCapture}
-            disabled={loading}
-            style={{
-                width: '100%', marginTop: 16, padding: '18px 0',
-                background: 'var(--accent)', color: 'white',
-                fontWeight: 700, fontSize: 16, borderRadius: 16, border: 'none',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.75 : 1,
-                boxShadow: '0 4px 24px rgba(216,90,48,0.25)',
-                transition: 'transform 100ms ease, opacity 200ms',
-                transform: 'scale(1)',
-            }}
-            onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.97)')}
-            onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
-            onTouchStart={e => (e.currentTarget.style.transform = 'scale(0.97)')}
-            onTouchEnd={e => (e.currentTarget.style.transform = 'scale(1)')}
-        >
-            {loading ? (
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <span style={{
-                        width: 16, height: 16, borderRadius: '50%',
-                        border: '2px solid rgba(255,255,255,0.3)',
-                        borderTopColor: 'white',
-                        display: 'inline-block',
-                        animation: 'spin 0.7s linear infinite',
-                    }} />
-                    Connecting to the streets...
-                </span>
-            ) : isLoggedIn ? 'Capture this lighter' : 'Login to claim this lighter'}
-        </button>
+        <div style={{ width: '100%', marginTop: 16 }}>
+            {isLoggedIn && (
+                <div style={{ marginBottom: 12 }}>
+                    <textarea
+                        placeholder="اترك رسالة للمالك القديم... (اختياري)"
+                        value={captureMessage}
+                        onChange={(e) => setCaptureMessage(e.target.value)}
+                        maxLength={160}
+                        rows={2}
+                        dir="auto"
+                        style={{
+                            width: '100%', padding: '14px 16px', borderRadius: 16,
+                            background: 'var(--bg)', color: 'var(--text-1)',
+                            border: '1px solid var(--border)', fontSize: 14,
+                            resize: 'none', outline: 'none', fontFamily: 'inherit'
+                        }}
+                    />
+                </div>
+            )}
+            <button
+                onClick={handleCapture}
+                disabled={loading}
+                style={{
+                    width: '100%', padding: '18px 0',
+                    background: 'var(--accent)', color: 'white',
+                    fontWeight: 700, fontSize: 16, borderRadius: 16, border: 'none',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.75 : 1,
+                    boxShadow: '0 4px 24px rgba(216,90,48,0.25)',
+                    transition: 'transform 100ms ease, opacity 200ms',
+                    transform: 'scale(1)',
+                }}
+                onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.97)')}
+                onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+                onTouchStart={e => (e.currentTarget.style.transform = 'scale(0.97)')}
+                onTouchEnd={e => (e.currentTarget.style.transform = 'scale(1)')}
+            >
+                {loading ? (
+                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                        <span style={{
+                            width: 16, height: 16, borderRadius: '50%',
+                            border: '2px solid rgba(255,255,255,0.3)',
+                            borderTopColor: 'white',
+                            display: 'inline-block',
+                            animation: 'spin 0.7s linear infinite',
+                        }} />
+                        Connecting to the streets...
+                    </span>
+                ) : isLoggedIn ? 'Capture this lighter' : 'Login to claim this lighter'}
+            </button>
+        </div>
     );
 }

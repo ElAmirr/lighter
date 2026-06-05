@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
             where: todayOnly ? { captured_at: { gte: todayStart } } : undefined,
             include: {
                 owner: { select: { username: true } },
+                stolen_from: { select: { username: true } },
                 lighter: {
                     include: { collection: true, rarity: true }
                 }
@@ -36,6 +37,8 @@ export async function GET(req: NextRequest) {
                 city_name: h.city_name,
                 captured_at: h.captured_at,
                 lighter_image: h.lighter.image_url || h.lighter.collection?.image_url || null,
+                message: h.message,
+                stolen_from: h.stolen_from?.username || null,
             };
         });
 
