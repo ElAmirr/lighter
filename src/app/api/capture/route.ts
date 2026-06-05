@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { lighter_id, latitude, longitude, challenge_message } = await request.json();
+        const { lighter_id, latitude, longitude } = await request.json();
 
         if (!lighter_id) {
             return NextResponse.json({ error: 'lighter_id is required' }, { status: 400 });
@@ -47,46 +47,20 @@ export async function POST(request: NextRequest) {
             city_name = await getCityFromCoords(latitude, longitude);
         }
 
-        const previousOwnerId = lighter.current_owner_id;
-        const previousOwnerEntry = previousOwnerId ? await prisma.user.findUnique({ where: { id: previousOwnerId } }) : null;
-
         await prisma.lighter.update({
             where: { id: lighter_id },
             data: { current_owner_id: user.userId, scan_count: { increment: 1 } }
         });
 
         const history = await prisma.ownershipHistory.create({
-            data: {
-                lighter_id,
-                owner_id: user.userId,
-                latitude,
-                longitude,
-                city_name,
-                challenge_message: challenge_message || null
-            }
+            data: { lighter_id, owner_id: user.userId, latitude, longitude, city_name }
         });
 
         await prisma.scan.create({
             data: { lighter_id, user_id: user.userId, latitude, longitude }
         });
 
-        // Determine if it's revenge (you owned it before, then someone else took it, now you're taking it back)
-        let isRevenge = false;
-        if (previousOwnerId) {
-            const pastOwnerships = await prisma.ownershipHistory.count({
-                where: { lighter_id, owner_id: user.userId }
-            });
-            // > 1 because the entry we just created is included in the count
-            isRevenge = pastOwnerships > 1;
-        }
-
-        return NextResponse.json({
-            success: true,
-            capture: history,
-            city_name,
-            stolen_from: previousOwnerEntry?.username || null,
-            is_revenge: isRevenge
-        });
+        return NextResponse.json({ success: true, capture: history, city_name });
     } catch (error: any) {
         console.error(error);
         return NextResponse.json({ error: 'Internal Server Error', detail: error?.message }, { status: 500 });

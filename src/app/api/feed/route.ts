@@ -20,15 +20,10 @@ export async function GET(req: NextRequest) {
         });
 
         const rankMap = new Map<string, number>();
-        const feed = history.map((h, i) => {
+        const feed = history.map((h) => {
             const key = h.lighter_id;
             const rank = (rankMap.get(key) ?? 0) + 1;
             rankMap.set(key, rank);
-
-            // Find the immediate next entry in the history array (which is the previous owner, since it's DESC)
-            const prevEntry = history.slice(i + 1).find(p => p.lighter_id === h.lighter_id);
-            const stolenFrom = prevEntry ? prevEntry.owner.username : null;
-
             return {
                 id: h.id,
                 username: h.owner.username,
@@ -41,8 +36,6 @@ export async function GET(req: NextRequest) {
                 city_name: h.city_name,
                 captured_at: h.captured_at,
                 lighter_image: h.lighter.image_url || h.lighter.collection?.image_url || null,
-                challenge_message: h.challenge_message,
-                stolen_from: stolenFrom
             };
         });
 

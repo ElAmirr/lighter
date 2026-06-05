@@ -51,17 +51,16 @@ model Lighter {
 }
 
 model OwnershipHistory {
-  id                String   @id @default(uuid())
-  lighter_id        String
-  owner_id          String
-  captured_at       DateTime @default(now())
-  latitude          Float?
-  longitude         Float?
-  city_name         String   @default("Unknown")
-  challenge_message String?  // taunt written by captor to the previous owner
+  id               String             @id @default(uuid())
+  lighter_id       String
+  owner_id         String
+  captured_at      DateTime           @default(now())
+  latitude         Float?
+  longitude        Float?
+  city_name        String             @default("Unknown")
 
-  lighter  Lighter @relation(fields: [lighter_id], references: [id])
-  owner    User    @relation("PreviousOwner", fields: [owner_id], references: [id])
+  lighter          Lighter            @relation(fields: [lighter_id], references: [id])
+  owner            User               @relation("PreviousOwner", fields: [owner_id], references: [id])
 }
 
 model Scan {
