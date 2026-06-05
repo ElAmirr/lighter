@@ -164,8 +164,6 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
     const [stolenFrom, setStolenFrom] = useState<string | null>(null);
     const [isRevenge, setIsRevenge] = useState(false);
     const [cityName, setCityName] = useState('');
-    const [captureCoords, setCaptureCoords] = useState<{ lat: number, lon: number } | null>(null);
-    const [gpsStatus, setGpsStatus] = useState<string>('');
     const [finalOwner, setFinalOwner] = useState(ownerIndex);
     const animVal = useCountUp(finalOwner, 1200, success);
     const ed = EDITIONS[collection] || EDITIONS.Default;
@@ -181,25 +179,16 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
         }
 
         setLoading(true);
-        setGpsStatus('Locating you...');
-
-        const doSubmit = (lat: number | null, lon: number | null) => {
-            if (lat && lon) setCaptureCoords({ lat, lon });
+        const doSubmit = (lat: number | null, lon: number | null) =>
             submitCapture(lat, lon);
-        };
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (pos) => doSubmit(pos.coords.latitude, pos.coords.longitude),
-                (err) => {
-                    console.warn("GPS error:", err);
-                    setGpsStatus('GPS failed, relying on street instincts...');
-                    doSubmit(null, null);
-                },
-                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+                () => doSubmit(null, null),
+                { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
             );
         } else {
-            setGpsStatus('No GPS available on this device.');
             doSubmit(null, null);
         }
     };
@@ -274,14 +263,9 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
 
                 <div style={{ fontSize: 17, fontWeight: 800, color: '#FFF8E6', marginBottom: 4 }}>{lighterName}</div>
                 <div style={{ fontSize: 12, color: '#A0896A', marginBottom: 6 }}>#{lighterId.slice(0, 6)}</div>
-                <div style={{ fontSize: 13, color: '#C4A96A', marginBottom: 6 }}>
+                <div style={{ fontSize: 13, color: '#C4A96A', marginBottom: 36 }}>
                     Captured in <strong style={{ color: '#FFD700' }}>{cityName}</strong>
                 </div>
-                {captureCoords && (
-                    <div style={{ fontSize: 10, color: '#888', marginBottom: 30 }}>
-                        Lat: {captureCoords.lat.toFixed(4)} • Lon: {captureCoords.lon.toFixed(4)}
-                    </div>
-                )}
 
                 {/* Share button */}
                 <button
@@ -339,14 +323,9 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                 <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-1)', marginBottom: 6 }}>
                     owner
                 </div>
-                <div style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 2 }}>
+                <div style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 12 }}>
                     Captured in <strong>{cityName}</strong>
                 </div>
-                {captureCoords && (
-                    <div style={{ fontSize: 10, color: 'var(--text-3)', marginBottom: 12 }}>
-                        Lat: {captureCoords.lat.toFixed(4)} • Lon: {captureCoords.lon.toFixed(4)}
-                    </div>
-                )}
 
                 {stolenFrom && (
                     <div style={{
@@ -436,7 +415,7 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                             boxShadow: '0 4px 24px rgba(216,90,48,0.25)',
                         }}
                     >
-                        {loading ? (gpsStatus || 'Connecting to streets...') : 'Claim it'}
+                        {loading ? 'Connecting to streets...' : 'Claim it'}
                     </button>
                 </div>
             ) : (

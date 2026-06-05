@@ -78,20 +78,6 @@ export async function POST(request: NextRequest) {
             });
             // > 1 because the entry we just created is included in the count
             isRevenge = pastOwnerships > 1;
-
-            const captor = await prisma.user.findUnique({ where: { id: user.userId } });
-            if (captor) {
-                await prisma.notification.create({
-                    data: {
-                        user_id: previousOwnerId,
-                        type: isRevenge ? 'REVENGE' : 'STOLEN',
-                        title: isRevenge ? '🩸 Vengeance!' : '👀 Lighter Stolen!',
-                        message: isRevenge
-                            ? `${captor.username} finally took back "${lighter.name}" from you!`
-                            : `${captor.username} just stole "${lighter.name}" from you!`,
-                    }
-                });
-            }
         }
 
         return NextResponse.json({

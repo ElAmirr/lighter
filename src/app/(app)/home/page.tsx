@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
-import { Flame, Leaf, Droplet, Star, Circle, Bell } from 'lucide-react';
+import { Flame, Leaf, Droplet, Star, Circle } from 'lucide-react';
 
 // ── Ordinal ───────────────────────────────────────────────
 function getOrdinal(n: number) {
@@ -148,7 +148,6 @@ export default function HomePage() {
     const [loading, setLoading] = useState(true);
     const [newIds, setNewIds] = useState<Set<string>>(new Set());
     const [loadingMsg, setLoadingMsg] = useState(loadingMessages[0]);
-    const [unreadNotifs, setUnreadNotifs] = useState(0);
     const latestIdRef = useRef<string | null>(null);
 
     const loadFeed = async (prepend = false) => {
@@ -175,12 +174,6 @@ export default function HomePage() {
             setHot(safeHot);
         } catch { }
         finally { setLoading(false); }
-
-        try {
-            const nts = await fetch('/api/notifications');
-            const data = await nts.json();
-            if (data.unreadCount !== undefined) setUnreadNotifs(data.unreadCount);
-        } catch { }
     };
 
     useEffect(() => {
@@ -198,19 +191,9 @@ export default function HomePage() {
                 <span style={{ fontSize: 22, fontWeight: 900, fontFamily: 'var(--font-arabic), serif', letterSpacing: '0.04em', color: 'var(--text-1)', direction: 'rtl' }}>
                     هات <span style={{ color: '#D85A30' }}>شعول</span>
                 </span>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--bg-sub)', borderRadius: 20, padding: '4px 10px' }}>
-                        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#D85A30', display: 'inline-block', animation: 'pulse-dot 1.5s infinite ease-in-out' }} />
-                        <span style={{ fontSize: 11, fontWeight: 700, color: '#D85A30', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Live</span>
-                    </div>
-
-                    <Link href="/notifications" style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '4px', color: 'var(--text-2)' }}>
-                        <Bell size={20} />
-                        {unreadNotifs > 0 && (
-                            <span style={{ position: 'absolute', top: 3, right: 3, width: 8, height: 8, background: '#D85A30', borderRadius: '50%', border: '2px solid var(--bg-card)' }} />
-                        )}
-                    </Link>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--bg-sub)', borderRadius: 20, padding: '4px 10px' }}>
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#D85A30', display: 'inline-block', animation: 'pulse-dot 1.5s infinite ease-in-out' }} />
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#D85A30', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Live</span>
                 </div>
             </div>
 
