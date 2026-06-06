@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TopBar from '@/components/layout/TopBar';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { useRouter } from 'next/navigation';
@@ -9,6 +9,13 @@ import { AlertCircle } from 'lucide-react';
 export default function ScanPage() {
     const router = useRouter();
     const [errorString, setErrorString] = useState<string | null>(null);
+    const [isHttpWarning, setIsHttpWarning] = useState(false);
+
+    useEffect(() => {
+        if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost') {
+            setIsHttpWarning(true);
+        }
+    }, []);
 
     const handleScan = (result: any) => {
         if (result && result.length > 0) {
@@ -32,12 +39,12 @@ export default function ScanPage() {
                     قابل ولاعة هات شعول فيزيائية وسدد الكاميرا على QR ديالها.
                 </p>
 
-                {typeof window !== 'undefined' && window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && (
+                {isHttpWarning && (
                     <div className="w-full bg-red-900/50 border border-red-500/50 text-red-200 text-xs p-4 rounded-xl flex items-start gap-3 mb-6">
                         <AlertCircle className="shrink-0 text-red-400 mt-0.5" size={16} />
                         <div>
                             <p className="font-bold mb-1">Camera Blocked by Your Phone</p>
-                            <p>For security, iOS and Android only allow camera access on HTTPS or localhost. Because you are on {window.location.host} (HTTP), the camera will not open.</p>
+                            <p>For security, iOS and Android only allow camera access on HTTPS or localhost. Because you are on {typeof window !== 'undefined' ? window.location.host : 'this site'}, the camera will not open.</p>
                         </div>
                     </div>
                 )}

@@ -95,9 +95,9 @@ function FeedCard({ item, isNew }: { item: any; isNew?: boolean }) {
                 <div style={{ flex: 1, minWidth: 0 }} dir="rtl">
                     <p style={{ fontSize: 14, margin: 0, color: 'var(--text-1)' }}>
                         <span style={{ fontWeight: 600 }}>{item.username}</span>
-                        {' قبض على '}
+                        {' captured '}
                         <span style={{ fontWeight: 700, color: '#D85A30' }}>{item.lighter_name}</span>
-                        {item.stolen_from && <span style={{ fontSize: 12, color: 'var(--text-2)', marginRight: 4 }}>(سرقها من {item.stolen_from})</span>}
+                        {item.stolen_from && <span style={{ fontSize: 12, color: 'var(--text-2)', marginRight: 4 }}>(stolen from {item.stolen_from})</span>}
                     </p>
                     {item.message && (
                         <p style={{ fontSize: 13, color: 'var(--text-1)', background: 'var(--bg)', padding: '8px 12px', borderRadius: 8, margin: '6px 0', fontStyle: 'italic', borderRight: '3px solid #D85A30' }}>
@@ -108,7 +108,7 @@ function FeedCard({ item, isNew }: { item: any; isNew?: boolean }) {
                         {timeAgo} · {item.city_name}
                     </p>
                     <p style={{ fontSize: 11, color: 'var(--text-3)', margin: '2px 0 0' }}>
-                        المالك رقم {item.owner_number} · {item.scan_count} مسحات
+                        Owner #{item.owner_number} · {item.scan_count} scans
                     </p>
                 </div>
                 <span style={{ position: 'absolute', top: 10, right: 10, fontSize: 10, fontWeight: 700, background: rarity.bg, color: rarity.text, borderRadius: 20, padding: '2px 7px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>

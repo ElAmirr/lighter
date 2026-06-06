@@ -167,16 +167,24 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
         if (!isLoggedIn) { router.push('/login'); return; }
         setLoading(true);
 
+        const isHttpOnMobile = typeof window !== 'undefined' && window.location.protocol === 'http:' && window.location.hostname !== 'localhost';
+
         const doSubmit = (lat: number | null, lon: number | null) =>
             submitCapture(lat, lon);
 
-        if (navigator.geolocation) {
+        if (navigator.geolocation && !isHttpOnMobile) {
             navigator.geolocation.getCurrentPosition(
                 (pos) => doSubmit(pos.coords.latitude, pos.coords.longitude),
-                () => doSubmit(null, null),
+                () => {
+                    alert("GPS access was denied or failed. Capturing anyway without exact location.");
+                    doSubmit(null, null);
+                },
                 { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
             );
         } else {
+            if (isHttpOnMobile) {
+                alert("Location capture requires HTTPS on mobile. Capturing with unknown location.");
+            }
             doSubmit(null, null);
         }
     };

@@ -22,6 +22,7 @@ export default function PushNotificationManager() {
     const [isSupported, setIsSupported] = useState(false);
     const [subscription, setSubscription] = useState<PushSubscription | null>(null);
     const [permission, setPermission] = useState<NotificationPermission>('default');
+    const [subscribeError, setSubscribeError] = useState<string | null>(null);
 
     useEffect(() => {
         if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -54,33 +55,52 @@ export default function PushNotificationManager() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(sub)
             });
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error subscribing to push', error);
+            setSubscribeError(error.message || 'Required HTTPS to subscribe');
             setPermission(Notification.permission);
         }
     }
 
+    // HTTP warning helper
+    const isHttpOnMobile = typeof window !== 'undefined' && window.location.protocol === 'http:' && window.location.hostname !== 'localhost';
+
     if (!isSupported || permission === 'granted' || permission === 'denied') {
+        if (!isSupported && isHttpOnMobile) {
+            return (
+                <div className="bg-orange-500/10 border border-orange-500/50 p-4 rounded-2xl mb-4 shadow-sm text-center">
+                    <p className="text-orange-400 font-bold text-sm mb-1">Push Notifications Blocked</p>
+                    <p className="text-xs text-orange-400/80">iOS/Android require HTTPS connections to turn on notifications. You are currently on HTTP.</p>
+                </div>
+            );
+        }
         return null; // Don't show anything if already subscribed or denied
     }
 
     return (
-        <div className="bg-[#D85A30] text-white p-4 rounded-2xl mb-4 flex items-center justify-between shadow-lg">
-            <div className="flex items-center gap-3">
-                <div className="bg-white/20 p-2 rounded-full">
-                    <Bell size={20} className="text-white" />
+        <div className="bg-[#D85A30] text-white p-4 rounded-2xl mb-4 shadow-lg">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="bg-white/20 p-2 rounded-full">
+                        <Bell size={20} className="text-white" />
+                    </div>
+                    <div dir="rtl">
+                        <p className="font-bold text-sm">شغّل الإشعارات</p>
+                        <p className="text-xs text-white/80">باش تعرف شكون يسرق ولاعتك 🔥</p>
+                    </div>
                 </div>
-                <div dir="rtl">
-                    <p className="font-bold text-sm">شغّل الإشعارات</p>
-                    <p className="text-xs text-white/80">باش تعرف شكون يسرق ولاعتك 🔥</p>
-                </div>
+                <button
+                    onClick={subscribeToPush}
+                    className="bg-white text-[#D85A30] font-bold text-xs px-4 py-2 rounded-xl shadow-sm hover:scale-95 transition-transform"
+                >
+                    تشغيل
+                </button>
             </div>
-            <button
-                onClick={subscribeToPush}
-                className="bg-white text-[#D85A30] font-bold text-xs px-4 py-2 rounded-xl shadow-sm hover:scale-95 transition-transform"
-            >
-                تشغيل
-            </button>
+            {subscribeError && (
+                <div className="mt-3 text-[11px] font-bold text-white/90 bg-black/20 p-2 rounded-lg">
+                    ⚠️ {subscribeError}
+                </div>
+            )}
         </div>
     );
 }
