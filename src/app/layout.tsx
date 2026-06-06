@@ -40,8 +40,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" className={`${interSans.variable} ${lalezar.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col justify-start items-center bg-[var(--color-davay-bg)] text-[var(--color-davay-text)]">
+    <html lang="en" className={`${interSans.variable} ${lalezar.variable} h-full antialiased`} suppressHydrationWarning>
+      <body suppressHydrationWarning className="min-h-full flex flex-col justify-start items-center bg-[var(--color-davay-bg)] text-[var(--color-davay-text)]">
         <div className="w-full max-w-[390px] min-h-screen bg-[var(--color-davay-bg)] flex flex-col relative overflow-x-hidden shadow-2xl shadow-black/5">
           {children}
         </div>

@@ -15,7 +15,15 @@ export async function GET(req: NextRequest) {
                 owner: { select: { username: true, avatar_url: true } },
                 stolen_from: { select: { username: true } },
                 lighter: {
-                    include: { collection: true, rarity: true }
+                    include: {
+                        collection: true,
+                        rarity: true,
+                        history_entries: {
+                            orderBy: { captured_at: 'asc' },
+                            take: 1,
+                            include: { owner: { select: { username: true } } }
+                        }
+                    }
                 }
             }
         });
@@ -34,6 +42,7 @@ export async function GET(req: NextRequest) {
                 collection: h.lighter.collection?.name || 'Default',
                 rarity: h.lighter.rarity?.name || 'Common',
                 owner_number: rank,
+                origin_owner: h.lighter.history_entries[0]?.owner?.username || 'Unknown',
                 scan_count: h.lighter.scan_count,
                 city_name: h.city_name,
                 captured_at: h.captured_at,

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Davay Lighter</string>
+    <string name="title_activity_main">Davay Lighter</string>
+    <string name="package_name">tn.davay.lighter</string>
+    <string name="custom_url_scheme">tn.davay.lighter</string>
+</resources>

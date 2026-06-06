@@ -58,18 +58,40 @@ export default async function CollectionPage() {
                             </h2>
 
                             <div className="grid grid-cols-2 gap-3">
-                                {categoryLighters.map(lighter => (
-                                    <Link href={`/l/${lighter.id}`} key={lighter.id}
-                                        className={`flex flex-col p-3 rounded-2xl shadow-sm border border-[var(--border)] active:scale-[1.02] transition-transform ${bg}`}
-                                        style={{ overflow: 'hidden', isolation: 'isolate', transform: 'translateZ(0)' }}>
-                                        <div className="flex justify-between items-start mb-2">
-                                            <span className="text-[10px] font-bold opacity-50">#{lighter.id.slice(0, 3)}</span>
-                                            <span className="text-[9px] font-bold uppercase tracking-wider bg-[var(--text-1)]/10 px-1.5 py-0.5 rounded-sm">{lighter.rarity?.name}</span>
-                                        </div>
-                                        <Icon size={32} className={`my-2 opacity-80 ${text}`} />
-                                        <span className="font-bold text-sm leading-snug mt-1 opacity-90 text-[var(--text-1)]">{lighter.name}</span>
-                                    </Link>
-                                ))}
+                                {categoryLighters.map(lighter => {
+                                    const img = lighter.image_url || lighter.collection?.image_url;
+
+                                    return (
+                                        <Link href={`/l/${lighter.id}`} key={lighter.id}
+                                            className="flex flex-col rounded-2xl shadow-sm border border-[var(--border)] active:scale-95 transition-transform overflow-hidden relative pb-3 bg-[var(--bg-card)]">
+
+                                            {/* Trading Card Image Area */}
+                                            <div className={`w-full aspect-[4/5] flex items-center justify-center relative ${img ? 'bg-[#f5f5f5]' : bg}`}>
+                                                {img ? (
+                                                    <img src={img} alt={lighter.name} className="absolute inset-0 w-full h-full object-cover mix-blend-multiply" />
+                                                ) : (
+                                                    <Icon size={40} className={`opacity-80 ${text}`} />
+                                                )}
+
+                                                {/* Top Overlay Badges */}
+                                                <div className="absolute top-2 left-2 right-2 flex justify-between items-start">
+                                                    <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded backdrop-blur-sm bg-black/40 text-white shadow-sm">
+                                                        #{lighter.id.slice(0, 3)}
+                                                    </span>
+                                                    <span className="text-[9px] font-extrabold uppercase tracking-wider bg-[var(--text-1)] text-[var(--bg-card)] px-1.5 py-0.5 rounded shadow-sm">
+                                                        {lighter.rarity?.name}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Bottom Card Info */}
+                                            <div className="px-3 pt-2">
+                                                <span className="font-extrabold text-sm leading-snug mt-1 opacity-90 text-[var(--text-1)] line-clamp-1">{lighter.name}</span>
+                                                <span className="text-[10px] font-bold text-[var(--text-3)] mt-0.5 block">{lighter.scan_count || 0} SCANS</span>
+                                            </div>
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         </div>
                     );

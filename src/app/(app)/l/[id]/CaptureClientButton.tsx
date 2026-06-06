@@ -156,6 +156,7 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [showModal, setShowModal] = useState(false);
     const [captureMessage, setCaptureMessage] = useState('');
     const [cityName, setCityName] = useState('');
     const [finalOwner, setFinalOwner] = useState(ownerIndex);
@@ -365,34 +366,61 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
 
     return (
         <div style={{ width: '100%', marginTop: 16 }}>
-            {isLoggedIn && (
-                <div style={{ marginBottom: 12 }}>
-                    <textarea
-                        placeholder="اترك رسالة للمالك القديم... (اختياري)"
-                        value={captureMessage}
-                        onChange={(e) => setCaptureMessage(e.target.value)}
-                        maxLength={160}
-                        rows={2}
-                        dir="auto"
-                        style={{
-                            width: '100%', padding: '14px 16px', borderRadius: 16,
-                            background: 'var(--bg)', color: 'var(--text-1)',
-                            border: '1px solid var(--border)', fontSize: 14,
-                            resize: 'none', outline: 'none', fontFamily: 'inherit'
-                        }}
-                    />
+            {showModal && (
+                <div style={{
+                    position: 'fixed', inset: 0, zIndex: 9999,
+                    background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+                    display: 'flex', alignItems: 'center', justifyItems: 'center', padding: 24,
+                    animation: 'fade-in 200ms ease-out'
+                }} onClick={() => setShowModal(false)}>
+                    <div style={{
+                        background: 'var(--bg-card)', padding: 24, borderRadius: 24, width: '100%', maxWidth: 360,
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.2)', margin: 'auto'
+                    }} onClick={e => e.stopPropagation()}>
+                        <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 8, color: 'var(--text-1)' }}>Capture this lighter!</h2>
+                        <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 20 }}>Leave a message for the previous owner to see on the global feed.</p>
+
+                        {isLoggedIn ? (
+                            <>
+                                <textarea
+                                    placeholder="Leave a message... (optional)"
+                                    value={captureMessage}
+                                    onChange={(e) => setCaptureMessage(e.target.value)}
+                                    maxLength={160}
+                                    rows={3}
+                                    style={{
+                                        width: '100%', padding: '14px 16px', borderRadius: 16,
+                                        background: 'var(--bg)', color: 'var(--text-1)',
+                                        border: '1px solid var(--border)', fontSize: 14,
+                                        resize: 'none', outline: 'none', fontFamily: 'inherit',
+                                        marginBottom: 16
+                                    }}
+                                />
+                                <div style={{ display: 'flex', gap: 12 }}>
+                                    <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: '14px 0', background: 'var(--bg-sub)', color: 'var(--text-2)', fontWeight: 700, borderRadius: 14, border: 'none', cursor: 'pointer' }}>Cancel</button>
+                                    <button onClick={handleCapture} disabled={loading} style={{ flex: 1, padding: '14px 0', background: 'var(--accent)', color: 'white', fontWeight: 800, borderRadius: 14, border: 'none', cursor: 'pointer', opacity: loading ? 0.6 : 1 }}>
+                                        {loading ? 'Capturing...' : 'Claim it'}
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div style={{ display: 'flex', gap: 12 }}>
+                                <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: '14px 0', background: 'var(--bg-sub)', color: 'var(--text-2)', fontWeight: 700, borderRadius: 14, border: 'none', cursor: 'pointer' }}>Cancel</button>
+                                <button onClick={() => router.push('/login')} style={{ flex: 1, padding: '14px 0', background: 'var(--text-1)', color: 'var(--bg-card)', fontWeight: 800, borderRadius: 14, border: 'none', cursor: 'pointer' }}>Login to Catch</button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
+
             <button
-                onClick={handleCapture}
-                disabled={loading}
+                onClick={() => setShowModal(true)}
                 style={{
                     width: '100%', padding: '18px 0',
                     background: 'var(--accent)', color: 'white',
-                    fontWeight: 700, fontSize: 16, borderRadius: 16, border: 'none',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    opacity: loading ? 0.75 : 1,
-                    boxShadow: '0 4px 24px rgba(216,90,48,0.25)',
+                    fontWeight: 800, fontSize: 16, borderRadius: 16, border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 6px 24px rgba(216,90,48,0.3)',
                     transition: 'transform 100ms ease, opacity 200ms',
                     transform: 'scale(1)',
                 }}
@@ -401,18 +429,7 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                 onTouchStart={e => (e.currentTarget.style.transform = 'scale(0.97)')}
                 onTouchEnd={e => (e.currentTarget.style.transform = 'scale(1)')}
             >
-                {loading ? (
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                        <span style={{
-                            width: 16, height: 16, borderRadius: '50%',
-                            border: '2px solid rgba(255,255,255,0.3)',
-                            borderTopColor: 'white',
-                            display: 'inline-block',
-                            animation: 'spin 0.7s linear infinite',
-                        }} />
-                        Connecting to the streets...
-                    </span>
-                ) : isLoggedIn ? 'Capture this lighter' : 'Login to claim this lighter'}
+                🔥 CAPTURE THIS LIGHTER
             </button>
         </div>
     );

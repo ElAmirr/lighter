@@ -3,8 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
-import { Flame, Leaf, Droplet, Star, Circle, MessageSquare, Share2 } from 'lucide-react';
-import PushNotificationManager from '@/components/PushNotificationManager';
+import { Flame, Leaf, Droplet, Star, Circle, MessageSquare, Share2, Crown } from 'lucide-react';
 
 // ── Ordinal ───────────────────────────────────────────────
 function getOrdinal(n: number) {
@@ -129,32 +128,43 @@ function FeedCard({ item, isNew }: { item: any; isNew?: boolean }) {
             <div style={{ width: '100%', aspectRatio: '4/5', background: '#f5f5f5', position: 'relative' }}>
                 <img src={lighterImage} alt="Lighter" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
 
-                {/* Overlay Badge for Owner Number */}
-                <div style={{ position: 'absolute', bottom: 12, left: 12, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)', color: 'white', padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700, display: 'flex', gap: 6, alignItems: 'center' }}>
-                    <Flame size={14} color="#D85A30" />
-                    <span>Owner #{item.owner_number}</span>
+                {/* Overlay Badge for Origin Owner */}
+                <div style={{ position: 'absolute', bottom: 12, left: 12, background: 'linear-gradient(135deg, rgba(255,215,0,0.85), rgba(255,165,0,0.85))', border: '1px solid rgba(255,255,255,0.3)', backdropFilter: 'blur(4px)', color: 'white', padding: '6px 12px', borderRadius: 20, fontSize: 11, fontWeight: 800, display: 'flex', gap: 6, alignItems: 'center', boxShadow: '0 4px 12px rgba(255,215,0,0.3)' }}>
+                    <Crown size={14} color="white" />
+                    <span style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>Origin: {item.origin_owner}</span>
                 </div>
             </div>
 
             {/* Post Actions & Caption */}
             <div style={{ padding: '14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                     <div style={{ display: 'flex', gap: 10 }}>
-                        <Link href={`/l/${item.lighter_id}`} style={{ border: '2px solid #D85A30', backgroundColor: '#D85A30', color: 'white', padding: '6px 16px', borderRadius: 24, fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Flame size={16} fill="white" /> Steal Back
+                        <Link href={`/l/${item.lighter_id}`} className="active:scale-95 transition-transform" style={{ border: '2px solid #D85A30', backgroundColor: '#D85A30', color: 'white', padding: '6px 16px', borderRadius: 24, fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 4px 10px rgba(216,90,48,0.25)' }}>
+                            <Flame size={16} fill="white" /> HUNT IT DOWN
                         </Link>
+                        <button className="active:scale-95 transition-transform" style={{ border: '2px solid var(--border)', backgroundColor: 'var(--bg-card)', color: 'var(--text-2)', width: 34, height: 34, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <MessageSquare size={16} />
+                        </button>
                     </div>
                     <p style={{ margin: 0, fontSize: 11, color: 'var(--text-3)', fontWeight: 600 }}>{timeAgo}</p>
                 </div>
 
-                <p style={{ fontSize: 14, margin: '0 0 8px', color: 'var(--text-1)', lineHeight: 1.4 }}>
-                    <span style={{ fontWeight: 800 }}>{item.username}</span> captured <span style={{ fontWeight: 800, color: '#D85A30' }}>{item.lighter_name}</span>
-                    {item.stolen_from && <span style={{ fontWeight: 600, color: 'var(--text-2)' }}> (stolen from {item.stolen_from} 🛑)</span>}
+                <p style={{ fontSize: 14.5, margin: '0 0 8px', color: 'var(--text-1)', lineHeight: 1.45 }}>
+                    {item.stolen_from ? (
+                        <>
+                            💀 <span style={{ fontWeight: 900 }}>{item.username}</span> ruthlessly snatched <span style={{ fontWeight: 800, color: '#D85A30' }}>{item.lighter_name}</span> straight out of the hands of <span style={{ fontWeight: 700, textDecoration: 'line-through', color: 'var(--text-3)' }}>{item.stolen_from}</span>!
+                        </>
+                    ) : (
+                        <>
+                            🔥 <span style={{ fontWeight: 900 }}>{item.username}</span> just struck gold and claimed <span style={{ fontWeight: 800, color: '#D85A30' }}>{item.lighter_name}</span> from the wild!
+                        </>
+                    )}
                 </p>
 
                 {item.message && (
-                    <div style={{ background: 'var(--bg-sub)', padding: '10px 14px', borderRadius: 12, marginTop: 8, borderLeft: '4px solid #D85A30' }}>
-                        <p style={{ margin: 0, fontSize: 13, color: 'var(--text-1)', fontStyle: 'italic' }}>"{item.message}"</p>
+                    <div style={{ background: '#fdf9f7', padding: '12px 14px', borderRadius: '16px', borderTopLeftRadius: '2px', marginTop: 10, border: '1px solid #f6e6df', position: 'relative' }}>
+                        <div style={{ position: 'absolute', top: -14, left: 6, fontSize: 22 }}>🗣️</div>
+                        <p style={{ margin: '4px 0 0', fontSize: 13.5, color: '#b94016', fontStyle: 'italic', fontWeight: 700 }}>"{item.message}"</p>
                     </div>
                 )}
 
@@ -239,8 +249,7 @@ export default function HomePage() {
         // Set random loading message on client only (avoids SSR hydration mismatch)
         setLoadingMsg(loadingMessages[Math.floor(Math.random() * loadingMessages.length)]);
         const timer = setTimeout(() => loadFeed(false), 300);
-        const interval = setInterval(() => loadFeed(true), 30000);
-        return () => { clearTimeout(timer); clearInterval(interval); };
+        return () => { clearTimeout(timer); };
     }, []);
 
     return (
@@ -257,8 +266,6 @@ export default function HomePage() {
             </div>
 
             <div style={{ padding: '14px 14px 0' }}>
-                <PushNotificationManager />
-
                 {/* Hot right now */}
                 {loading ? (
                     <>

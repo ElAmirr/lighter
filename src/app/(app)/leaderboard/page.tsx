@@ -11,6 +11,7 @@ export const revalidate = 60; // 1 minute cache for leaderboard
 type LeaderboardEntry = {
     id: string;
     username: string;
+    avatar_url: string | null;
     score: number;
 };
 
@@ -41,7 +42,10 @@ export default async function LeaderboardPage({
     let entries: LeaderboardEntry[] = [];
 
     const users = await prisma.user.findMany({
-        include: {
+        select: {
+            id: true,
+            username: true,
+            avatar_url: true,
             _count: {
                 select: {
                     history_entries: true, // captures
@@ -53,13 +57,15 @@ export default async function LeaderboardPage({
     });
 
     if (activeTab === 'captures') {
-        entries = users.map(u => ({ id: u.id, username: u.username, score: u._count.history_entries }));
+        entries = users.map(u => ({ id: u.id, username: u.username, avatar_url: u.avatar_url, score: u._count.history_entries }));
     } else if (activeTab === 'owned') {
-        entries = users.map(u => ({ id: u.id, username: u.username, score: u._count.lighters }));
+        entries = users.map(u => ({ id: u.id, username: u.username, avatar_url: u.avatar_url, score: u._count.lighters }));
     } else if (activeTab === 'scans') {
-        entries = users.map(u => ({ id: u.id, username: u.username, score: u._count.scans }));
+        entries = users.map(u => ({ id: u.id, username: u.username, avatar_url: u.avatar_url, score: u._count.scans }));
     }
 
+    // Filter out 0 scores
+    entries = entries.filter(e => e.score > 0);
     entries.sort((a, b) => b.score - a.score);
 
     // Top 3
@@ -95,15 +101,16 @@ export default async function LeaderboardPage({
                             {/* #2 */}
                             {top2 && (
                                 <div className="flex flex-col items-center flex-1">
-                                    <Link href={`/u/${top2.username}`} className="flex flex-col items-center w-full">
-                                        <div className="w-12 h-12 bg-[var(--bg-sub)] rounded-full flex items-center justify-center font-bold text-[var(--accent)] border-2 border-[var(--bg-card)] shadow-sm -mb-3 z-10 text-sm">
-                                            {top2.username.substring(0, 2).toUpperCase()}
+                                    <Link href={`/u/${top2.username}`} className="flex flex-col items-center w-full active:scale-95 transition-transform cursor-pointer">
+                                        <div className="w-14 h-14 bg-[var(--bg-sub)] rounded-full flex items-center justify-center font-bold text-[var(--accent)] border-2 border-[var(--bg-card)] shadow-md -mb-4 z-10 text-sm overflow-hidden bg-cover bg-center"
+                                            style={top2.avatar_url ? { backgroundImage: `url(${top2.avatar_url})`, color: 'transparent' } : {}}>
+                                            {!top2.avatar_url && top2.username.substring(0, 2).toUpperCase()}
                                         </div>
-                                        <div className="w-full bg-[var(--bg-sub)] h-28 rounded-t-xl flex flex-col items-center justify-start pt-6 border border-b-0 border-[var(--border)]"
+                                        <div className="w-full bg-gradient-to-t from-[var(--bg-card)] to-[#fcfcfc] h-28 rounded-t-xl flex flex-col items-center justify-start pt-7 border border-b-0 border-[var(--border)] shadow-[0_-2px_10px_rgba(0,0,0,0.02)]"
                                             style={{ transformOrigin: 'bottom', animation: 'podium-grow 500ms ease-out 0ms forwards' }}>
-                                            <span className="font-bold text-[var(--text-1)] text-xs">#2</span>
-                                            <span className="font-bold text-[var(--accent)] mt-1">{top2.score}</span>
-                                            <span className="text-[9px] font-semibold text-[var(--text-2)] mt-1 px-1 text-center truncate w-full">{top2.username}</span>
+                                            <span className="font-extrabold text-[var(--text-2)] text-xs bg-[var(--bg-sub)] px-2 py-0.5 rounded-full mb-1">#2</span>
+                                            <span className="font-extrabold text-[#D85A30] text-lg">{top2.score}</span>
+                                            <span className="text-[10px] font-bold text-[var(--text-1)] mt-1 px-1 text-center truncate w-full">{top2.username}</span>
                                         </div>
                                     </Link>
                                 </div>
@@ -112,18 +119,19 @@ export default async function LeaderboardPage({
                             {/* #1 */}
                             {top1 && (
                                 <div className="flex flex-col items-center flex-[1.2]">
-                                    <Link href={`/u/${top1.username}`} className="flex flex-col items-center w-full">
-                                        <div className="w-16 h-16 bg-[var(--text-1)] rounded-full flex items-center justify-center font-bold text-[var(--accent)] border-[3px] border-[var(--bg-card)] shadow-md relative -mb-4 z-10">
-                                            <div className="absolute -top-5 text-[var(--accent)] drop-shadow-md">
-                                                <Crown fill="currentColor" size={24} />
+                                    <Link href={`/u/${top1.username}`} className="flex flex-col items-center w-full active:scale-95 transition-transform cursor-pointer">
+                                        <div className="w-20 h-20 bg-[var(--text-1)] rounded-full flex items-center justify-center font-extrabold text-[#D85A30] border-[4px] border-[var(--bg-card)] shadow-lg relative -mb-5 z-10 overflow-hidden bg-cover bg-center"
+                                            style={top1.avatar_url ? { backgroundImage: `url(${top1.avatar_url})`, color: 'transparent' } : {}}>
+                                            <div className="absolute -top-6 text-[#D85A30] drop-shadow-md z-20" style={{ color: '#D85A30' }}>
+                                                <Crown fill="#D85A30" size={28} />
                                             </div>
-                                            {top1.username.substring(0, 2).toUpperCase()}
+                                            {!top1.avatar_url && top1.username.substring(0, 2).toUpperCase()}
                                         </div>
-                                        <div className="w-full bg-[var(--accent)] text-white h-32 rounded-t-xl flex flex-col items-center justify-start pt-8 pb-2 shadow-[0_-4px_12px_rgba(216,90,48,0.2)] border border-b-0 border-[#c44e26]"
+                                        <div className="w-full bg-gradient-to-t from-[#D85A30] to-[#E66439] text-white h-32 rounded-t-xl flex flex-col items-center justify-start pt-8 pb-2 shadow-[0_-8px_20px_rgba(216,90,48,0.25)] border border-b-0 border-[#c44e26]"
                                             style={{ transformOrigin: 'bottom', animation: 'podium-grow 500ms ease-out 300ms both' }}>
-                                            <span className="font-bold text-xs opacity-90">#1</span>
-                                            <span className="text-xl font-bold mt-1">{top1.score}</span>
-                                            <span className="text-[10px] uppercase tracking-wider font-semibold truncate w-full text-center px-1 mt-auto pb-1 opacity-90">{top1.username}</span>
+                                            <span className="font-bold text-[10px] opacity-90 bg-white/20 px-2.5 py-0.5 rounded-full mb-1 shadow-sm">#1</span>
+                                            <span className="text-2xl font-extrabold mt-1">{top1.score}</span>
+                                            <span className="text-[11px] uppercase tracking-wider font-extrabold truncate w-full text-center px-1 mt-auto pb-1 opacity-95">{top1.username}</span>
                                         </div>
                                     </Link>
                                 </div>
@@ -132,15 +140,16 @@ export default async function LeaderboardPage({
                             {/* #3 */}
                             {top3 && (
                                 <div className="flex flex-col items-center flex-1">
-                                    <Link href={`/u/${top3.username}`} className="flex flex-col items-center w-full">
-                                        <div className="w-12 h-12 bg-[var(--bg-sub)] rounded-full flex items-center justify-center font-bold text-[var(--text-1)] border-2 border-[var(--bg-card)] shadow-sm -mb-3 z-10 text-sm">
-                                            {top3.username.substring(0, 2).toUpperCase()}
+                                    <Link href={`/u/${top3.username}`} className="flex flex-col items-center w-full active:scale-95 transition-transform cursor-pointer">
+                                        <div className="w-14 h-14 bg-[var(--bg-sub)] rounded-full flex items-center justify-center font-bold text-[var(--text-1)] border-2 border-[var(--bg-card)] shadow-md -mb-4 z-10 text-sm overflow-hidden bg-cover bg-center"
+                                            style={top3.avatar_url ? { backgroundImage: `url(${top3.avatar_url})`, color: 'transparent' } : {}}>
+                                            {!top3.avatar_url && top3.username.substring(0, 2).toUpperCase()}
                                         </div>
-                                        <div className="w-full bg-[var(--bg-sub)] h-24 rounded-t-xl flex flex-col items-center justify-start pt-6 border border-b-0 border-[var(--border)]"
+                                        <div className="w-full bg-gradient-to-t from-[var(--bg-card)] to-[#f9f9f9] h-24 rounded-t-xl flex flex-col items-center justify-start pt-7 border border-b-0 border-[var(--border)] shadow-[0_-2px_10px_rgba(0,0,0,0.02)]"
                                             style={{ transformOrigin: 'bottom', animation: 'podium-grow 500ms ease-out 150ms both' }}>
-                                            <span className="font-bold text-[var(--text-1)] text-xs">#3</span>
-                                            <span className="font-bold text-[var(--accent)] mt-1">{top3.score}</span>
-                                            <span className="text-[9px] font-semibold text-[var(--text-2)] mt-1 px-1 text-center truncate w-full">{top3.username}</span>
+                                            <span className="font-bold text-[var(--text-3)] text-xs bg-[var(--bg-sub)] px-2 py-0.5 rounded-full mb-1">#3</span>
+                                            <span className="font-extrabold text-[var(--text-1)] text-lg">{top3.score}</span>
+                                            <span className="text-[10px] font-bold text-[var(--text-2)] mt-1 px-1 text-center truncate w-full">{top3.username}</span>
                                         </div>
                                     </Link>
                                 </div>
@@ -168,18 +177,19 @@ export default async function LeaderboardPage({
                         const isMe = entry.id === currentUser;
 
                         return (
-                            <Link href={`/u/${entry.username}`} key={entry.id} className={`flex items-center justify-between p-3 rounded-xl bg-[var(--bg-card)] border ${isMe ? 'border-[var(--accent)] shadow-sm shadow-[var(--accent)]/10' : 'border-[var(--border)]'}`}>
+                            <Link href={`/u/${entry.username}`} key={entry.id} className={`flex items-center justify-between p-3 rounded-xl bg-[var(--bg-card)] border active:scale-95 transition-transform ${isMe ? 'border-[#D85A30] shadow-sm shadow-[#D85A30]/10' : 'border-[var(--border)]'}`}>
                                 <div className="flex items-center gap-3">
                                     <span className="font-bold text-[var(--text-3)] w-5 text-center text-sm">{rank}</span>
-                                    <div className="w-10 h-10 rounded-full bg-[var(--bg-sub)] flex items-center justify-center font-bold text-xs text-[var(--text-2)]">
-                                        {entry.username.substring(0, 2).toUpperCase()}
+                                    <div className="w-10 h-10 rounded-full bg-[var(--bg-sub)] flex items-center justify-center font-bold text-xs text-[var(--text-2)] overflow-hidden bg-cover bg-center border border-[var(--border)]"
+                                        style={entry.avatar_url ? { backgroundImage: `url(${entry.avatar_url})`, color: 'transparent' } : {}}>
+                                        {!entry.avatar_url && entry.username.substring(0, 2).toUpperCase()}
                                     </div>
-                                    <div className="flex flex-col">
-                                        <span className="font-bold text-sm text-[var(--text-1)]">{entry.username}</span>
-                                        {isMe && <span className="text-[10px] text-[var(--accent)] font-bold uppercase tracking-wider">You</span>}
+                                    <div className="flex flex-col gap-0.5">
+                                        <span className={`font-bold text-sm ${isMe ? 'text-[#D85A30]' : 'text-[var(--text-1)]'}`}>{entry.username}</span>
+                                        {isMe && <span className="text-[9px] text-white bg-[#D85A30] px-1.5 py-0.5 rounded-sm font-bold tracking-wider w-fit">YOU</span>}
                                     </div>
                                 </div>
-                                <div className="font-bold text-sm">
+                                <div className="font-extrabold text-sm text-[var(--text-1)] bg-[var(--bg-sub)] px-3 py-1 rounded-full">
                                     {entry.score}
                                 </div>
                             </Link>

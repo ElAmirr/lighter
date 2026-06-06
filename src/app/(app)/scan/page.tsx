@@ -36,7 +36,7 @@ export default function ScanPage() {
 
                 <h1 className="text-2xl font-bold mb-2 tracking-tighter mt-4 text-center">Scan Lighter</h1>
                 <p className="text-center text-xs text-[var(--color-davay-hint)] max-w-[280px] leading-relaxed mb-6">
-                    قابل ولاعة هات شعول فيزيائية وسدد الكاميرا على QR ديالها.
+                    scan the lighter's qr code to claim it
                 </p>
 
                 {isHttpWarning && (
