@@ -100,7 +100,16 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
                 </div>
 
                 {/* Info Section */}
-                <div className="px-5 pt-8 flex flex-col gap-6">
+                <div className="px-5 flex flex-col gap-6 -mt-2 relative z-20">
+
+                    <CaptureClientButton
+                        lighterId={lighter.id}
+                        lighterName={lighter.name}
+                        collection={lighter.collection?.name || 'Default'}
+                        isLoggedIn={!!currentUser}
+                        alreadyOwns={alreadyOwns}
+                        ownerIndex={lighter.history_entries.length + 1}
+                    />
 
                     <div>
                         <h1 className="text-3xl font-extrabold text-[var(--color-davay-text)] leading-tight tracking-tight">
@@ -200,14 +209,6 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
                         </div>
                     </div>
 
-                    <CaptureClientButton
-                        lighterId={lighter.id}
-                        lighterName={lighter.name}
-                        collection={lighter.collection?.name || 'Default'}
-                        isLoggedIn={!!currentUser}
-                        alreadyOwns={alreadyOwns}
-                        ownerIndex={lighter.history_entries.length + 1}
-                    />
                 </div>
             </div>
         </>

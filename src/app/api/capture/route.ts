@@ -41,6 +41,13 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'lighter_id is required' }, { status: 400 });
         }
 
+        const realUser = await prisma.user.findUnique({ where: { id: user.userId } });
+        if (!realUser) {
+            const resp = NextResponse.json({ error: 'Session invalid. Please log out and log in again.' }, { status: 401 });
+            resp.cookies.delete('token');
+            return resp;
+        }
+
         const lighter = await prisma.lighter.findUnique({ where: { id: lighter_id } });
         if (!lighter) {
             return NextResponse.json({ error: 'Lighter not found' }, { status: 404 });

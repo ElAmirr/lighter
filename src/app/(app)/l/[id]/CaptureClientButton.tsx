@@ -418,9 +418,8 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                 style={{
                     width: '100%', padding: '18px 0',
                     background: 'var(--accent)', color: 'white',
-                    fontWeight: 800, fontSize: 16, borderRadius: 16, border: 'none',
+                    fontWeight: 900, fontSize: 16, borderRadius: 16, border: 'none',
                     cursor: 'pointer',
-                    boxShadow: '0 6px 24px rgba(216,90,48,0.3)',
                     transition: 'transform 100ms ease, opacity 200ms',
                     transform: 'scale(1)',
                 }}
@@ -429,7 +428,7 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                 onTouchStart={e => (e.currentTarget.style.transform = 'scale(0.97)')}
                 onTouchEnd={e => (e.currentTarget.style.transform = 'scale(1)')}
             >
-                🔥 CAPTURE THIS LIGHTER
+                CAPTURE THIS LIGHTER
             </button>
         </div>
     );
