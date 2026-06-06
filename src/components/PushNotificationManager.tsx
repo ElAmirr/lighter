@@ -84,16 +84,16 @@ export default function PushNotificationManager() {
                     <div className="bg-white/20 p-2 rounded-full">
                         <Bell size={20} className="text-white" />
                     </div>
-                    <div dir="rtl">
-                        <p className="font-bold text-sm">شغّل الإشعارات</p>
-                        <p className="text-xs text-white/80">باش تعرف شكون يسرق ولاعتك 🔥</p>
+                    <div>
+                        <p className="font-bold text-sm">Turn on notifications</p>
+                        <p className="text-xs text-white/80">Know exactly who steals your lighter 🔥</p>
                     </div>
                 </div>
                 <button
                     onClick={subscribeToPush}
                     className="bg-white text-[#D85A30] font-bold text-xs px-4 py-2 rounded-xl shadow-sm hover:scale-95 transition-transform"
                 >
-                    تشغيل
+                    Turn On
                 </button>
             </div>
             {subscribeError && (

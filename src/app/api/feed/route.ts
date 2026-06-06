@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
             take: 50,
             where: todayOnly ? { captured_at: { gte: todayStart } } : undefined,
             include: {
-                owner: { select: { username: true } },
+                owner: { select: { username: true, avatar_url: true } },
                 stolen_from: { select: { username: true } },
                 lighter: {
                     include: { collection: true, rarity: true }
@@ -28,6 +28,7 @@ export async function GET(req: NextRequest) {
             return {
                 id: h.id,
                 username: h.owner.username,
+                user_avatar: h.owner.avatar_url,
                 lighter_id: h.lighter_id,
                 lighter_name: h.lighter.name,
                 collection: h.lighter.collection?.name || 'Default',

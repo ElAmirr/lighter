@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
-import { Flame, Leaf, Droplet, Star, Circle } from 'lucide-react';
+import { Flame, Leaf, Droplet, Star, Circle, MessageSquare, Share2 } from 'lucide-react';
 import PushNotificationManager from '@/components/PushNotificationManager';
 
 // ── Ordinal ───────────────────────────────────────────────
@@ -53,12 +53,18 @@ function EditionThumb({ collection, size = 52, image }: { collection: string; si
 // ── Skeleton card ─────────────────────────────────────────
 function FeedCardSkeleton() {
     return (
-        <div style={{ display: 'flex', gap: 12, padding: '12px 14px', background: 'var(--bg-card)', borderRadius: 16, marginBottom: 10, border: '1px solid var(--border)' }}>
-            <div className="skeleton" style={{ width: 40, height: 52, borderRadius: 10, flexShrink: 0 }} />
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <div className="skeleton" style={{ height: 14, width: '75%' }} />
-                <div className="skeleton" style={{ height: 11, width: '50%' }} />
-                <div className="skeleton" style={{ height: 11, width: '35%' }} />
+        <div style={{ background: 'var(--bg-card)', borderRadius: 16, marginBottom: 20, border: '1px solid var(--border)', overflow: 'hidden' }}>
+            <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div className="skeleton" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+                <div style={{ flex: 1 }}>
+                    <div className="skeleton" style={{ width: 80, height: 14, marginBottom: 4 }} />
+                    <div className="skeleton" style={{ width: 50, height: 10 }} />
+                </div>
+            </div>
+            <div className="skeleton" style={{ width: '100%', aspectRatio: '4/5' }} />
+            <div style={{ padding: '14px' }}>
+                <div className="skeleton" style={{ width: '100%', height: 14, marginBottom: 6 }} />
+                <div className="skeleton" style={{ width: '60%', height: 14 }} />
             </div>
         </div>
     );
@@ -82,40 +88,86 @@ function FeedCard({ item, isNew }: { item: any; isNew?: boolean }) {
     const rarity = getRarity(item.rarity);
     const timeAgo = formatDistanceToNow(new Date(item.captured_at), { addSuffix: true });
 
+    // Fallback lighter image
+    const fallbackImgs = [
+        'https://images.unsplash.com/photo-1596484552993-8ad5fc0b91e9?w=600&q=80',
+        'https://images.unsplash.com/photo-1629851609101-72af4d310ea0?w=600&q=80'
+    ];
+    const lighterImage = item.lighter_image || fallbackImgs[item.lighter_id.charCodeAt(0) % 2];
+
     return (
-        <Link href={`/l/${item.lighter_id}`}>
-            <div style={{
-                background: 'var(--bg-card)',
-                borderRadius: 16, padding: '12px 14px', marginBottom: 10,
-                display: 'flex', alignItems: 'center', gap: 12,
-                border: '1px solid var(--border)', position: 'relative',
-                animation: isNew ? 'slide-down 250ms ease-out' : undefined,
-            }}>
-                <EditionThumb collection={item.collection} image={item.lighter_image} />
-                <div style={{ flex: 1, minWidth: 0 }} dir="rtl">
-                    <p style={{ fontSize: 14, margin: 0, color: 'var(--text-1)' }}>
-                        <span style={{ fontWeight: 600 }}>{item.username}</span>
-                        {' captured '}
-                        <span style={{ fontWeight: 700, color: '#D85A30' }}>{item.lighter_name}</span>
-                        {item.stolen_from && <span style={{ fontSize: 12, color: 'var(--text-2)', marginRight: 4 }}>(stolen from {item.stolen_from})</span>}
+        <div style={{
+            background: 'var(--bg-card)',
+            borderRadius: 16, marginBottom: 20,
+            border: '1px solid var(--border)', overflow: 'hidden',
+            animation: isNew ? 'slide-down 400ms ease-out' : undefined,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
+        }}>
+            {/* Post Header */}
+            <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Link href={`/u/${item.username}`} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#eee', overflow: 'hidden', border: '1px solid var(--border)' }}>
+                        {item.user_avatar ? (
+                            <img src={item.user_avatar} alt={item.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                            <div style={{ width: '100%', height: '100%', background: '#D85A30' }}></div>
+                        )}
+                    </div>
+                    <div>
+                        <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--text-1)' }}>{item.username}</p>
+                        <p style={{ margin: 0, fontSize: 11, color: 'var(--text-3)' }}>{item.city_name}</p>
+                    </div>
+                </Link>
+                <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: 10, fontWeight: 800, background: rarity.bg, color: rarity.text, borderRadius: 20, padding: '3px 8px', textTransform: 'uppercase' }}>
+                        {item.rarity}
+                    </span>
+                </div>
+            </div>
+
+            {/* Post Image Showcase */}
+            <div style={{ width: '100%', aspectRatio: '4/5', background: '#f5f5f5', position: 'relative' }}>
+                <img src={lighterImage} alt="Lighter" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+
+                {/* Overlay Badge for Owner Number */}
+                <div style={{ position: 'absolute', bottom: 12, left: 12, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)', color: 'white', padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700, display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <Flame size={14} color="#D85A30" />
+                    <span>Owner #{item.owner_number}</span>
+                </div>
+            </div>
+
+            {/* Post Actions & Caption */}
+            <div style={{ padding: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                        <Link href={`/l/${item.lighter_id}`} style={{ border: '2px solid #D85A30', backgroundColor: '#D85A30', color: 'white', padding: '6px 16px', borderRadius: 24, fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Flame size={16} fill="white" /> Steal Back
+                        </Link>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 11, color: 'var(--text-3)', fontWeight: 600 }}>{timeAgo}</p>
+                </div>
+
+                <p style={{ fontSize: 14, margin: '0 0 8px', color: 'var(--text-1)', lineHeight: 1.4 }}>
+                    <span style={{ fontWeight: 800 }}>{item.username}</span> captured <span style={{ fontWeight: 800, color: '#D85A30' }}>{item.lighter_name}</span>
+                    {item.stolen_from && <span style={{ fontWeight: 600, color: 'var(--text-2)' }}> (stolen from {item.stolen_from} 🛑)</span>}
+                </p>
+
+                {item.message && (
+                    <div style={{ background: 'var(--bg-sub)', padding: '10px 14px', borderRadius: 12, marginTop: 8, borderLeft: '4px solid #D85A30' }}>
+                        <p style={{ margin: 0, fontSize: 13, color: 'var(--text-1)', fontStyle: 'italic' }}>"{item.message}"</p>
+                    </div>
+                )}
+
+                <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
+                    <p style={{ fontSize: 11, color: 'var(--text-3)', margin: 0, fontWeight: 700 }}>
+                        {item.scan_count} TOTAL SCANS
                     </p>
-                    {item.message && (
-                        <p style={{ fontSize: 13, color: 'var(--text-1)', background: 'var(--bg)', padding: '8px 12px', borderRadius: 8, margin: '6px 0', fontStyle: 'italic', borderRight: '3px solid #D85A30' }}>
-                            "{item.message}"
-                        </p>
-                    )}
-                    <p style={{ fontSize: 12, color: 'var(--text-2)', margin: '2px 0 0' }}>
-                        {timeAgo} · {item.city_name}
-                    </p>
-                    <p style={{ fontSize: 11, color: 'var(--text-3)', margin: '2px 0 0' }}>
-                        Owner #{item.owner_number} · {item.scan_count} scans
+                    <p style={{ fontSize: 11, color: 'var(--text-3)', margin: 0, fontWeight: 700 }}>
+                        EDITION {item.collection.toUpperCase()}
                     </p>
                 </div>
-                <span style={{ position: 'absolute', top: 10, right: 10, fontSize: 10, fontWeight: 700, background: rarity.bg, color: rarity.text, borderRadius: 20, padding: '2px 7px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    {item.rarity}
-                </span>
             </div>
-        </Link>
+        </div>
     );
 }
 
@@ -195,8 +247,8 @@ export default function HomePage() {
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', background: 'var(--bg)', paddingBottom: 80 }}>
             {/* Header */}
             <div style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border)', padding: '14px 16px', position: 'sticky', top: 0, zIndex: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 22, fontWeight: 900, fontFamily: 'var(--font-arabic), serif', letterSpacing: '0.04em', color: 'var(--text-1)', direction: 'rtl' }}>
-                    هات <span style={{ color: '#D85A30' }}>شعول</span>
+                <span style={{ fontSize: 22, fontWeight: 900, fontFamily: 'var(--font-arabic), serif', letterSpacing: '0.04em', color: 'var(--text-1)' }}>
+                    DA<span style={{ color: '#D85A30' }}>VAY</span>
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--bg-sub)', borderRadius: 20, padding: '4px 10px' }}>
                     <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#D85A30', display: 'inline-block', animation: 'pulse-dot 1.5s infinite ease-in-out' }} />
@@ -221,19 +273,19 @@ export default function HomePage() {
                 )}
 
                 {/* Today's captures */}
-                <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>Today&apos;s captures</p>
+                <p style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Live Feed</p>
 
                 {loading && (
                     <>
                         <p style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 12, fontStyle: 'italic' }}>{loadingMsg}</p>
-                        {[1, 2, 3, 4].map(i => <FeedCardSkeleton key={i} />)}
+                        {[1, 2, 3].map(i => <FeedCardSkeleton key={i} />)}
                     </>
                 )}
                 {!loading && feed.length === 0 && (
                     <div style={{ textAlign: 'center', padding: '48px 24px' }}>
                         <div style={{ fontSize: 40, marginBottom: 12 }}>🔥</div>
-                        <div style={{ fontWeight: 800, fontSize: 18, color: 'var(--text-1)', marginBottom: 6 }}>The streets are quiet... for now</div>
-                        <div style={{ fontSize: 14, color: 'var(--text-2)' }}>كون أول واحد يقبض ولاعة 🔥</div>
+                        <div style={{ fontWeight: 800, fontSize: 18, color: 'var(--text-1)', marginBottom: 6 }}>The streets are quiet...</div>
+                        <div style={{ fontSize: 14, color: 'var(--text-2)' }}>Be the first one to capture a lighter today!</div>
                     </div>
                 )}
                 {feed.map((item: any) => <FeedCard key={item.id} item={item} isNew={newIds.has(item.id)} />)}

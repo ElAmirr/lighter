@@ -8,6 +8,7 @@ import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/jwt';
 import Link from 'next/link';
 import clsx from 'clsx';
+import ProfilePictureUpload from '@/components/ProfilePictureUpload';
 
 
 function getEditionStyles(collection: string) {
@@ -66,12 +67,12 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
     const distinctCities = new Set(user.history_entries.map(h => h.city_name)).size;
 
     // Rank Calculation
+    // Rank Calculation using a more optimal query
     const allUsersCaptures = await prisma.user.findMany({
-        include: { _count: { select: { history_entries: true } } }
+        select: { id: true, _count: { select: { history_entries: true } } },
+        orderBy: { history_entries: { _count: 'desc' } }
     });
-    const rankings = allUsersCaptures.map(u => ({ id: u.id, score: u._count.history_entries }));
-    rankings.sort((a, b) => b.score - a.score);
-    const globalRank = rankings.findIndex(r => r.id === user.id) + 1;
+    const globalRank = allUsersCaptures.findIndex(u => u.id === user.id) + 1;
 
 
     // Achievements
@@ -90,10 +91,12 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
                 {/* Profile Header */}
                 <div className="bg-[var(--bg-card)] p-6 rounded-3xl shadow-sm border border-[var(--border)] flex flex-col items-center">
                     <div className="relative mb-3">
-                        <div className="w-20 h-20 bg-[var(--color-rarity-legendary)] text-[var(--color-rarity-legendary-text)] rounded-full flex items-center justify-center font-extrabold text-2xl shadow-inner border border-white">
-                            {user.username.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div className="absolute -bottom-2 -right-2 bg-[var(--color-davay-primary)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-white shadow-sm">
+                        <ProfilePictureUpload
+                            username={user.username}
+                            initialAvatar={user.avatar_url}
+                            isOwnProfile={isOwnProfile}
+                        />
+                        <div className="absolute -bottom-2 -right-2 bg-[var(--color-davay-primary)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-white shadow-sm z-10">
                             #{globalRank}
                         </div>
                     </div>
