@@ -37,72 +37,46 @@
   --color-rarity-epic: var(--rarity-epic-bg);
   --color-rarity-legendary: var(--rarity-legendary-bg);
 
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-space), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-/* ── Light Mode (default) ───────────────────────────────── */
+/* ── DESIGN SYSTEM: HAT CHA3OUL (Dark/Neon Core) ─────────────────── */
 :root {
-  --bg: #F8F7F4;
-  --bg-card: #FFFFFF;
-  --bg-sub: #EFEDE8;
-  --border: #E5E3DE;
-  --text-1: #1A1A1A;
-  --text-2: #666666;
-  --text-3: #888888;
-  --nav-bg: #FFFFFF;
-  --accent: #D85A30;
+  --bg: #0F1014;
+  --bg-card: #1B1B1F;
+  --bg-sub: #25252B;
+  --border: rgba(255, 255, 255, 0.08);
 
-  /* Edition backgrounds — light */
-  --edition-tunis: #FDF0EA;
-  --edition-sfax: #EAF3DE;
-  --edition-sahel: #E6F1FB;
-  --edition-meme: #FBEAF0;
-  --edition-default: #EFEDE8;
+  --text-1: #FFFFFF;
+  --text-2: #A1A1AA;
+  --text-3: #71717A;
 
-  /* Rarity badges — light */
-  --rarity-legendary-bg: #FAECE7;
-  --rarity-legendary-text: #993C1D;
-  --rarity-epic-bg: #EEEDFE;
-  --rarity-epic-text: #534AB7;
-  --rarity-rare-bg: #E6F1FB;
-  --rarity-rare-text: #185FA5;
-  --rarity-uncommon-bg: #EAF3DE;
-  --rarity-uncommon-text: #3B6D11;
-  --rarity-common-bg: #EFEDE8;
-  --rarity-common-text: #5F5E5A;
-}
+  --nav-bg: #121212;
+  --accent: #FFD60A;
+  --accent-alt: #FF7A00;
 
-/* ── Dark Mode ──────────────────────────────────────────── */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0F0F0F;
-    --bg-card: #1A1A1A;
-    --bg-sub: #222222;
-    --border: #272727;
-    --text-1: #EFEFEF;
-    --text-2: #A0A0A0;
-    --text-3: #707070;
-    --nav-bg: #141414;
-    --accent: #D85A30;
+  --danger: #FF4D4F;
+  --success: #2ECC71;
 
-    --edition-tunis: #1E1510;
-    --edition-sfax: #141E14;
-    --edition-sahel: #10161E;
-    --edition-meme: #1E1018;
-    --edition-default: #181818;
+  /* Edition backgrounds — neon dark styles */
+  --edition-tunis: rgba(255, 122, 0, 0.1);
+  --edition-sfax: rgba(46, 204, 113, 0.1);
+  --edition-sahel: rgba(59, 130, 246, 0.1);
+  --edition-meme: rgba(155, 89, 182, 0.1);
+  --edition-default: rgba(255, 255, 255, 0.05);
 
-    --rarity-legendary-bg: #2A1510;
-    --rarity-legendary-text: #D85A30;
-    --rarity-epic-bg: #1A1A2E;
-    --rarity-epic-text: #9FA8DA;
-    --rarity-rare-bg: #1A1E2A;
-    --rarity-rare-text: #90CAF9;
-    --rarity-uncommon-bg: #1A2A1A;
-    --rarity-uncommon-text: #81C784;
-    --rarity-common-bg: #222222;
-    --rarity-common-text: #B0B0B0;
-  }
+  /* Rarity badges */
+  --rarity-legendary-bg: rgba(255, 214, 10, 0.15);
+  --rarity-legendary-text: #FFD60A;
+  --rarity-epic-bg: rgba(155, 89, 182, 0.15);
+  --rarity-epic-text: #9B59B6;
+  --rarity-rare-bg: rgba(59, 130, 246, 0.15);
+  --rarity-rare-text: #3B82F6;
+  --rarity-uncommon-bg: rgba(46, 204, 113, 0.15);
+  --rarity-uncommon-text: #2ECC71;
+  --rarity-common-bg: rgba(189, 189, 189, 0.15);
+  --rarity-common-text: #BDBDBD;
 }
 
 /* ── Base ───────────────────────────────────────────────── */
@@ -288,6 +262,71 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes badge-pulse-yellow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 214, 10, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 214, 10, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 214, 10, 0);
+  }
+}
+
+@keyframes badge-pulse-red {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 77, 79, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0);
+  }
+}
+
+@keyframes badge-pulse-orange {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 122, 0, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 122, 0, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 122, 0, 0);
+  }
+}
+
+@keyframes float-rotate {
+  0% {
+    transform: translateY(0) rotate(-1deg);
+  }
+
+  50% {
+    transform: translateY(-8px) rotate(1.5deg);
+  }
+
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+}
+
+.bg-asphalt {
+  background-color: var(--bg);
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.04"/></svg>');
+}
+
+.bg-sticker {
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.4), inset 0px 1px 0px rgba(255, 255, 255, 0.1);
 }
 
 /* ── Skeleton ────────────────────────────────────────────── */

@@ -305,7 +305,7 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                 </div>
 
                 {/* Count-up owner number */}
-                <div style={{ fontSize: 80, fontWeight: 900, color: '#D85A30', lineHeight: 1, marginBottom: 8 }}>
+                <div style={{ fontSize: 80, fontWeight: 900, color: 'var(--accent)', lineHeight: 1, marginBottom: 8 }}>
                     {getOrdinal(animVal || 1)}
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-1)', marginBottom: 6 }}>
@@ -314,7 +314,7 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                 <div style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 24 }}>
                     Captured in <strong>{cityName}</strong>
                 </div>
-                <div style={{ fontSize: 16, fontWeight: 800, color: '#D85A30', marginBottom: 4 }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--accent)', marginBottom: 4 }}>
                     {lighterName}
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 40 }}>
@@ -326,10 +326,10 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                     onClick={() => shareCapture({ ownerNumber: finalOwner, lighterName, lighterId, collection, cityName })}
                     style={{
                         width: '100%', maxWidth: 320, padding: '16px 0',
-                        background: '#D85A30', color: 'white',
+                        background: 'var(--accent)', color: '#121212',
                         fontWeight: 700, fontSize: 16, borderRadius: 16,
                         border: 'none', cursor: 'pointer', marginBottom: 12,
-                        boxShadow: '0 4px 24px rgba(216,90,48,0.3)',
+                        boxShadow: '0 4px 24px rgba(255,214,10,0.2)',
                     }}
                 >
                     Share this capture
@@ -398,7 +398,7 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                                 />
                                 <div style={{ display: 'flex', gap: 12 }}>
                                     <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: '14px 0', background: 'var(--bg-sub)', color: 'var(--text-2)', fontWeight: 700, borderRadius: 14, border: 'none', cursor: 'pointer' }}>Cancel</button>
-                                    <button onClick={handleCapture} disabled={loading} style={{ flex: 1, padding: '14px 0', background: 'var(--accent)', color: 'white', fontWeight: 800, borderRadius: 14, border: 'none', cursor: 'pointer', opacity: loading ? 0.6 : 1 }}>
+                                    <button onClick={handleCapture} disabled={loading} style={{ flex: 1, padding: '14px 0', background: 'var(--accent)', color: '#121212', fontWeight: 800, borderRadius: 14, border: 'none', cursor: 'pointer', opacity: loading ? 0.6 : 1 }}>
                                         {loading ? 'Capturing...' : 'Claim it'}
                                     </button>
                                 </div>
@@ -417,7 +417,7 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                 onClick={() => setShowModal(true)}
                 style={{
                     width: '100%', padding: '18px 0',
-                    background: 'var(--accent)', color: 'white',
+                    background: 'var(--accent)', color: '#121212',
                     fontWeight: 900, fontSize: 16, borderRadius: 16, border: 'none',
                     cursor: 'pointer',
                     transition: 'transform 100ms ease, opacity 200ms',

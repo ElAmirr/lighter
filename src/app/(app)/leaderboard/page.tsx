@@ -41,32 +41,65 @@ export default async function LeaderboardPage({
     // Calculate ranks
     let entries: LeaderboardEntry[] = [];
 
-    const users = await prisma.user.findMany({
-        select: {
-            id: true,
-            username: true,
-            avatar_url: true,
-            _count: {
-                select: {
-                    history_entries: true, // captures
-                    lighters: true, // currently owned
-                    scans: true, // scans triggered
+    if (activeTab === 'captures') {
+        const topUsersRaw = await prisma.user.findMany({
+            take: 30,
+            where: { history_entries: { some: {} } },
+            select: { id: true, username: true, avatar_url: true, _count: { select: { history_entries: true } } },
+            orderBy: { history_entries: { _count: 'desc' } }
+        });
+        entries = topUsersRaw.map(u => ({ id: u.id, username: u.username, avatar_url: u.avatar_url, score: u._count.history_entries }));
+    } else if (activeTab === 'owned') {
+        const topUsersRaw = await prisma.user.findMany({
+            take: 30,
+            where: { lighters: { some: {} } },
+            select: { id: true, username: true, avatar_url: true, _count: { select: { lighters: true } } },
+            orderBy: { lighters: { _count: 'desc' } }
+        });
+        entries = topUsersRaw.map(u => ({ id: u.id, username: u.username, avatar_url: u.avatar_url, score: u._count.lighters }));
+    } else if (activeTab === 'scans') {
+        const topUsersRaw = await prisma.user.findMany({
+            take: 30,
+            where: { scans: { some: {} } },
+            select: { id: true, username: true, avatar_url: true, _count: { select: { scans: true } } },
+            orderBy: { scans: { _count: 'desc' } }
+        });
+        entries = topUsersRaw.map(u => ({ id: u.id, username: u.username, avatar_url: u.avatar_url, score: u._count.scans }));
+    }
+
+    entries = entries.filter(e => e.score > 0);
+
+    // Current user rank
+    let myRankIndex = entries.findIndex(e => e.id === currentUser);
+    let myRank: number | string = '-';
+    let myScore = 0;
+
+    if (currentUser !== "UNKNOWN") {
+        if (myRankIndex >= 0) {
+            myRank = myRankIndex + 1;
+            myScore = entries[myRankIndex].score;
+        } else {
+            const me = await prisma.user.findUnique({
+                where: { id: currentUser },
+                select: { _count: { select: { history_entries: true, lighters: true, scans: true } } }
+            });
+            if (me) {
+                if (activeTab === 'captures') {
+                    myScore = me._count.history_entries;
+                    const r: any = await prisma.$queryRaw`SELECT COUNT(DISTINCT "owner_id")::int as rank FROM (SELECT "owner_id" FROM "OwnershipHistory" GROUP BY "owner_id" HAVING COUNT("id") > ${myScore}) as T;`;
+                    myRank = (r[0]?.rank || 0) + 1;
+                } else if (activeTab === 'owned') {
+                    myScore = me._count.lighters;
+                    const r: any = await prisma.$queryRaw`SELECT COUNT(DISTINCT "current_owner_id")::int as rank FROM (SELECT "current_owner_id" FROM "Lighter" WHERE "current_owner_id" IS NOT NULL GROUP BY "current_owner_id" HAVING COUNT("id") > ${myScore}) as T;`;
+                    myRank = (r[0]?.rank || 0) + 1;
+                } else {
+                    myScore = me._count.scans;
+                    const r: any = await prisma.$queryRaw`SELECT COUNT(DISTINCT "user_id")::int as rank FROM (SELECT "user_id" FROM "Scan" WHERE "user_id" IS NOT NULL GROUP BY "user_id" HAVING COUNT("id") > ${myScore}) as T;`;
+                    myRank = (r[0]?.rank || 0) + 1;
                 }
             }
         }
-    });
-
-    if (activeTab === 'captures') {
-        entries = users.map(u => ({ id: u.id, username: u.username, avatar_url: u.avatar_url, score: u._count.history_entries }));
-    } else if (activeTab === 'owned') {
-        entries = users.map(u => ({ id: u.id, username: u.username, avatar_url: u.avatar_url, score: u._count.lighters }));
-    } else if (activeTab === 'scans') {
-        entries = users.map(u => ({ id: u.id, username: u.username, avatar_url: u.avatar_url, score: u._count.scans }));
     }
-
-    // Filter out 0 scores
-    entries = entries.filter(e => e.score > 0);
-    entries.sort((a, b) => b.score - a.score);
 
     // Top 3
     const top1 = entries[0];
@@ -74,12 +107,7 @@ export default async function LeaderboardPage({
     const top3 = entries[2];
 
     // Rest
-    const rest = entries.slice(3);
-
-    // Current user rank
-    const myRankIndex = entries.findIndex(e => e.id === currentUser);
-    const myRank = myRankIndex >= 0 ? myRankIndex + 1 : '-';
-    const myScore = myRankIndex >= 0 ? entries[myRankIndex].score : 0;
+    const rest = entries.slice(3, 20);
 
     return (
         <>
@@ -109,7 +137,7 @@ export default async function LeaderboardPage({
                                         <div className="w-full bg-gradient-to-t from-[var(--bg-card)] to-[#fcfcfc] h-28 rounded-t-xl flex flex-col items-center justify-start pt-7 border border-b-0 border-[var(--border)] shadow-[0_-2px_10px_rgba(0,0,0,0.02)]"
                                             style={{ transformOrigin: 'bottom', animation: 'podium-grow 500ms ease-out 0ms forwards' }}>
                                             <span className="font-extrabold text-[var(--text-2)] text-xs bg-[var(--bg-sub)] px-2 py-0.5 rounded-full mb-1">#2</span>
-                                            <span className="font-extrabold text-[#D85A30] text-lg">{top2.score}</span>
+                                            <span className="font-extrabold text-[var(--accent)] text-lg">{top2.score}</span>
                                             <span className="text-[10px] font-bold text-[var(--text-1)] mt-1 px-1 text-center truncate w-full">{top2.username}</span>
                                         </div>
                                     </Link>
@@ -120,16 +148,16 @@ export default async function LeaderboardPage({
                             {top1 && (
                                 <div className="flex flex-col items-center flex-[1.2]">
                                     <Link href={`/u/${top1.username}`} className="flex flex-col items-center w-full active:scale-95 transition-transform cursor-pointer">
-                                        <div className="w-20 h-20 bg-[var(--text-1)] rounded-full flex items-center justify-center font-extrabold text-[#D85A30] border-[4px] border-[var(--bg-card)] shadow-lg relative -mb-5 z-10 overflow-hidden bg-cover bg-center"
+                                        <div className="w-20 h-20 bg-[var(--text-1)] rounded-full flex items-center justify-center font-extrabold text-[var(--accent)] border-[4px] border-[var(--bg-card)] shadow-lg relative -mb-5 z-10 overflow-hidden bg-cover bg-center"
                                             style={top1.avatar_url ? { backgroundImage: `url(${top1.avatar_url})`, color: 'transparent' } : {}}>
-                                            <div className="absolute -top-6 text-[#D85A30] drop-shadow-md z-20" style={{ color: '#D85A30' }}>
-                                                <Crown fill="#D85A30" size={28} />
+                                            <div className="absolute -top-6 text-[var(--accent)] drop-shadow-md z-20" style={{ color: 'var(--accent)' }}>
+                                                <Crown fill="var(--accent)" size={28} />
                                             </div>
                                             {!top1.avatar_url && top1.username.substring(0, 2).toUpperCase()}
                                         </div>
-                                        <div className="w-full bg-gradient-to-t from-[#D85A30] to-[#E66439] text-white h-32 rounded-t-xl flex flex-col items-center justify-start pt-8 pb-2 shadow-[0_-8px_20px_rgba(216,90,48,0.25)] border border-b-0 border-[#c44e26]"
+                                        <div className="w-full bg-gradient-to-t from-[var(--accent)] to-[#FFE866] text-[#121212] h-32 rounded-t-xl flex flex-col items-center justify-start pt-8 pb-2 shadow-[0_-8px_20px_rgba(255,214,10,0.15)] border border-b-0 border-[var(--accent)]"
                                             style={{ transformOrigin: 'bottom', animation: 'podium-grow 500ms ease-out 300ms both' }}>
-                                            <span className="font-bold text-[10px] opacity-90 bg-white/20 px-2.5 py-0.5 rounded-full mb-1 shadow-sm">#1</span>
+                                            <span className="font-bold text-[10px] opacity-90 bg-black/20 px-2.5 py-0.5 rounded-full mb-1 shadow-sm">#1</span>
                                             <span className="text-2xl font-extrabold mt-1">{top1.score}</span>
                                             <span className="text-[11px] uppercase tracking-wider font-extrabold truncate w-full text-center px-1 mt-auto pb-1 opacity-95">{top1.username}</span>
                                         </div>
@@ -177,7 +205,7 @@ export default async function LeaderboardPage({
                         const isMe = entry.id === currentUser;
 
                         return (
-                            <Link href={`/u/${entry.username}`} key={entry.id} className={`flex items-center justify-between p-3 rounded-xl bg-[var(--bg-card)] border active:scale-95 transition-transform ${isMe ? 'border-[#D85A30] shadow-sm shadow-[#D85A30]/10' : 'border-[var(--border)]'}`}>
+                            <Link href={`/u/${entry.username}`} key={entry.id} className={`flex items-center justify-between p-3 rounded-xl bg-[var(--bg-card)] border active:scale-95 transition-transform ${isMe ? 'border-[var(--accent)] shadow-sm shadow-[var(--accent)]/10' : 'border-[var(--border)]'}`}>
                                 <div className="flex items-center gap-3">
                                     <span className="font-bold text-[var(--text-3)] w-5 text-center text-sm">{rank}</span>
                                     <div className="w-10 h-10 rounded-full bg-[var(--bg-sub)] flex items-center justify-center font-bold text-xs text-[var(--text-2)] overflow-hidden bg-cover bg-center border border-[var(--border)]"
@@ -185,8 +213,8 @@ export default async function LeaderboardPage({
                                         {!entry.avatar_url && entry.username.substring(0, 2).toUpperCase()}
                                     </div>
                                     <div className="flex flex-col gap-0.5">
-                                        <span className={`font-bold text-sm ${isMe ? 'text-[#D85A30]' : 'text-[var(--text-1)]'}`}>{entry.username}</span>
-                                        {isMe && <span className="text-[9px] text-white bg-[#D85A30] px-1.5 py-0.5 rounded-sm font-bold tracking-wider w-fit">YOU</span>}
+                                        <span className={`font-bold text-sm ${isMe ? 'text-[var(--accent)]' : 'text-[var(--text-1)]'}`}>{entry.username}</span>
+                                        {isMe && <span className="text-[9px] text-[#121212] bg-[var(--accent)] px-1.5 py-0.5 rounded-sm font-bold tracking-wider w-fit">YOU</span>}
                                     </div>
                                 </div>
                                 <div className="font-extrabold text-sm text-[var(--text-1)] bg-[var(--bg-sub)] px-3 py-1 rounded-full">

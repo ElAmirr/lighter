@@ -66,19 +66,19 @@ export default async function CollectionPage() {
                                             className="flex flex-col rounded-2xl shadow-sm border border-[var(--border)] active:scale-95 transition-transform overflow-hidden relative pb-3 bg-[var(--bg-card)]">
 
                                             {/* Trading Card Image Area */}
-                                            <div className={`w-full aspect-[4/5] flex items-center justify-center relative ${img ? 'bg-[#f5f5f5]' : bg}`}>
+                                            <div className={`w-full aspect-[4/5] flex items-center justify-center relative ${img ? 'bg-[var(--bg-sub)]' : bg}`}>
                                                 {img ? (
-                                                    <img src={img} alt={lighter.name} className="absolute inset-0 w-full h-full object-cover mix-blend-multiply" />
+                                                    <img src={img} alt={lighter.name} className="absolute inset-0 w-full h-full object-cover" />
                                                 ) : (
                                                     <Icon size={40} className={`opacity-80 ${text}`} />
                                                 )}
 
                                                 {/* Top Overlay Badges */}
                                                 <div className="absolute top-2 left-2 right-2 flex justify-between items-start">
-                                                    <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded backdrop-blur-sm bg-black/40 text-white shadow-sm">
+                                                    <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded backdrop-blur-sm bg-black/60 text-white shadow-sm">
                                                         #{lighter.id.slice(0, 3)}
                                                     </span>
-                                                    <span className="text-[9px] font-extrabold uppercase tracking-wider bg-[var(--text-1)] text-[var(--bg-card)] px-1.5 py-0.5 rounded shadow-sm">
+                                                    <span className="text-[9px] font-extrabold uppercase tracking-wider bg-[var(--text-1)] text-[#121212] px-1.5 py-0.5 rounded shadow-sm">
                                                         {lighter.rarity?.name}
                                                     </span>
                                                 </div>

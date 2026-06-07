@@ -27,7 +27,7 @@ function getRarityStyle(rarity: string) {
         case 'Rare': return { bg: 'bg-[var(--color-rarity-rare)]', text: 'text-[var(--color-rarity-rare-text)]' };
         case 'Epic': return { bg: 'bg-[var(--color-rarity-epic)]', text: 'text-[var(--color-rarity-epic-text)]' };
         case 'Legendary': return { bg: 'bg-[var(--color-rarity-legendary)]', text: 'text-[var(--color-rarity-legendary-text)]' };
-        default: return { bg: 'bg-gray-100', text: 'text-gray-500' };
+        default: return { bg: 'bg-[var(--bg-sub)]', text: 'text-[var(--text-2)]' };
     }
 }
 
@@ -192,7 +192,7 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
                                     <div className="flex flex-col justify-center min-h-[40px]">
                                         <div className="flex items-center gap-2">
                                             <span className={`font-bold ${idx === 0 ? 'text-[var(--text-1)]' : 'text-[var(--text-2)]'}`}>{history.owner.username}</span>
-                                            {idx === 0 && <span className="text-[9px] font-bold uppercase tracking-wider bg-[var(--accent)] text-white px-1.5 py-0.5 rounded-sm">Now</span>}
+                                            {idx === 0 && <span className="text-[9px] font-bold uppercase tracking-wider bg-[var(--accent)] text-[#121212] px-1.5 py-0.5 rounded-sm">Now</span>}
                                         </div>
                                         <div className="text-xs text-[var(--color-davay-muted)] font-medium mt-0.5">
                                             {format(history.captured_at, 'MMM d, yyyy')}

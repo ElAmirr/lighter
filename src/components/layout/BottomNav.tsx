@@ -18,7 +18,7 @@ export default function BottomNav() {
     ];
 
     return (
-        <nav style={{ background: 'var(--nav-bg)', borderTop: '1px solid var(--border)' }}
+        <nav style={{ background: 'var(--bg-card)', borderTop: '1px solid var(--border)' }}
             className="fixed bottom-0 w-full max-w-[390px] px-2 py-2 flex justify-between items-end pb-safe z-50">
             {tabs.map((tab) => {
                 const isActive = pathname.startsWith(tab.href) || (tab.href === '/u/me' && pathname.startsWith('/u/'));
@@ -28,7 +28,7 @@ export default function BottomNav() {
                     return (
                         <Link key={tab.name} href={tab.href} className="flex flex-col items-center justify-center flex-1 -mt-6">
                             <div className={clsx(
-                                "bg-[var(--accent)] text-white p-3 rounded-full shadow-lg shadow-[var(--accent)]/40 mb-1 active:scale-95 transition-transform",
+                                "bg-[var(--accent)] text-[#121212] p-3 rounded-full shadow-lg shadow-[var(--accent)]/30 mb-1 active:scale-95 transition-transform",
                                 !isScanActive && "scan-bounce-anim"
                             )}
                                 style={{ animation: isScanActive ? 'none' : 'scan-bounce 2.5s infinite ease-in-out' }}>

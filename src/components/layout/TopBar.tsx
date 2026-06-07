@@ -10,20 +10,20 @@ interface TopBarProps {
 
 export default function TopBar({ rightIcon = 'bell', rightLabel }: TopBarProps) {
     return (
-        <header className="flex w-full items-center justify-between px-4 py-4 bg-[var(--color-davay-card)] border-b border-[var(--color-davay-hint)]/30 sticky top-0 z-50">
-            <Link href="/home" className="text-xl font-bold tracking-[0.15em] text-[var(--color-davay-text)]">
-                DA<span className="text-[var(--color-davay-primary)]">V</span>AY
+        <header className="flex w-full items-center justify-between px-4 py-4 bg-[var(--bg-card)] border-b border-[var(--border)] sticky top-0 z-50">
+            <Link href="/home" className="text-xl font-black tracking-[0.15em] text-[var(--text-1)] font-sans">
+                DA<span className="text-[var(--accent)]">V</span>AY
             </Link>
 
-            <div className="flex items-center gap-3 text-[var(--color-davay-muted)]">
+            <div className="flex items-center gap-3 text-[var(--text-2)]">
                 {rightLabel ? (
                     <span className="text-sm font-medium">{rightLabel}</span>
                 ) : rightIcon === 'bell' ? (
-                    <button aria-label="Notifications" className="p-1 hover:text-[var(--color-davay-primary)] transition-colors">
+                    <button aria-label="Notifications" className="p-1 hover:text-[var(--accent)] transition-colors">
                         <Bell size={24} />
                     </button>
                 ) : rightIcon === 'settings' ? (
-                    <button aria-label="Settings" className="p-1 hover:text-[var(--color-davay-primary)] transition-colors">
+                    <button aria-label="Settings" className="p-1 hover:text-[var(--accent)] transition-colors">
                         <Settings size={24} />
                     </button>
                 ) : null}

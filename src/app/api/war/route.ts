@@ -22,39 +22,26 @@ export async function GET() {
             }
         });
 
-        // Lighters where user was once owner but someone else took it after
-        const allUserLighters = await prisma.lighter.findMany({
-            where: { history_entries: { some: { owner_id: userId } } },
+        // A lighter is "stolen" for each time ownership passed FROM this user TO someone else
+        const stolenEventsRaw = await prisma.ownershipHistory.findMany({
+            where: { stolen_from_id: userId },
+            orderBy: { captured_at: 'desc' },
             include: {
-                history_entries: {
-                    orderBy: { captured_at: 'asc' },
-                    include: { owner: { select: { username: true } } }
-                },
-                collection: true,
-                rarity: true,
+                lighter: { include: { collection: true, rarity: true } },
+                owner: { select: { username: true } },
             }
         });
 
-        // A lighter is "stolen" for each time ownership passed FROM this user TO someone else
-        const stolenEvents: any[] = [];
-        for (const lighter of allUserLighters) {
-            const entries = lighter.history_entries;
-            for (let i = 0; i < entries.length - 1; i++) {
-                if (entries[i].owner_id === userId && entries[i + 1].owner_id !== userId) {
-                    stolenEvents.push({
-                        id: entries[i + 1].id,
-                        lighter_id: lighter.id,
-                        lighter_name: lighter.name,
-                        collection: lighter.collection?.name || 'Default',
-                        rarity: lighter.rarity?.name || 'Common',
-                        stolen_by: entries[i + 1].owner.username,
-                        stolen_at: entries[i + 1].captured_at,
-                        lighter_image: lighter.image_url || lighter.collection?.image_url || null,
-                    });
-                }
-            }
-        }
-        stolenEvents.sort((a, b) => new Date(b.stolen_at).getTime() - new Date(a.stolen_at).getTime());
+        const stolenEvents = stolenEventsRaw.map(s => ({
+            id: s.id,
+            lighter_id: s.lighter_id,
+            lighter_name: s.lighter.name,
+            collection: s.lighter.collection?.name || 'Default',
+            rarity: s.lighter.rarity?.name || 'Common',
+            stolen_by: s.owner.username,
+            stolen_at: s.captured_at,
+            lighter_image: s.lighter.image_url || s.lighter.collection?.image_url || null,
+        }));
 
         const capturedMapped = captured.map(c => ({
             id: c.id,

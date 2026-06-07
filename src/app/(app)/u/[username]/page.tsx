@@ -67,12 +67,17 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
     const distinctCities = new Set(user.history_entries.map(h => h.city_name)).size;
 
     // Rank Calculation
-    // Rank Calculation using a more optimal query
-    const allUsersCaptures = await prisma.user.findMany({
-        select: { id: true, _count: { select: { history_entries: true } } },
-        orderBy: { history_entries: { _count: 'desc' } }
-    });
-    const globalRank = allUsersCaptures.findIndex(u => u.id === user.id) + 1;
+    // Rank Calculation using raw SQL to bypass Prisma version limits
+    const rankResult: any = await prisma.$queryRaw`
+        SELECT COUNT(DISTINCT "owner_id")::int as rank
+        FROM (
+            SELECT "owner_id"
+            FROM "OwnershipHistory"
+            GROUP BY "owner_id"
+            HAVING COUNT("id") > ${totalCaptures}
+        ) AS TopUsers;
+    `;
+    const globalRank = (rankResult[0]?.rank || 0) + 1;
 
 
     // Achievements
@@ -131,28 +136,28 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
                     <div className="grid grid-cols-3 gap-3">
                         {/* First Capture */}
                         <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !hasFirstCapture && "opacity-40 grayscale")}>
-                            <div className="w-10 h-10 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mb-2">
+                            <div className="w-10 h-10 bg-[#FF7A00]/20 text-[#FF7A00] rounded-full flex items-center justify-center mb-2">
                                 <Zap size={20} />
                             </div>
                             <span className="text-[10px] font-bold text-center leading-tight">First<br />Capture</span>
                         </div>
 
                         <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !has10Captures && "opacity-40 grayscale")}>
-                            <div className="w-10 h-10 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-2">
+                            <div className="w-10 h-10 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mb-2">
                                 <Flame size={20} />
                             </div>
                             <span className="text-[10px] font-bold text-center leading-tight">10<br />Captures</span>
                         </div>
 
                         <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !has3Cities && "opacity-40 grayscale")}>
-                            <div className="w-10 h-10 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mb-2">
+                            <div className="w-10 h-10 bg-blue-500/20 text-blue-500 rounded-full flex items-center justify-center mb-2">
                                 <MapPin size={20} />
                             </div>
                             <span className="text-[10px] font-bold text-center leading-tight">3<br />Cities</span>
                         </div>
 
                         <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !hasRare && "opacity-40 grayscale")}>
-                            <div className="w-10 h-10 bg-purple-100 text-purple-500 rounded-full flex items-center justify-center mb-2">
+                            <div className="w-10 h-10 bg-purple-500/20 text-purple-500 rounded-full flex items-center justify-center mb-2">
                                 <Star size={20} />
                             </div>
                             <span className="text-[10px] font-bold text-center leading-tight">Rare<br />Find</span>
@@ -160,7 +165,7 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
 
                         {(hasLegendary || isOwnProfile) && (
                             <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !hasLegendary && "opacity-40 grayscale")}>
-                                <div className="w-10 h-10 bg-yellow-100 text-[var(--color-davay-primary)] rounded-full flex items-center justify-center mb-2">
+                                <div className="w-10 h-10 bg-[var(--accent)]/20 text-[var(--color-davay-primary)] rounded-full flex items-center justify-center mb-2">
                                     <Crown size={20} />
                                 </div>
                                 <span className="text-[10px] font-bold text-center leading-tight">Legendary<br />Hunter</span>
@@ -169,7 +174,7 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
 
                         {(has10Cities || isOwnProfile) && (
                             <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !has10Cities && "opacity-40 grayscale")}>
-                                <div className="w-10 h-10 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mb-2">
+                                <div className="w-10 h-10 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mb-2">
                                     <Globe size={20} />
                                 </div>
                                 <span className="text-[10px] font-bold text-center leading-tight">10<br />Cities</span>
@@ -226,21 +231,18 @@ async function RecentActivity({ username }: { username: string }) {
                 take: 20,
                 include: { lighter: { include: { collection: true } } }
             });
-            const lightersEver = await prisma.lighter.findMany({
-                where: { history_entries: { some: { owner_id: user.id } } },
-                include: { history_entries: { orderBy: { captured_at: 'asc' }, include: { owner: true } } }
+            const stolenFromUser = await prisma.ownershipHistory.findMany({
+                where: { stolen_from_id: user.id },
+                orderBy: { captured_at: 'desc' },
+                take: 10,
+                include: { lighter: true, owner: true }
             });
             const evts: Array<{ type: string; text: string; timestamp: Date }> = [];
             for (const c of captures) {
                 evts.push({ type: 'capture', text: `Captured #${c.lighter_id.slice(0, 3)} ${c.lighter.name}`, timestamp: c.captured_at });
             }
-            for (const l of lightersEver) {
-                const entries = l.history_entries;
-                for (let i = 0; i < entries.length - 1; i++) {
-                    if (entries[i].owner_id === user.id && entries[i + 1].owner_id !== user.id) {
-                        evts.push({ type: 'lost', text: `Lost #${l.id.slice(0, 3)} ${l.name} to ${entries[i + 1].owner.username}`, timestamp: entries[i + 1].captured_at });
-                    }
-                }
+            for (const s of stolenFromUser) {
+                evts.push({ type: 'lost', text: `Lost #${s.lighter_id.slice(0, 3)} ${s.lighter.name} to ${s.owner.username}`, timestamp: s.captured_at });
             }
             evts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
             events = evts.slice(0, 10).map(e => ({ ...e, timestamp: e.timestamp.toISOString() }));
@@ -248,8 +250,8 @@ async function RecentActivity({ username }: { username: string }) {
     } catch { }
 
     const dotColor: Record<string, string> = {
-        capture: '#D85A30',
-        lost: '#888',
+        capture: 'var(--accent)',
+        lost: 'var(--text-3)',
         achievement: '#534AB7',
     };
 

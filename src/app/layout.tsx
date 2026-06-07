@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Lalezar } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
@@ -8,11 +8,10 @@ const interSans = Inter({
   subsets: ["latin"],
 });
 
-// Lalezar — bold Arabic display font, perfect for street/teen aesthetic
-const lalezar = Lalezar({
-  variable: "--font-arabic",
-  weight: "400",
-  subsets: ["arabic", "latin"],
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -27,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#F05423",
+  themeColor: "#FFD60A",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -40,9 +39,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${interSans.variable} ${lalezar.variable} h-full antialiased`} suppressHydrationWarning>
-      <body suppressHydrationWarning className="min-h-full flex flex-col justify-start items-center bg-[var(--color-davay-bg)] text-[var(--color-davay-text)]">
-        <div className="w-full max-w-[390px] min-h-screen bg-[var(--color-davay-bg)] flex flex-col relative overflow-x-hidden shadow-2xl shadow-black/5">
+    <html lang="en" className={`${interSans.variable} ${spaceGrotesk.variable} ${spaceGrotesk.className} h-full antialiased`} suppressHydrationWarning>
+      <body suppressHydrationWarning className="min-h-full flex flex-col justify-start items-center bg-[var(--bg)] text-[var(--text-1)]">
+        <div className="w-full max-w-[390px] min-h-screen bg-[var(--bg)] flex flex-col relative overflow-x-hidden shadow-2xl shadow-black/50">
           {children}
         </div>
         <Script id="sw-register" strategy="afterInteractive">
