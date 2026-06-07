@@ -1,11 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { cookies } from 'next/headers';
+import { verifyToken } from '@/lib/jwt';
 
 export async function GET(req: NextRequest) {
     try {
         const todayOnly = req.nextUrl.searchParams.get('today') === 'true';
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
+
+        const cookieStore = await cookies();
+        const token = cookieStore.get('token')?.value;
+        let myMissionProgress = 0;
+        if (token) {
+            try {
+                const payload = verifyToken(token) as any;
+                if (payload?.userId) {
+                    const myCaps = await prisma.ownershipHistory.findMany({
+                        where: { owner_id: payload.userId, captured_at: { gte: todayStart } },
+                        distinct: ['lighter_id'],
+                        select: { lighter_id: true }
+                    });
+                    myMissionProgress = myCaps.length;
+                }
+            } catch (e) { }
+        }
 
         const history = await prisma.ownershipHistory.findMany({
             orderBy: { captured_at: 'desc' },
@@ -52,10 +71,18 @@ export async function GET(req: NextRequest) {
             };
         });
 
-        return NextResponse.json(feed);
+        const todayCaptures = await prisma.ownershipHistory.count({ where: { captured_at: { gte: todayStart } } });
+        const activeRes: any = await prisma.$queryRaw`SELECT COUNT(DISTINCT owner_id)::int as hunters FROM "OwnershipHistory" WHERE captured_at >= ${todayStart}`;
+        const activeHunters = activeRes[0]?.hunters || 0;
+        const legendaryFound = await prisma.ownershipHistory.count({ where: { captured_at: { gte: todayStart }, lighter: { rarity: { name: 'Legendary' } } } });
+
+        return NextResponse.json({
+            feed,
+            stats: { todayCaptures, activeHunters, legendaryFound, myMissionProgress }
+        });
     } catch (error: any) {
         console.error(error);
-        return NextResponse.json([], { status: 500 });
+        return NextResponse.json({ feed: [], stats: { todayCaptures: 0, activeHunters: 0, legendaryFound: 0, myMissionProgress: 0 } }, { status: 500 });
     }
 }
 

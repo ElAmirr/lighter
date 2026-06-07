@@ -128,6 +128,7 @@ const loadingMessages = [
 
 export default function HomePage() {
     const [feed, setFeed] = useState<any[]>([]);
+    const [stats, setStats] = useState<any>({ todayCaptures: 0, activeHunters: 0, legendaryFound: 0, myMissionProgress: 0 });
     const [loading, setLoading] = useState(true);
     const [newIds, setNewIds] = useState<Set<string>>(new Set());
     const [loadingMsg, setLoadingMsg] = useState(loadingMessages[0]);
@@ -136,9 +137,10 @@ export default function HomePage() {
     const loadFeed = async (prepend = false) => {
         try {
             const feedRes = await fetch('/api/feed?today=true');
-            const feedData = await feedRes.json();
+            const data = await feedRes.json();
 
-            const safeFeed = Array.isArray(feedData) ? feedData : [];
+            const safeFeed = Array.isArray(data.feed) ? data.feed : Array.isArray(data) ? data : [];
+            if (data.stats) setStats(data.stats);
 
             if (prepend && latestIdRef.current && safeFeed.length > 0) {
                 const latestIdx = safeFeed.findIndex((f: any) => f.id === latestIdRef.current);
@@ -164,9 +166,8 @@ export default function HomePage() {
     }, []);
 
     // Derived stats
-    const todayCaptures = feed.length || 127;
-    const activeHunters = new Set(feed.map(f => f.username)).size || 53;
-    const legendaryFound = feed.filter(f => f.rarity === 'Legendary').length || 14;
+    const { todayCaptures, activeHunters, legendaryFound, myMissionProgress } = stats;
+    const missionPct = Math.min(100, Math.floor((myMissionProgress / 3) * 100));
 
     return (
         <div className="bg-asphalt" style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', paddingBottom: 80 }}>
@@ -215,10 +216,10 @@ export default function HomePage() {
                     <p style={{ margin: '0 0 12px 0', fontSize: 14, fontWeight: 800, color: 'var(--text-1)' }}>Capture 3 different lighters</p>
 
                     <div style={{ background: '#121212', height: 8, borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
-                        <div style={{ width: '33%', height: '100%', background: 'var(--accent)', borderRadius: 4 }}></div>
+                        <div style={{ width: `${missionPct}%`, height: '100%', background: 'var(--accent)', borderRadius: 4, transition: 'width 600ms cubic-bezier(0.16, 1, 0.3, 1)' }}></div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)' }}>1 / 3 Items</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)' }}>{myMissionProgress} / 3 Items</span>
                         <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)' }}>Rare Sticker</span>
                     </div>
                 </div>
