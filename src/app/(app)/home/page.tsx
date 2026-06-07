@@ -147,7 +147,7 @@ export default function HomePage() {
                 const latestIdx = safeFeed.findIndex((f: any) => f.id === latestIdRef.current);
                 const newItems = latestIdx > 0 ? safeFeed.slice(0, latestIdx) : [];
                 if (newItems.length > 0) {
-                    const newSet = new Set(newItems.map((i: any) => i.id));
+                    const newSet = new Set<string>(newItems.map((i: any) => String(i.id)));
                     setNewIds(newSet);
                     setFeed(prev => [...newItems, ...prev]);
                     setTimeout(() => setNewIds(new Set()), 1000);
