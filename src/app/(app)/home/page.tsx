@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { Flame, ShieldAlert, Zap, MapPin, Users, Star, Crown, Navigation, BookOpen, Share2, Target, Circle, Leaf, Droplet, MessageSquare } from 'lucide-react';
+import TopBar from '@/components/layout/TopBar';
 
 const editionMap: Record<string, { bg: string; icon: any; iconColor: string }> = {
     Tunis: { bg: 'rgba(255, 122, 0, 0.1)', icon: Flame, iconColor: '#D85A30' },
@@ -172,15 +173,7 @@ export default function HomePage() {
     return (
         <div className="bg-asphalt" style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', paddingBottom: 80 }}>
             {/* Header */}
-            <div style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border)', padding: '14px 16px', position: 'sticky', top: 0, zIndex: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 22, fontWeight: 900, fontFamily: 'var(--font-sans)', letterSpacing: '0.04em', color: 'var(--text-1)' }}>
-                    DA<span style={{ color: 'var(--accent)' }}>VAY</span>
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--bg-sub)', borderRadius: 20, padding: '4px 10px' }}>
-                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block', animation: 'pulse-dot 1.5s infinite ease-in-out' }} />
-                    <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Live</span>
-                </div>
-            </div>
+            <TopBar rightIcon="pulse" rightLabel="Live" />
 
             <div style={{ padding: '16px 14px 0' }}>
 

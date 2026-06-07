@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { Flame, Leaf, Droplet, Star, Circle, Sword, Shield } from 'lucide-react';
+import TopBar from '@/components/layout/TopBar';
 
 // ── Edition config ────────────────────────────────────────
 const editionMap: Record<string, { bg: string; icon: any; iconColor: string }> = {
@@ -61,22 +62,20 @@ function CapturedCard({ item }: { item: any }) {
     const rarity = getRarity(item.rarity);
     return (
         <Link href={`/l/${item.lighter_id}`}>
-            <div style={{ display: 'flex', gap: 12, padding: '12px 14px', background: 'var(--bg-card)', borderRadius: 16, marginBottom: 10, border: '1px solid var(--border)', alignItems: 'center', position: 'relative', opacity: 0.9 }}>
-                {/* Red left stripe for stolen */}
-                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: '#30d846ff', borderRadius: '16px 0 0 16px' }} />
+            <div className="bg-sticker" style={{ display: 'flex', gap: 12, padding: '12px 14px', background: 'var(--bg-card)', borderRadius: 16, marginBottom: 12, border: '1px solid rgba(255,255,255,0.08)', alignItems: 'center', position: 'relative' }}>
+                {/* Green left stripe for captured */}
+                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: 'var(--success)', borderRadius: '16px 0 0 16px' }} />
 
-                <div style={{ display: 'flex', gap: 12, padding: '12px 14px', background: 'var(--bg-card)', borderRadius: 16, marginBottom: 10, border: '1px solid var(--border)', alignItems: 'center', position: 'relative' }}>
-                    <LighterThumb collection={item.collection} image={item.lighter_image} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontWeight: 700, fontSize: 14, margin: 0, color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.lighter_name}</p>
-                        <p style={{ fontSize: 11, color: 'var(--text-2)', margin: '2px 0 0' }}>
-                            {item.city_name} · {formatDistanceToNow(new Date(item.captured_at), { addSuffix: true })}
-                        </p>
-                    </div>
-                    <span style={{ fontSize: 10, fontWeight: 700, background: rarity.bg, color: rarity.text, borderRadius: 20, padding: '2px 8px', textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0 }}>
-                        {item.rarity}
-                    </span>
+                <LighterThumb collection={item.collection} image={item.lighter_image} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontWeight: 900, fontSize: 15, margin: 0, color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.lighter_name}</p>
+                    <p style={{ fontSize: 11, color: 'var(--text-2)', margin: '2px 0 0', fontWeight: 600 }}>
+                        {item.city_name} · {formatDistanceToNow(new Date(item.captured_at), { addSuffix: true })}
+                    </p>
                 </div>
+                <span style={{ fontSize: 10, fontWeight: 800, background: rarity.bg, color: rarity.text, borderRadius: 20, padding: '4px 10px', textTransform: 'uppercase' }}>
+                    {item.rarity}
+                </span>
             </div>
         </Link>
     );
@@ -87,22 +86,23 @@ function StolenCard({ item }: { item: any }) {
     const rarity = getRarity(item.rarity);
     return (
         <Link href={`/l/${item.lighter_id}`}>
-            <div style={{ display: 'flex', gap: 12, padding: '12px 14px', background: 'var(--bg-card)', borderRadius: 16, marginBottom: 10, border: '1px solid var(--border)', alignItems: 'center', position: 'relative', opacity: 0.9 }}>
+            <div className="bg-sticker" style={{ display: 'flex', gap: 12, padding: '12px 14px', background: 'var(--bg-sub)', borderRadius: 16, marginBottom: 12, border: '1px solid rgba(255,77,79,0.2)', alignItems: 'center', position: 'relative' }}>
                 {/* Red left stripe for stolen */}
-                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: '#D85A30', borderRadius: '16px 0 0 16px' }} />
-                <div style={{ paddingLeft: 6, display: 'flex', gap: 12, flex: 1, alignItems: 'center', minWidth: 0 }}>
+                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: 'var(--danger)', borderRadius: '16px 0 0 16px' }} />
+
+                <div style={{ paddingLeft: 4, display: 'flex', gap: 12, flex: 1, alignItems: 'center', minWidth: 0 }}>
                     <LighterThumb collection={item.collection} image={item.lighter_image} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontWeight: 700, fontSize: 14, margin: 0, color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.lighter_name}</p>
-                        <p style={{ fontSize: 11, color: '#D85A30', margin: '2px 0 0', fontWeight: 600 }}>
-                            Stolen by <strong>{item.stolen_by}</strong>
+                        <p style={{ fontWeight: 900, fontSize: 15, margin: 0, color: 'var(--text-1)', textDecoration: 'line-through', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.lighter_name}</p>
+                        <p style={{ fontSize: 11, color: 'var(--danger)', margin: '2px 0 0', fontWeight: 800 }}>
+                            STOLEN BY {item.stolen_by}
                         </p>
-                        <p style={{ fontSize: 10, color: 'var(--text-3)', margin: '1px 0 0' }}>
+                        <p style={{ fontSize: 10, color: 'var(--text-3)', margin: '2px 0 0', fontWeight: 600 }}>
                             {formatDistanceToNow(new Date(item.stolen_at), { addSuffix: true })}
                         </p>
                     </div>
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 700, background: rarity.bg, color: rarity.text, borderRadius: 20, padding: '2px 8px', textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0 }}>
+                <span style={{ fontSize: 10, fontWeight: 800, background: rarity.bg, color: rarity.text, borderRadius: 20, padding: '4px 10px', textTransform: 'uppercase' }}>
                     {item.rarity}
                 </span>
             </div>
@@ -135,47 +135,47 @@ export default function WarPage() {
     const items = activeTab === 'captured' ? captured : stolen;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', background: 'var(--bg)', paddingBottom: 90 }}>
+        <div className="bg-asphalt" style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', paddingBottom: 90 }}>
             {/* Header */}
-            <div style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border)', padding: '14px 16px', position: 'sticky', top: 0, zIndex: 40 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <span style={{ fontSize: 17, fontWeight: 900, letterSpacing: '0.08em', color: 'var(--text-1)' }}>WAR ROOM</span>
-                    <div style={{ display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-2)', fontWeight: 600 }}>
-                        <span style={{ color: 'var(--accent)' }}>{captured.length} snagged</span>
+            <TopBar rightLabel="War Room" />
+
+            <div style={{ padding: '16px 14px 0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: '0.08em', color: 'var(--text-1)' }}>WAR ROOM</span>
+                    <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--text-2)', fontWeight: 800 }}>
+                        <span style={{ color: 'var(--success)' }}>{captured.length} SNAGGED</span>
                         <span>·</span>
-                        <span>{stolen.length} lost</span>
+                        <span style={{ color: 'var(--danger)' }}>{stolen.length} LOST</span>
                     </div>
                 </div>
                 {/* Tabs */}
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
                     <button
                         onClick={() => setActiveTab('captured')}
                         style={{
-                            flex: 1, padding: '8px 0', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13,
+                            flex: 1, padding: '10px 0', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 13,
                             background: activeTab === 'captured' ? 'var(--accent)' : 'var(--bg-sub)',
-                            color: activeTab === 'captured' ? 'white' : 'var(--text-2)',
+                            color: activeTab === 'captured' ? '#121212' : 'var(--text-2)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                             transition: 'all 200ms ease',
                         }}
                     >
-                        <Sword size={14} /> Captured {!loading && `(${captured.length})`}
+                        <Sword size={16} /> Captured {!loading && `(${captured.length})`}
                     </button>
                     <button
                         onClick={() => setActiveTab('stolen')}
                         style={{
-                            flex: 1, padding: '8px 0', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13,
-                            background: activeTab === 'stolen' ? '#D85A30' : 'var(--bg-sub)',
+                            flex: 1, padding: '10px 0', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 13,
+                            background: activeTab === 'stolen' ? 'var(--danger)' : 'var(--bg-sub)',
                             color: activeTab === 'stolen' ? 'white' : 'var(--text-2)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                             transition: 'all 200ms ease',
                         }}
                     >
-                        <Shield size={14} /> Stolen {!loading && `(${stolen.length})`}
+                        <Shield size={16} /> Stolen {!loading && `(${stolen.length})`}
                     </button>
                 </div>
-            </div>
 
-            <div style={{ padding: '14px' }}>
                 {loading && [1, 2, 3, 4].map(i => <CardSkeleton key={i} />)}
 
                 {!loading && items.length === 0 && (

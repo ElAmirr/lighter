@@ -9,6 +9,7 @@ import { verifyToken } from '@/lib/jwt';
 import Link from 'next/link';
 import clsx from 'clsx';
 import ProfilePictureUpload from '@/components/ProfilePictureUpload';
+import LogoutButton from './LogoutButton';
 
 
 function getEditionStyles(collection: string) {
@@ -214,6 +215,7 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
                 {/* Recent Activity */}
                 <RecentActivity username={username} />
 
+                {isOwnProfile && <LogoutButton />}
             </div>
         </>
     );
