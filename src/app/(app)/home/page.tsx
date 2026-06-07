@@ -70,7 +70,7 @@ function FeedCard({ item, isNew }: { item: any; isNew?: boolean }) {
             </div>
 
             {/* Product Image */}
-            <Link href={`/l/${item.lighter_id}`} style={{ display: 'block', position: 'relative', width: '100%', aspectRatio: '4/5', background: 'var(--bg-sub)' }}>
+            <Link href={`/l/${item.lighter_id}`} style={{ display: 'block', position: 'relative', width: '100%', aspectRatio: '16/9', background: 'var(--bg-sub)' }}>
                 <img src={lighterImage} alt="Lighter" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <div style={{ position: 'absolute', bottom: 12, left: 12, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', color: 'white', padding: '4px 10px', borderRadius: 8, fontSize: 10, fontWeight: 800, textTransform: 'uppercase' }}>
                     {item.lighter_name} • {item.rarity}
