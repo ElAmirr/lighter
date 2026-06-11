@@ -3,6 +3,7 @@ import TopBar from '@/components/layout/TopBar';
 import { Crown, Flame } from 'lucide-react';
 import Link from 'next/link';
 import LeaderboardTabs from './LeaderboardTabs';
+import DailyStats from './DailyStats';
 import { getUserFromRequest } from '@/lib/jwt';
 import { cookies } from 'next/headers';
 
@@ -111,8 +112,10 @@ export default async function LeaderboardPage({
 
     return (
         <>
-            <TopBar rightLabel="This week" />
+            <TopBar rightLabel="Ranks" />
             <div className="flex flex-col flex-1 p-4">
+
+                <DailyStats />
 
                 <LeaderboardTabs activeTab={activeTab} />
 

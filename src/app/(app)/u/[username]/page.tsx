@@ -89,6 +89,27 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
     const hasRare = user.history_entries.some(h => ['Rare', 'Epic', 'Legendary'].includes(h.lighter.rarity?.name || ''));
     const hasLegendary = user.history_entries.some(h => h.lighter.rarity?.name === 'Legendary');
 
+    // XP & Level Calculation
+    let xp = 0;
+    xp += totalCaptures * 150;
+    xp += currentlyOwned * 200;
+    xp += scansTriggered * 20;
+    xp += distinctCities * 100;
+
+    if (hasFirstCapture) xp += 100;
+    if (has10Captures) xp += 500;
+    if (has3Cities) xp += 200;
+    if (has10Cities) xp += 1000;
+    if (hasRare) xp += 250;
+    if (hasLegendary) xp += 1000;
+
+    const level = Math.floor(Math.sqrt(xp / 100)) + 1;
+    const currentLevelXp = Math.pow(level - 1, 2) * 100;
+    const nextLevelXp = Math.pow(level, 2) * 100;
+    const xpIntoLevel = xp - currentLevelXp;
+    const levelXpReq = nextLevelXp - currentLevelXp;
+    const xpProgressPct = Math.min(100, Math.max(0, (xpIntoLevel / levelXpReq) * 100));
+
     return (
         <>
             <TopBar rightIcon={isOwnProfile ? 'settings' : 'none'} />
@@ -110,8 +131,28 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
                     <h1 className="text-xl font-bold tracking-tight text-[var(--color-davay-text)]">{user.username}</h1>
                     <p className="text-xs font-semibold text-[var(--color-davay-muted)] uppercase tracking-wider mt-1">Joined {format(user.created_at, 'MMM yyyy')}</p>
 
+                    {/* XP Progress Bar */}
+                    <div className="w-full mt-5 bg-[var(--bg-sub)] p-4 rounded-xl border border-[var(--border)] shadow-inner">
+                        <div className="flex justify-between items-end mb-2">
+                            <div className="flex items-center gap-2">
+                                <span className="text-lg font-black italic text-[var(--text-1)]">LVL {level}</span>
+                                <span className="text-[9px] font-bold text-[#121212] bg-[var(--accent)] px-2 py-0.5 rounded-sm uppercase tracking-widest leading-none mt-1">
+                                    {level < 3 ? 'Rookie' : level < 6 ? 'Street Hunter' : level < 10 ? 'Elite' : 'Legend'}
+                                </span>
+                            </div>
+                            <span className="text-[10px] font-black tracking-widest text-[var(--text-3)]">{xp} XP</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-[#121212] rounded-full overflow-hidden border border-[rgba(255,255,255,0.02)]">
+                            <div className="h-full bg-[var(--accent)] rounded-full transition-all duration-1000 shadow-[0_0_8px_rgba(255,214,10,0.4)]" style={{ width: `${xpProgressPct}%` }}></div>
+                        </div>
+                        <div className="flex justify-between mt-1.5">
+                            <span className="text-[8px] font-bold text-[var(--text-3)] opacity-50 tracking-wider text-left">{currentLevelXp}</span>
+                            <span className="text-[8px] font-bold text-[var(--text-3)] opacity-50 tracking-wider text-right">{nextLevelXp}</span>
+                        </div>
+                    </div>
+
                     {/* Stats strip */}
-                    <div className="flex w-full mt-6 gap-2">
+                    <div className="flex w-full mt-4 gap-2">
                         <div className="flex flex-col items-center flex-1 bg-[var(--bg-sub)] py-2 rounded-xl">
                             <span className="text-lg font-bold text-[var(--color-davay-primary)]">{totalCaptures}</span>
                             <span className="text-[9px] font-bold text-[var(--text-2)] uppercase tracking-widest">Captures</span>
