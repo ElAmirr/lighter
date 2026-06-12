@@ -213,46 +213,50 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
         }
     };
 
-    // ── ORIGIN screen (first-ever owner, straight from shop) ──
+    // ── ORIGIN screen (first-ever owner) ──────────────────────────────────
     if (success && finalOwner === 1) {
         return (
             <div style={{
                 position: 'fixed', inset: 0, zIndex: 9990,
-                background: 'linear-gradient(160deg, #1A0F00 0%, #3D2000 50%, #1A0F00 100%)',
+                background: '#0F1014',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                padding: '32px 24px', textAlign: 'center',
+                padding: '40px 28px', textAlign: 'center',
                 animation: 'fade-scale-in 300ms ease-out forwards',
             }}>
-                {/* Crown glow */}
-                <div style={{ fontSize: 72, marginBottom: 8, filter: 'drop-shadow(0 0 24px #FFD700)' }}>👑</div>
+                {/* Top label */}
+                <div style={{
+                    fontSize: 10, fontWeight: 900, letterSpacing: '0.3em',
+                    textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)',
+                    marginBottom: 32,
+                }}>DAVAY · ORIGIN CAPTURE</div>
+
+                {/* #001 — the big statement */}
+                <div style={{
+                    fontSize: 96, fontWeight: 900, lineHeight: 1,
+                    color: '#FFD60A', letterSpacing: '-0.04em',
+                    marginBottom: 4,
+                }}>#001</div>
 
                 <div style={{
-                    background: 'linear-gradient(135deg, #FFD700, #FFA500)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    fontSize: 13, fontWeight: 900, letterSpacing: '0.3em',
-                    textTransform: 'uppercase', marginBottom: 4,
-                }}>Origin Owner</div>
+                    fontSize: 13, fontWeight: 700, letterSpacing: '0.2em',
+                    textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)',
+                    marginBottom: 40,
+                }}>You are the origin</div>
 
-                <div style={{ fontSize: 42, fontWeight: 900, color: '#FFD700', lineHeight: 1.1, margin: '12px 0 4px', textShadow: '0 0 40px #FFD70080' }}>
-                    #001
-                </div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: '#FFF8E6', marginBottom: 6 }}>First to ever hold this</div>
-
-                {/* Shop badge */}
+                {/* Lighter name block */}
                 <div style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                    background: 'rgba(255,215,0,0.15)', border: '1px solid rgba(255,215,0,0.4)',
-                    borderRadius: 20, padding: '6px 16px', marginBottom: 20,
+                    borderTop: '1px solid rgba(255,255,255,0.08)',
+                    borderBottom: '1px solid rgba(255,255,255,0.08)',
+                    padding: '20px 0', width: '100%', maxWidth: 320,
+                    marginBottom: 40,
                 }}>
-                    <span style={{ fontSize: 14 }}>🏪</span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#FFD700', letterSpacing: '0.06em' }}>STRAIGHT FROM THE SHOP</span>
-                </div>
-
-                <div style={{ fontSize: 17, fontWeight: 800, color: '#FFF8E6', marginBottom: 4 }}>{lighterName}</div>
-                <div style={{ fontSize: 12, color: '#A0896A', marginBottom: 6 }}>#{lighterId.slice(0, 6)}</div>
-                <div style={{ fontSize: 13, color: '#C4A96A', marginBottom: 36 }}>
-                    Captured in <strong style={{ color: '#FFD700' }}>{cityName}</strong>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: '#FFFFFF', marginBottom: 4 }}>{lighterName}</div>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>#{lighterId.slice(0, 8).toUpperCase()}</div>
+                    {cityName && (
+                        <div style={{ fontSize: 12, color: '#FFD60A', marginTop: 8, fontWeight: 600, letterSpacing: '0.05em' }}>
+                            {cityName.toUpperCase()}
+                        </div>
+                    )}
                 </div>
 
                 {/* Share button */}
@@ -260,21 +264,22 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                     onClick={() => shareCapture({ ownerNumber: finalOwner, lighterName, lighterId, collection, cityName })}
                     style={{
                         width: '100%', maxWidth: 320, padding: '16px 0',
-                        background: 'linear-gradient(135deg, #FFD700, #FFA500)', color: '#1A0F00',
-                        fontWeight: 800, fontSize: 16, borderRadius: 16,
+                        background: '#FFD60A', color: '#0F1014',
+                        fontWeight: 900, fontSize: 14, letterSpacing: '0.1em',
+                        textTransform: 'uppercase', borderRadius: 14,
                         border: 'none', cursor: 'pointer', marginBottom: 12,
-                        boxShadow: '0 4px 32px rgba(255,215,0,0.4)',
                     }}
                 >
-                    🏆 Share — You&apos;re the OG
+                    Share this capture
                 </button>
                 <button
                     onClick={() => setSuccess(false)}
                     style={{
                         width: '100%', maxWidth: 320, padding: '14px 0',
-                        background: 'transparent', color: '#A0896A',
-                        fontWeight: 600, fontSize: 15, borderRadius: 16,
-                        border: '1px solid rgba(255,215,0,0.2)', cursor: 'pointer',
+                        background: 'transparent', color: 'rgba(255,255,255,0.4)',
+                        fontWeight: 600, fontSize: 14,
+                        border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14,
+                        cursor: 'pointer',
                     }}
                 >
                     View lighter
@@ -282,6 +287,7 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
             </div>
         );
     }
+
 
     // ── Cinematic success screen (subsequent owners) ──────────────────────
     if (success) {
