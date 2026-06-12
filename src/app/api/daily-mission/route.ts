@@ -55,29 +55,12 @@ export async function GET() {
                     });
 
                     if (user) {
-                        const totalCaptures = user.history_entries.length;
-                        const currentlyOwned = user.lighters.length;
-                        const scansTriggered = user.scans.length;
-                        const distinctCities = new Set(user.history_entries.map(h => h.city_name)).size;
-
-                        const xpConfig = await prisma.xpConfig.findUnique({ where: { id: 'default' } }) || {
-                            capture_base: 150, owned_base: 200, scan_base: 20, city_base: 100,
-                            first_capture: 100, ten_captures: 500, three_cities: 200, ten_cities: 1000,
-                            rare_find: 250, legendary_found: 1000
-                        } as any;
-
-                        myXp += totalCaptures * xpConfig.capture_base;
-                        myXp += currentlyOwned * xpConfig.owned_base;
-                        myXp += scansTriggered * xpConfig.scan_base;
-                        myXp += distinctCities * xpConfig.city_base;
-                        myXp += user.history_entries.reduce((acc, h) => acc + (h.lighter.rarity?.xp_reward || 0), 0);
-
-                        if (totalCaptures >= 1) myXp += xpConfig.first_capture;
-                        if (totalCaptures >= 10) myXp += xpConfig.ten_captures;
-                        if (distinctCities >= 3) myXp += xpConfig.three_cities;
-                        if (distinctCities >= 10) myXp += xpConfig.ten_cities;
-
-                        myLevel = Math.floor(Math.sqrt(myXp / 100)) + 1;
+                        myXp = user.history_entries.reduce((acc, h) => acc + (h.lighter.rarity?.xp_reward || 0), 0);
+                        const levelSchedule = await prisma.levelConfig.findMany({ orderBy: { xp_required: 'asc' } });
+                        myLevel = 1;
+                        for (const lv of levelSchedule) {
+                            if (myXp >= lv.xp_required) myLevel = lv.level;
+                        }
                     }
                 }
             } catch (e) { }

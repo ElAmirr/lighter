@@ -12,8 +12,17 @@ export default function AdminPage() {
     const [users, setUsers] = useState<any[]>([]);
     const [collections, setCollections] = useState<any[]>([]);
     const [rarities, setRarities] = useState<any[]>([]);
-    const [xpConfig, setXpConfig] = useState<any>(null);
+    const [xpConfig, setXpConfig] = useState<any>(null); // kept for safe removal
     const [dailyMission, setDailyMission] = useState<any>(null);
+    const [levels, setLevels] = useState<any[]>([]);
+    const [newLevel, setNewLevel] = useState({ level: '', xp_required: '', title: '' });
+    const [editingLevelId, setEditingLevelId] = useState<number | null>(null);
+    const [editingLevel, setEditingLevel] = useState({ level: '', xp_required: '', title: '' });
+
+    const [achievements, setAchievements] = useState<any[]>([]);
+    const [newAchievement, setNewAchievement] = useState({ title: '', icon: 'Zap', color: '#FFD60A', goal_type: 'captures', goal_count: '1', goal_string: '' });
+    const [editingAchievementId, setEditingAchievementId] = useState<number | null>(null);
+    const [editingAchievement, setEditingAchievement] = useState({ title: '', icon: 'Zap', color: '#FFD60A', goal_type: 'captures', goal_count: '1', goal_string: '' });
 
     // Form states
     const [loading, setLoading] = useState(false);
@@ -43,9 +52,20 @@ export default function AdminPage() {
         if (password === 'admin') {
             setIsAuthenticated(true);
             fetchData();
-            fetchXpConfig();
             fetchDailyMission();
+            fetchLevels();
+            fetchAchievements();
         } else alert("Wrong password. Hint: admin");
+    };
+
+    const fetchAchievements = async () => {
+        const res = await fetch('/api/admin/achievements?pw=davay_admin_2026');
+        if (res.ok) setAchievements(await res.json());
+    };
+
+    const fetchLevels = async () => {
+        const res = await fetch('/api/admin/levels?pw=davay_admin_2026');
+        if (res.ok) setLevels(await res.json());
     };
 
     const fetchDailyMission = async () => {
@@ -53,10 +73,6 @@ export default function AdminPage() {
         if (res.ok) setDailyMission(await res.json());
     };
 
-    const fetchXpConfig = async () => {
-        const res = await fetch('/api/admin/xp-config?pw=davay_admin_2026');
-        if (res.ok) setXpConfig(await res.json());
-    };
 
     const fetchData = async () => {
         const res = await fetch('/api/admin/data?pw=' + password);
@@ -162,19 +178,54 @@ export default function AdminPage() {
         setQrCodeData({ id, encodedUrl });
     };
 
-    const handleUpdateXp = async (e: React.FormEvent) => {
+    const handleAddLevel = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         try {
-            await fetch('/api/admin/xp-config', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password: 'davay_admin_2026', ...xpConfig })
-            });
-            alert("XP Settings Updated");
-        } finally {
-            setLoading(false);
-        }
+            await fetch('/api/admin/levels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'davay_admin_2026', ...newLevel }) });
+            setNewLevel({ level: '', xp_required: '', title: '' });
+            fetchLevels();
+        } finally { setLoading(false); }
+    };
+
+    const handleUpdateLevel = async (id: number) => {
+        setLoading(true);
+        try {
+            await fetch('/api/admin/levels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'davay_admin_2026', action: 'update', id, ...editingLevel }) });
+            setEditingLevelId(null);
+            fetchLevels();
+        } finally { setLoading(false); }
+    };
+
+    const handleDeleteLevel = async (id: number) => {
+        if (!confirm('Delete this level?')) return;
+        await fetch('/api/admin/levels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'davay_admin_2026', action: 'delete', id }) });
+        fetchLevels();
+    };
+
+    const handleAddAchievement = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await fetch('/api/admin/achievements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'davay_admin_2026', ...newAchievement }) });
+            setNewAchievement({ title: '', icon: 'Zap', color: '#FFD60A', goal_type: 'captures', goal_count: '1', goal_string: '' });
+            fetchAchievements();
+        } finally { setLoading(false); }
+    };
+
+    const handleUpdateAchievement = async (id: number) => {
+        setLoading(true);
+        try {
+            await fetch('/api/admin/achievements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'davay_admin_2026', action: 'update', id, ...editingAchievement }) });
+            setEditingAchievementId(null);
+            fetchAchievements();
+        } finally { setLoading(false); }
+    };
+
+    const handleDeleteAchievement = async (id: number) => {
+        if (!confirm('Delete this achievement?')) return;
+        await fetch('/api/admin/achievements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'davay_admin_2026', action: 'delete', id }) });
+        fetchAchievements();
     };
 
     const handleUpdateMission = async (e: React.FormEvent) => {
@@ -292,32 +343,154 @@ export default function AdminPage() {
                     )}
                 </div>
 
-                {/* XP CONFIGURATOR */}
-                {xpConfig && (
-                    <div className="bg-[#1B1B1F] p-6 rounded-3xl shadow-lg border border-[rgba(255,255,255,0.08)] col-span-1 lg:col-span-3">
-                        <h2 className="text-lg font-bold mb-4 tracking-wide text-[#FFD60A]">⚙️ XP CONFIGURATOR</h2>
-                        <form onSubmit={handleUpdateXp} className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                            {Object.entries(xpConfig).map(([key, val]) => {
-                                if (key === 'id' || key === 'updated_at') return null;
-                                return (
-                                    <div key={key} className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)]">
-                                        <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-2">{key.replace('_', ' ')}</label>
-                                        <input
-                                            type="number"
-                                            value={val as number}
-                                            onChange={(e) => setXpConfig({ ...xpConfig, [key]: parseInt(e.target.value) || 0 })}
-                                            className="p-2 border-b-2 border-[rgba(255,255,255,0.1)] bg-transparent font-black text-lg focus:outline-none focus:border-[#FFD60A] transition-colors"
-                                            required
-                                        />
-                                    </div>
-                                );
-                            })}
-                            <div className="col-span-2 md:col-span-4 lg:col-span-5 flex justify-end mt-4 pt-4 border-t border-[rgba(255,255,255,0.05)]">
-                                <button disabled={loading} type="submit" className="bg-[#FFD60A] text-[#121212] font-black tracking-widest px-8 py-3 rounded-xl active:scale-95 transition-transform hover:bg-[#FFE866]">SAVE CONFIGURATION</button>
+                {/* LEVEL SCHEDULE */}
+                <div className="bg-[#1B1B1F] p-6 rounded-3xl shadow-lg border border-[rgba(255,255,255,0.08)] col-span-1 lg:col-span-3">
+                    <h2 className="text-lg font-bold mb-4 tracking-wide text-[#FFD60A]">🏆 LEVEL SCHEDULE</h2>
+                    <p className="text-xs text-zinc-500 mb-4">Define XP thresholds per level. Users advance when their total rarity XP reaches the threshold.</p>
+
+                    {/* Add new level form */}
+                    <form onSubmit={handleAddLevel} className="grid grid-cols-3 gap-3 mb-5">
+                        <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)]">
+                            <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-1">Level #</label>
+                            <input type="number" min={1} value={newLevel.level} onChange={e => setNewLevel({ ...newLevel, level: e.target.value })} placeholder="1" className="p-1 bg-transparent font-black text-lg focus:outline-none border-b border-[rgba(255,255,255,0.1)] focus:border-[#FFD60A]" required />
+                        </div>
+                        <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)]">
+                            <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-1">XP Required</label>
+                            <input type="number" min={0} value={newLevel.xp_required} onChange={e => setNewLevel({ ...newLevel, xp_required: e.target.value })} placeholder="500" className="p-1 bg-transparent font-black text-lg focus:outline-none border-b border-[rgba(255,255,255,0.1)] focus:border-[#FFD60A]" required />
+                        </div>
+                        <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)]">
+                            <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-1">Title</label>
+                            <input type="text" value={newLevel.title} onChange={e => setNewLevel({ ...newLevel, title: e.target.value })} placeholder="Street Hunter" className="p-1 bg-transparent font-bold text-sm focus:outline-none border-b border-[rgba(255,255,255,0.1)] focus:border-[#FFD60A]" />
+                        </div>
+                        <div className="col-span-3 flex justify-end">
+                            <button disabled={loading} type="submit" className="bg-[#FFD60A] text-[#121212] font-black tracking-widest px-6 py-2 rounded-xl text-sm active:scale-95 transition-transform">+ ADD LEVEL</button>
+                        </div>
+                    </form>
+
+                    {/* Existing levels table */}
+                    {levels.length === 0 ? (
+                        <p className="text-xs text-zinc-600 text-center py-4">No levels configured yet. Add your first level above.</p>
+                    ) : (
+                        <div className="flex flex-col gap-2">
+                            {levels.map(lv => (
+                                <div key={lv.id} className="flex items-center gap-3 bg-[#0F1014] px-4 py-3 rounded-xl border border-[rgba(255,255,255,0.04)]">
+                                    {editingLevelId === lv.id ? (
+                                        <>
+                                            <input type="number" value={editingLevel.level} onChange={e => setEditingLevel({ ...editingLevel, level: e.target.value })} className="w-12 bg-transparent border-b border-[#FFD60A] font-black text-sm focus:outline-none text-center" />
+                                            <input type="number" value={editingLevel.xp_required} onChange={e => setEditingLevel({ ...editingLevel, xp_required: e.target.value })} className="w-20 bg-transparent border-b border-[#FFD60A] font-bold text-sm focus:outline-none" />
+                                            <input type="text" value={editingLevel.title} onChange={e => setEditingLevel({ ...editingLevel, title: e.target.value })} className="flex-1 bg-transparent border-b border-[#FFD60A] font-bold text-sm focus:outline-none" />
+                                            <button onClick={() => handleUpdateLevel(lv.id)} className="text-[#FFD60A] font-black text-xs hover:underline">SAVE</button>
+                                            <button onClick={() => setEditingLevelId(null)} className="text-zinc-500 font-bold text-xs hover:underline">CANCEL</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="w-12 text-center font-black text-[#FFD60A] text-sm">LVL {lv.level}</span>
+                                            <span className="w-20 font-bold text-white text-sm">{lv.xp_required.toLocaleString()} XP</span>
+                                            <span className="flex-1 text-zinc-400 text-sm font-medium">{lv.title}</span>
+                                            <button onClick={() => { setEditingLevelId(lv.id); setEditingLevel({ level: String(lv.level), xp_required: String(lv.xp_required), title: lv.title }); }} className="text-zinc-400 font-bold text-xs hover:text-[#FFD60A]">EDIT</button>
+                                            <button onClick={() => handleDeleteLevel(lv.id)} className="text-red-500 font-bold text-xs hover:underline">DEL</button>
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* ACHIEVEMENTS */}
+                <div className="bg-[#1B1B1F] p-6 rounded-3xl shadow-lg border border-[rgba(255,255,255,0.08)] col-span-1 lg:col-span-3">
+                    <h2 className="text-lg font-bold mb-4 tracking-wide text-[#FFD60A]">🌟 ACHIEVEMENTS</h2>
+
+                    {/* Add new achievement form */}
+                    <form onSubmit={handleAddAchievement} className="grid grid-cols-2 lg:grid-cols-6 gap-3 mb-5">
+                        <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)] lg:col-span-2">
+                            <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-1">Title</label>
+                            <input type="text" value={newAchievement.title} onChange={e => setNewAchievement({ ...newAchievement, title: e.target.value })} placeholder="First Capture" className="p-1 bg-transparent font-bold text-sm focus:outline-none border-b border-[rgba(255,255,255,0.1)] focus:border-[#FFD60A]" required />
+                        </div>
+                        <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)]">
+                            <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-1">Icon</label>
+                            <select value={newAchievement.icon} onChange={e => setNewAchievement({ ...newAchievement, icon: e.target.value })} className="p-1 bg-transparent font-bold text-sm focus:outline-none border-b border-[rgba(255,255,255,0.1)] focus:border-[#FFD60A] text-white">
+                                <option value="Zap" className="text-black">Zap ⚡️</option>
+                                <option value="Flame" className="text-black">Flame 🔥</option>
+                                <option value="MapPin" className="text-black">MapPin 📍</option>
+                                <option value="Star" className="text-black">Star ⭐️</option>
+                                <option value="Crown" className="text-black">Crown 👑</option>
+                                <option value="Globe" className="text-black">Globe 🌍</option>
+                                <option value="Award" className="text-black">Award 🥇</option>
+                            </select>
+                        </div>
+                        <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)]">
+                            <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-1">Color (Hex/CSS)</label>
+                            <input type="text" value={newAchievement.color} onChange={e => setNewAchievement({ ...newAchievement, color: e.target.value })} placeholder="#FFD60A" className="p-1 bg-transparent font-bold text-sm focus:outline-none border-b border-[rgba(255,255,255,0.1)] focus:border-[#FFD60A]" required />
+                        </div>
+                        <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)]">
+                            <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-1">Type</label>
+                            <select value={newAchievement.goal_type} onChange={e => setNewAchievement({ ...newAchievement, goal_type: e.target.value })} className="p-1 bg-transparent font-bold text-sm focus:outline-none border-b border-[rgba(255,255,255,0.1)] focus:border-[#FFD60A] text-white">
+                                <option value="captures" className="text-black">Captures</option>
+                                <option value="cities" className="text-black">Cities</option>
+                                <option value="rarity" className="text-black">Rarity Rank</option>
+                            </select>
+                        </div>
+                        {newAchievement.goal_type === 'rarity' ? (
+                            <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)]">
+                                <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-1">Rarity Name</label>
+                                <input type="text" value={newAchievement.goal_string} onChange={e => setNewAchievement({ ...newAchievement, goal_string: e.target.value })} placeholder="Legendary" className="p-1 bg-transparent font-bold text-sm focus:outline-none border-b border-[rgba(255,255,255,0.1)] focus:border-[#FFD60A]" required />
                             </div>
-                        </form>
-                    </div>
-                )}
+                        ) : (
+                            <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)]">
+                                <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-1">Required Count</label>
+                                <input type="number" min={1} value={newAchievement.goal_count} onChange={e => setNewAchievement({ ...newAchievement, goal_count: e.target.value })} className="p-1 bg-transparent font-bold text-sm focus:outline-none border-b border-[rgba(255,255,255,0.1)] focus:border-[#FFD60A]" required />
+                            </div>
+                        )}
+                        <div className="col-span-2 lg:col-span-6 flex justify-end">
+                            <button disabled={loading} type="submit" className="bg-[#FFD60A] text-[#121212] font-black tracking-widest px-6 py-2 rounded-xl text-sm active:scale-95 transition-transform">+ ADD ACHV</button>
+                        </div>
+                    </form>
+
+                    {/* Existing achievements table */}
+                    {achievements.length === 0 ? (
+                        <p className="text-xs text-zinc-600 text-center py-4">No achievements configured yet.</p>
+                    ) : (
+                        <div className="flex flex-col gap-2">
+                            {achievements.map(achv => (
+                                <div key={achv.id} className="flex items-center gap-3 bg-[#0F1014] px-4 py-3 rounded-xl border border-[rgba(255,255,255,0.04)] text-sm">
+                                    {editingAchievementId === achv.id ? (
+                                        <>
+                                            <input type="text" value={editingAchievement.title} onChange={e => setEditingAchievement({ ...editingAchievement, title: e.target.value })} className="flex-1 bg-transparent border-b border-[#FFD60A] font-bold focus:outline-none" />
+                                            <input type="text" value={editingAchievement.icon} onChange={e => setEditingAchievement({ ...editingAchievement, icon: e.target.value })} className="w-16 bg-transparent border-b border-[#FFD60A] font-bold focus:outline-none" />
+                                            <input type="text" value={editingAchievement.color} onChange={e => setEditingAchievement({ ...editingAchievement, color: e.target.value })} className="w-20 bg-transparent border-b border-[#FFD60A] font-bold focus:outline-none" />
+                                            <select value={editingAchievement.goal_type} onChange={e => setEditingAchievement({ ...editingAchievement, goal_type: e.target.value })} className="w-20 bg-transparent border-b border-[#FFD60A] font-bold focus:outline-none text-white">
+                                                <option value="captures" className="text-black">Cap</option>
+                                                <option value="cities" className="text-black">Cit</option>
+                                                <option value="rarity" className="text-black">Rar</option>
+                                            </select>
+                                            {editingAchievement.goal_type === 'rarity' ? (
+                                                <input type="text" value={editingAchievement.goal_string} onChange={e => setEditingAchievement({ ...editingAchievement, goal_string: e.target.value })} className="w-20 bg-transparent border-b border-[#FFD60A] font-bold focus:outline-none" />
+                                            ) : (
+                                                <input type="number" value={editingAchievement.goal_count} onChange={e => setEditingAchievement({ ...editingAchievement, goal_count: e.target.value })} className="w-12 bg-transparent border-b border-[#FFD60A] font-bold focus:outline-none text-center" />
+                                            )}
+                                            <button onClick={() => handleUpdateAchievement(achv.id)} className="text-[#FFD60A] font-black text-xs hover:underline">SAVE</button>
+                                            <button onClick={() => setEditingAchievementId(null)} className="text-zinc-500 font-bold text-xs hover:underline">CANCEL</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="w-6 text-center font-black" style={{ color: achv.color }}>★</span>
+                                            <span className="flex-1 font-bold text-white max-w-[200px] truncate">{achv.title}</span>
+                                            <span className="w-16 text-zinc-400">{achv.icon}</span>
+                                            <span className="w-20 font-mono text-xs" style={{ color: achv.color }}>{achv.color}</span>
+                                            <span className="w-24 text-zinc-400 font-bold">
+                                                {achv.goal_type === 'rarity' ? `Rarity: ${achv.goal_string}` : `${achv.goal_type}: ${achv.goal_count}`}
+                                            </span>
+                                            <span className="flex-1"></span>
+                                            <button onClick={() => { setEditingAchievementId(achv.id); setEditingAchievement({ title: achv.title, icon: achv.icon, color: achv.color, goal_type: achv.goal_type, goal_count: String(achv.goal_count), goal_string: achv.goal_string || '' }); }} className="text-zinc-400 font-bold text-xs hover:text-[#FFD60A]">EDIT</button>
+                                            <button onClick={() => handleDeleteAchievement(achv.id)} className="text-red-500 font-bold text-xs hover:underline">DEL</button>
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
                 {/* WEEKLY MISSION CONFIGURATOR */}
                 {dailyMission && (

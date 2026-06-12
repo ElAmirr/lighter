@@ -3,14 +3,18 @@ import { prisma } from '@/lib/prisma';
 import TopBar from '@/components/layout/TopBar';
 import { notFound, redirect } from 'next/navigation';
 import { format, formatDistanceToNow } from 'date-fns';
-import { Settings, Zap, Flame, MapPin, Star, Crown, Globe, Circle, Droplet, Leaf } from 'lucide-react';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/jwt';
 import Link from 'next/link';
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 import ProfilePictureUpload from '@/components/ProfilePictureUpload';
 import LogoutButton from './LogoutButton';
+import { Flame, MapPin, Zap, Crown, Globe, Star, Award, Circle, Droplet, Leaf } from 'lucide-react';
+import RecentActivity from './RecentActivity';
 
+const IconMap: Record<string, any> = {
+    Flame, MapPin, Zap, Crown, Globe, Star, Award, Circle, Droplet, Leaf
+};
 
 function getEditionStyles(collection: string) {
     switch (collection) {
@@ -79,52 +83,46 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
     `;
     const globalRank = (rankResult[0]?.rank || 0) + 1;
 
-    // Fetch Global XP Config
-    const xpConfigData = await prisma.xpConfig.findUnique({ where: { id: 'default' } });
-    const xpConfig = xpConfigData || {
-        capture_base: 150,
-        owned_base: 200,
-        scan_base: 20,
-        city_base: 100,
-        first_capture: 100,
-        ten_captures: 500,
-        three_cities: 200,
-        ten_cities: 1000,
-        rare_find: 250,
-        legendary_found: 1000,
-    };
+    // Fetch Level Schedule from DB (admin-configured)
+    const levelSchedule = await prisma.levelConfig.findMany({ orderBy: { xp_required: 'asc' } });
 
+    // XP: purely from rarity of each lighter ever captured
+    const xp = user.history_entries.reduce((acc, h) => acc + (h.lighter.rarity?.xp_reward || 0), 0);
 
-    // Achievements
-    const hasFirstCapture = totalCaptures >= 1;
-    const has10Captures = totalCaptures >= 10;
-    const has3Cities = distinctCities >= 3;
-    const has10Cities = distinctCities >= 10;
-    const hasRare = user.history_entries.some(h => ['Rare', 'Epic', 'Legendary'].includes(h.lighter.rarity?.name || ''));
-    const hasLegendary = user.history_entries.some(h => h.lighter.rarity?.name === 'Legendary');
-
-    // XP & Level Calculation
-    let xp = 0;
-    xp += totalCaptures * xpConfig.capture_base;
-    xp += currentlyOwned * xpConfig.owned_base;
-    xp += scansTriggered * xpConfig.scan_base;
-    xp += distinctCities * xpConfig.city_base;
-
-    // Dynamic Rarity XP
-    xp += user.history_entries.reduce((acc, h) => acc + (h.lighter.rarity?.xp_reward || 0), 0);
-
-    // Achievements
-    if (hasFirstCapture) xp += xpConfig.first_capture;
-    if (has10Captures) xp += xpConfig.ten_captures;
-    if (has3Cities) xp += xpConfig.three_cities;
-    if (has10Cities) xp += xpConfig.ten_cities;
-
-    const level = Math.floor(Math.sqrt(xp / 100)) + 1;
-    const currentLevelXp = Math.pow(level - 1, 2) * 100;
-    const nextLevelXp = Math.pow(level, 2) * 100;
+    // Determine level from schedule (highest threshold the user has passed)
+    let level = 1;
+    let levelTitle = 'Newcomer';
+    let currentLevelXp = 0;
+    let nextLevelXp = levelSchedule.length > 0 ? levelSchedule[0].xp_required : 500;
+    for (const lv of levelSchedule) {
+        if (xp >= lv.xp_required) {
+            level = lv.level;
+            levelTitle = lv.title;
+            currentLevelXp = lv.xp_required;
+        }
+    }
+    // Next level threshold
+    const nextLv = levelSchedule.find(lv => lv.xp_required > currentLevelXp);
+    nextLevelXp = nextLv?.xp_required ?? (currentLevelXp + 500);
     const xpIntoLevel = xp - currentLevelXp;
     const levelXpReq = nextLevelXp - currentLevelXp;
     const xpProgressPct = Math.min(100, Math.max(0, (xpIntoLevel / levelXpReq) * 100));
+
+    // Dynamic Achievements loading and evaluation
+    const achievementsConfig = await prisma.achievementConfig.findMany({ orderBy: { id: 'asc' } });
+    const evaluatedAchievements = achievementsConfig.map(achv => {
+        let isAchieved = false;
+        if (achv.goal_type === 'captures') {
+            isAchieved = totalCaptures >= achv.goal_count;
+        } else if (achv.goal_type === 'cities') {
+            isAchieved = distinctCities >= achv.goal_count;
+        } else if (achv.goal_type === 'rarity') {
+            isAchieved = user.history_entries.some(h =>
+                h.lighter.rarity?.name.toLowerCase() === (achv.goal_string || '').toLowerCase()
+            );
+        }
+        return { ...achv, isAchieved };
+    });
 
     return (
         <>
@@ -187,54 +185,27 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
                 {/* Achievements */}
                 <div>
                     <h2 className="text-sm font-bold tracking-widest text-[var(--color-davay-text)] mb-3 px-1">ACHIEVEMENTS</h2>
-                    <div className="grid grid-cols-3 gap-3">
-                        {/* First Capture */}
-                        <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !hasFirstCapture && "opacity-40 grayscale")}>
-                            <div className="w-10 h-10 bg-[#FF7A00]/20 text-[#FF7A00] rounded-full flex items-center justify-center mb-2">
-                                <Zap size={20} />
-                            </div>
-                            <span className="text-[10px] font-bold text-center leading-tight">First<br />Capture</span>
+                    {evaluatedAchievements.length === 0 ? (
+                        <div className="bg-[var(--bg-sub)] border border-[var(--border)] border-dashed rounded-2xl p-6 flex items-center justify-center text-xs font-semibold text-[var(--text-3)]">
+                            No achievements defined
                         </div>
+                    ) : (
+                        <div className="grid grid-cols-3 gap-3">
+                            {evaluatedAchievements.map(achv => {
+                                const IconComp = IconMap[achv.icon] || Circle;
+                                const isUnlocked = achv.isAchieved || isOwnProfile; // Always show color to owner so they know what it is? Wait, usually locked = grayscale. Let's make it grayscale if not achieved.
 
-                        <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !has10Captures && "opacity-40 grayscale")}>
-                            <div className="w-10 h-10 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mb-2">
-                                <Flame size={20} />
-                            </div>
-                            <span className="text-[10px] font-bold text-center leading-tight">10<br />Captures</span>
+                                return (
+                                    <div key={achv.id} className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !achv.isAchieved && "opacity-40 grayscale")}>
+                                        <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2" style={{ backgroundColor: `${achv.color}33`, color: achv.color }}>
+                                            <IconComp size={20} />
+                                        </div>
+                                        <span className="text-[10px] font-bold text-center leading-tight">{achv.title}</span>
+                                    </div>
+                                )
+                            })}
                         </div>
-
-                        <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !has3Cities && "opacity-40 grayscale")}>
-                            <div className="w-10 h-10 bg-blue-500/20 text-blue-500 rounded-full flex items-center justify-center mb-2">
-                                <MapPin size={20} />
-                            </div>
-                            <span className="text-[10px] font-bold text-center leading-tight">3<br />Cities</span>
-                        </div>
-
-                        <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !hasRare && "opacity-40 grayscale")}>
-                            <div className="w-10 h-10 bg-purple-500/20 text-purple-500 rounded-full flex items-center justify-center mb-2">
-                                <Star size={20} />
-                            </div>
-                            <span className="text-[10px] font-bold text-center leading-tight">Rare<br />Find</span>
-                        </div>
-
-                        {(hasLegendary || isOwnProfile) && (
-                            <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !hasLegendary && "opacity-40 grayscale")}>
-                                <div className="w-10 h-10 bg-[var(--accent)]/20 text-[var(--color-davay-primary)] rounded-full flex items-center justify-center mb-2">
-                                    <Crown size={20} />
-                                </div>
-                                <span className="text-[10px] font-bold text-center leading-tight">Legendary<br />Hunter</span>
-                            </div>
-                        )}
-
-                        {(has10Cities || isOwnProfile) && (
-                            <div className={clsx("flex flex-col items-center bg-[var(--bg-card)] p-3 rounded-2xl border border-[var(--border)] shadow-sm", !has10Cities && "opacity-40 grayscale")}>
-                                <div className="w-10 h-10 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mb-2">
-                                    <Globe size={20} />
-                                </div>
-                                <span className="text-[10px] font-bold text-center leading-tight">10<br />Cities</span>
-                            </div>
-                        )}
-                    </div>
+                    )}
                 </div>
 
                 {/* Currently Owns */}
