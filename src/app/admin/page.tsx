@@ -186,7 +186,7 @@ export default function AdminPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password: 'davay_admin_2026', ...dailyMission })
             });
-            alert("Daily Mission Updated!");
+            alert("Weekly Mission Updated!");
         } finally {
             setLoading(false);
         }
@@ -319,10 +319,10 @@ export default function AdminPage() {
                     </div>
                 )}
 
-                {/* DAILY MISSION CONFIGURATOR */}
+                {/* WEEKLY MISSION CONFIGURATOR */}
                 {dailyMission && (
                     <div className="bg-[#1B1B1F] p-6 rounded-3xl shadow-lg border border-[rgba(255,255,255,0.08)] col-span-1 lg:col-span-3">
-                        <h2 className="text-lg font-bold mb-4 tracking-wide text-[#FFD60A]">🎯 DAILY MISSION</h2>
+                        <h2 className="text-lg font-bold mb-4 tracking-wide text-[#FFD60A]">🎯 WEEKLY MISSION</h2>
                         <form onSubmit={handleUpdateMission} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)] md:col-span-2 lg:col-span-2">
                                 <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-2">Mission Title</label>

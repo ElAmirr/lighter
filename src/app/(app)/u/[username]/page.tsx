@@ -170,20 +170,16 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
                     {/* Stats strip */}
                     <div className="flex w-full mt-4 gap-2">
                         <div className="flex flex-col items-center flex-1 bg-[var(--bg-sub)] py-2 rounded-xl">
-                            <span className="text-lg font-bold text-[var(--color-davay-primary)]">{totalCaptures}</span>
-                            <span className="text-[9px] font-bold text-[var(--text-2)] uppercase tracking-widest">Captures</span>
-                        </div>
-                        <div className="flex flex-col items-center flex-1 bg-[var(--bg-sub)] py-2 rounded-xl">
                             <span className="text-lg font-bold text-[var(--color-davay-primary)]">{currentlyOwned}</span>
                             <span className="text-[9px] font-bold text-[var(--text-2)] uppercase tracking-widest">Owned</span>
                         </div>
                         <div className="flex flex-col items-center flex-1 bg-[var(--bg-sub)] py-2 rounded-xl">
-                            <span className="text-lg font-bold text-[var(--color-davay-primary)]">{scansTriggered}</span>
-                            <span className="text-[9px] font-bold text-[var(--text-2)] uppercase tracking-widest">Scans</span>
+                            <span className="text-lg font-bold text-[var(--color-davay-primary)]">{totalCaptures}</span>
+                            <span className="text-[9px] font-bold text-[var(--text-2)] uppercase tracking-widest">Captures</span>
                         </div>
-                        <div className="flex flex-col items-center flex-1 bg-[var(--bg-sub)] py-2 rounded-xl">
-                            <span className="text-lg font-bold text-[var(--color-davay-primary)]">{distinctCities}</span>
-                            <span className="text-[9px] font-bold text-[var(--text-2)] uppercase tracking-widest">Cities</span>
+                        <div className="flex flex-col items-center flex-1 bg-[var(--bg-sub)] py-2 rounded-xl border border-[var(--accent)]/30">
+                            <span className="text-lg font-bold text-[var(--accent)]">{xp}</span>
+                            <span className="text-[9px] font-black text-[var(--accent)] uppercase tracking-widest">Total XP</span>
                         </div>
                     </div>
                 </div>

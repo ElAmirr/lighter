@@ -76,6 +76,14 @@ export async function GET(req: NextRequest) {
         const activeHunters = activeRes[0]?.hunters || 0;
         const legendaryFound = await prisma.ownershipHistory.count({ where: { captured_at: { gte: todayStart }, lighter: { rarity: { name: 'Legendary' } } } });
 
+        // All-time totals
+        const totalCaptures = await prisma.ownershipHistory.count();
+        const totalHuntersRes: any = await prisma.$queryRaw`SELECT COUNT(DISTINCT owner_id)::int as hunters FROM "OwnershipHistory"`;
+        const totalHunters = totalHuntersRes[0]?.hunters || 0;
+        const totalLegendary = await prisma.ownershipHistory.count({ where: { lighter: { rarity: { name: 'Legendary' } } } });
+        const totalLighters = await prisma.lighter.count();
+        const totalFound = await prisma.lighter.count({ where: { history_entries: { some: {} } } });
+
         // Collection completion stats: % of lighters per collection that have been found
         const collectionsRaw = await prisma.collection.findMany({
             include: {
@@ -106,7 +114,7 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json({
             feed,
-            stats: { todayCaptures, activeHunters, legendaryFound, myMissionProgress },
+            stats: { todayCaptures, activeHunters, legendaryFound, myMissionProgress, totalCaptures, totalHunters, totalLegendary, totalLighters, totalFound },
             collections
         });
     } catch (error: any) {

@@ -4,18 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { Target, Trophy } from 'lucide-react';
 
 export default function DailyStats() {
-    const [stats, setStats] = useState<any>({ todayCaptures: 0, activeHunters: 0, legendaryFound: 0 });
     const [mission, setMission] = useState<any>(null);
     const [myProgress, setMyProgress] = useState<number>(0);
 
     useEffect(() => {
-        // Fetch daily feed stats
-        fetch('/api/feed?today=true')
-            .then(res => res.json())
-            .then(data => { if (data.stats) setStats(data.stats); })
-            .catch(() => { });
-
-        // Fetch daily mission + user progress
+        // Fetch weekly mission + user progress
         fetch('/api/daily-mission')
             .then(res => res.json())
             .then(data => {
@@ -25,39 +18,18 @@ export default function DailyStats() {
             .catch(() => { });
     }, []);
 
-    const { todayCaptures, activeHunters, legendaryFound } = stats;
     const goalCount = mission?.goal_count ?? 3;
     const missionPct = Math.min(100, Math.floor((myProgress / goalCount) * 100));
     const isComplete = myProgress >= goalCount;
 
     return (
         <div style={{ marginBottom: 24, marginTop: 16 }}>
-            {/* Daily Stats Header */}
-            <div style={{ background: 'var(--bg-card)', borderRadius: 16, border: '1px solid var(--border)', padding: '16px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: -40, right: -40, width: 100, height: 100, background: 'var(--accent)', opacity: 0.1, borderRadius: '50%', filter: 'blur(30px)' }}></div>
-                <div style={{ fontSize: 10, fontWeight: 900, color: 'var(--text-3)', letterSpacing: '0.15em', marginBottom: 12, borderBottom: '1px dashed var(--border)', paddingBottom: 6 }}>🔥 TODAY IN TUNISIA</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-1)' }}>{todayCaptures}</div>
-                        <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--text-3)' }}>CAPTURES</div>
-                    </div>
-                    <div style={{ textAlign: 'center', borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)' }}>
-                        <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-1)' }}>{activeHunters}</div>
-                        <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--text-3)' }}>HUNTERS</div>
-                    </div>
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--accent)' }}>{legendaryFound}</div>
-                        <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--text-3)' }}>LEGENDARY</div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Daily Mission Card */}
+            {/* Weekly Mission Card */}
             <div style={{ background: 'var(--bg-sub)', padding: '16px', borderRadius: 16, border: isComplete ? '1px solid rgba(255,214,10,0.6)' : '1px solid rgba(255, 214, 10, 0.3)', boxShadow: isComplete ? '0 4px 20px rgba(255,214,10,0.15)' : '0 4px 16px rgba(255, 214, 10, 0.05)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         {isComplete ? <Trophy size={16} color="var(--accent)" /> : <Target size={16} color="var(--accent)" />}
-                        <span style={{ fontSize: 11, fontWeight: 900, color: 'var(--text-1)', letterSpacing: '0.05em' }}>DAILY MISSION</span>
+                        <span style={{ fontSize: 11, fontWeight: 900, color: 'var(--text-1)', letterSpacing: '0.05em' }}>WEEKLY MISSION</span>
                     </div>
                     <span style={{ fontSize: 10, fontWeight: 800, background: 'rgba(255, 214, 10, 0.2)', color: 'var(--accent)', padding: '2px 8px', borderRadius: 12 }}>
                         +{mission?.xp_reward ?? 250} XP

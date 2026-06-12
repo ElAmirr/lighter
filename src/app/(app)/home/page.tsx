@@ -131,6 +131,10 @@ export default function HomePage() {
     const [feed, setFeed] = useState<any[]>([]);
     const [stats, setStats] = useState<any>({ todayCaptures: 0, activeHunters: 0, legendaryFound: 0, myMissionProgress: 0 });
     const [collections, setCollections] = useState<any[]>([]);
+    const [myXp, setMyXp] = useState<number>(0);
+    const [myLevel, setMyLevel] = useState<number>(1);
+    const [mission, setMission] = useState<any>(null);
+    const [missionProgress, setMissionProgress] = useState<number>(0);
     const [loading, setLoading] = useState(true);
     const [newIds, setNewIds] = useState<Set<string>>(new Set());
     const [loadingMsg, setLoadingMsg] = useState(loadingMessages[0]);
@@ -165,6 +169,16 @@ export default function HomePage() {
     useEffect(() => {
         setLoadingMsg(loadingMessages[Math.floor(Math.random() * loadingMessages.length)]);
         const timer = setTimeout(() => loadFeed(false), 300);
+        // Fetch weekly mission + personal XP
+        fetch('/api/daily-mission')
+            .then(r => r.json())
+            .then(d => {
+                if (d.mission) setMission(d.mission);
+                if (typeof d.myProgress === 'number') setMissionProgress(d.myProgress);
+                if (typeof d.myXp === 'number') setMyXp(d.myXp);
+                if (typeof d.myLevel === 'number') setMyLevel(d.myLevel);
+            })
+            .catch(() => { });
         return () => { clearTimeout(timer); };
     }, []);
 
@@ -174,6 +188,40 @@ export default function HomePage() {
             <TopBar rightIcon="pulse" rightLabel="Live" />
 
             <div style={{ padding: '16px 14px 0' }}>
+
+                {/* Personal HUD: XP + Weekly Mission */}
+                <div style={{ background: 'var(--bg-card)', borderRadius: 20, border: '1px solid var(--border)', padding: '14px 16px', marginBottom: 20 }}>
+                    {/* Top row: Level + XP */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div style={{ background: 'var(--accent)', color: '#121212', borderRadius: 8, padding: '2px 10px', fontSize: 11, fontWeight: 900 }}>LVL {myLevel}</div>
+                            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-1)' }}>{myXp.toLocaleString()} XP</div>
+                        </div>
+                        <div style={{ fontSize: 10, fontWeight: 900, color: 'var(--text-3)', letterSpacing: '0.08em' }}>🎯 WEEKLY MISSION</div>
+                    </div>
+                    {/* Mission info */}
+                    {mission && (
+                        <div style={{ marginBottom: 8 }}>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-2)' }}>{mission.title}</div>
+                        </div>
+                    )}
+                    {/* Progress bar */}
+                    <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 8, overflow: 'hidden' }}>
+                        <div style={{
+                            width: `${Math.min(100, Math.round((missionProgress / (mission?.goal_count || 3)) * 100))}%`,
+                            height: '100%',
+                            background: missionProgress >= (mission?.goal_count || 3) ? '#22c55e' : 'var(--accent)',
+                            borderRadius: 8,
+                            transition: 'width 600ms ease'
+                        }} />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: missionProgress >= (mission?.goal_count || 3) ? '#22c55e' : 'var(--text-3)' }}>
+                            {missionProgress >= (mission?.goal_count || 3) ? '✅ Completed!' : `${missionProgress} / ${mission?.goal_count ?? 3}`}
+                        </div>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent)' }}>+{mission?.xp_reward ?? 250} XP</div>
+                    </div>
+                </div>
 
                 {/* Trending Collections */}
                 <div style={{ marginBottom: 24 }}>
