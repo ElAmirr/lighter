@@ -67,7 +67,6 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
     const scansTriggered = user.scans.length;
     const distinctCities = new Set(user.history_entries.map(h => h.city_name)).size;
 
-    // Rank Calculation
     // Rank Calculation using raw SQL to bypass Prisma version limits
     const rankResult: any = await prisma.$queryRaw`
         SELECT COUNT(DISTINCT "owner_id")::int as rank
@@ -80,6 +79,21 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
     `;
     const globalRank = (rankResult[0]?.rank || 0) + 1;
 
+    // Fetch Global XP Config
+    const xpConfigData = await prisma.xpConfig.findUnique({ where: { id: 'default' } });
+    const xpConfig = xpConfigData || {
+        capture_base: 150,
+        owned_base: 200,
+        scan_base: 20,
+        city_base: 100,
+        first_capture: 100,
+        ten_captures: 500,
+        three_cities: 200,
+        ten_cities: 1000,
+        rare_find: 250,
+        legendary_found: 1000,
+    };
+
 
     // Achievements
     const hasFirstCapture = totalCaptures >= 1;
@@ -91,17 +105,17 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
 
     // XP & Level Calculation
     let xp = 0;
-    xp += totalCaptures * 150;
-    xp += currentlyOwned * 200;
-    xp += scansTriggered * 20;
-    xp += distinctCities * 100;
+    xp += totalCaptures * xpConfig.capture_base;
+    xp += currentlyOwned * xpConfig.owned_base;
+    xp += scansTriggered * xpConfig.scan_base;
+    xp += distinctCities * xpConfig.city_base;
 
-    if (hasFirstCapture) xp += 100;
-    if (has10Captures) xp += 500;
-    if (has3Cities) xp += 200;
-    if (has10Cities) xp += 1000;
-    if (hasRare) xp += 250;
-    if (hasLegendary) xp += 1000;
+    if (hasFirstCapture) xp += xpConfig.first_capture;
+    if (has10Captures) xp += xpConfig.ten_captures;
+    if (has3Cities) xp += xpConfig.three_cities;
+    if (has10Cities) xp += xpConfig.ten_cities;
+    if (hasRare) xp += xpConfig.rare_find;
+    if (hasLegendary) xp += xpConfig.legendary_found;
 
     const level = Math.floor(Math.sqrt(xp / 100)) + 1;
     const currentLevelXp = Math.pow(level - 1, 2) * 100;

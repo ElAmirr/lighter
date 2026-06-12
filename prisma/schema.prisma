@@ -90,3 +90,18 @@ model PushSubscription {
 
   user      User     @relation(fields: [user_id], references: [id])
 }
+
+model XpConfig {
+  id              String   @id @default("default") // Singleton ID
+  capture_base    Int      @default(150)
+  owned_base      Int      @default(200)
+  scan_base       Int      @default(20)
+  city_base       Int      @default(100)
+  first_capture   Int      @default(100)
+  ten_captures    Int      @default(500)
+  three_cities    Int      @default(200)
+  ten_cities      Int      @default(1000)
+  rare_find       Int      @default(250)
+  legendary_found Int      @default(1000)
+  updated_at      DateTime @updatedAt
+}
