@@ -110,12 +110,14 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
     xp += scansTriggered * xpConfig.scan_base;
     xp += distinctCities * xpConfig.city_base;
 
+    // Dynamic Rarity XP
+    xp += user.history_entries.reduce((acc, h) => acc + (h.lighter.rarity?.xp_reward || 0), 0);
+
+    // Achievements
     if (hasFirstCapture) xp += xpConfig.first_capture;
     if (has10Captures) xp += xpConfig.ten_captures;
     if (has3Cities) xp += xpConfig.three_cities;
     if (has10Cities) xp += xpConfig.ten_cities;
-    if (hasRare) xp += xpConfig.rare_find;
-    if (hasLegendary) xp += xpConfig.legendary_found;
 
     const level = Math.floor(Math.sqrt(xp / 100)) + 1;
     const currentLevelXp = Math.pow(level - 1, 2) * 100;

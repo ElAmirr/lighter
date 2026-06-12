@@ -30,9 +30,10 @@ model Collection {
 }
 
 model Rarity {
-  id       String    @id @default(uuid())
-  name     String    @unique
-  lighters Lighter[]
+  id        String    @id @default(uuid())
+  name      String    @unique
+  xp_reward Int       @default(0)
+  lighters  Lighter[]
 }
 
 model Lighter {
@@ -104,4 +105,15 @@ model XpConfig {
   rare_find       Int      @default(250)
   legendary_found Int      @default(1000)
   updated_at      DateTime @updatedAt
+}
+
+model DailyMission {
+  id          String   @id @default("daily") // Singleton ID
+  title       String   @default("Capture 3 different lighters")
+  description String   @default("Find and scan 3 unique lighters across the city.")
+  goal_type   String   @default("captures") // e.g. 'captures', 'scans', 'cities'
+  goal_count  Int      @default(3)
+  xp_reward   Int      @default(250)
+  reward_label String  @default("Rare Sticker")
+  updated_at  DateTime @updatedAt
 }

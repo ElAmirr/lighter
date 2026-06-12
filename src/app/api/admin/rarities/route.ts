@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
     try {
-        const { password, name, id, action } = await request.json();
+        const { password, name, id, action, xp_reward } = await request.json();
 
         if (password !== 'davay_admin_2026') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
         if (action === 'edit' && id) {
             const rarity = await prisma.rarity.update({
                 where: { id },
-                data: { name }
+                data: { name, xp_reward: parseInt(xp_reward) || 0 }
             });
             return NextResponse.json({ success: true, rarity });
         }
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
         if (!name) return NextResponse.json({ error: 'Missing name' }, { status: 400 });
 
         const rarity = await prisma.rarity.create({
-            data: { name }
+            data: { name, xp_reward: parseInt(xp_reward) || 0 }
         });
 
         return NextResponse.json({ success: true, rarity });

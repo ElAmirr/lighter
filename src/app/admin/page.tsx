@@ -13,6 +13,7 @@ export default function AdminPage() {
     const [collections, setCollections] = useState<any[]>([]);
     const [rarities, setRarities] = useState<any[]>([]);
     const [xpConfig, setXpConfig] = useState<any>(null);
+    const [dailyMission, setDailyMission] = useState<any>(null);
 
     // Form states
     const [loading, setLoading] = useState(false);
@@ -32,6 +33,7 @@ export default function AdminPage() {
     // Rarity Form
     const [editRarityId, setEditRarityId] = useState<string | null>(null);
     const [rName, setRName] = useState('');
+    const [rXp, setRXp] = useState<number>(0);
 
     // Utils
     const [qrCodeData, setQrCodeData] = useState<{ id: string, encodedUrl: string } | null>(null);
@@ -42,7 +44,13 @@ export default function AdminPage() {
             setIsAuthenticated(true);
             fetchData();
             fetchXpConfig();
+            fetchDailyMission();
         } else alert("Wrong password. Hint: admin");
+    };
+
+    const fetchDailyMission = async () => {
+        const res = await fetch('/api/admin/daily-mission?pw=davay_admin_2026');
+        if (res.ok) setDailyMission(await res.json());
     };
 
     const fetchXpConfig = async () => {
@@ -128,7 +136,7 @@ export default function AdminPage() {
     };
 
     // --- RARITIES CRUD ---
-    const resetRarityForm = () => { setEditRarityId(null); setRName(''); };
+    const resetRarityForm = () => { setEditRarityId(null); setRName(''); setRXp(0); };
     const createOrUpdateRarity = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -136,12 +144,12 @@ export default function AdminPage() {
             const res = await fetch('/api/admin/rarities', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password: 'davay_admin_2026', action: editRarityId ? 'edit' : 'create', id: editRarityId, name: rName })
+                body: JSON.stringify({ password: 'davay_admin_2026', action: editRarityId ? 'edit' : 'create', id: editRarityId, name: rName, xp_reward: rXp })
             });
             if (res.ok) { resetRarityForm(); fetchData(); }
         } finally { setLoading(false); }
     };
-    const editRarity = (r: any) => { setEditRarityId(r.id); setRName(r.name); };
+    const editRarity = (r: any) => { setEditRarityId(r.id); setRName(r.name); setRXp(r.xp_reward || 0); };
     const deleteRarity = async (id: string) => {
         if (!confirm('Are you sure you want to delete this rarity?')) return;
         await fetch('/api/admin/rarities', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'davay_admin_2026', action: 'delete', id }) });
@@ -164,6 +172,21 @@ export default function AdminPage() {
                 body: JSON.stringify({ password: 'davay_admin_2026', ...xpConfig })
             });
             alert("XP Settings Updated");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdateMission = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await fetch('/api/admin/daily-mission', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: 'davay_admin_2026', ...dailyMission })
+            });
+            alert("Daily Mission Updated!");
         } finally {
             setLoading(false);
         }
@@ -230,6 +253,10 @@ export default function AdminPage() {
                     </div>
                     <form onSubmit={createOrUpdateRarity} className="flex flex-col gap-3 mb-5 p-4 bg-[#0F1014] rounded-2xl border border-[rgba(255,255,255,0.03)]">
                         <input type="text" value={rName} onChange={e => setRName(e.target.value)} placeholder="Rarity (e.g. Legendary)" className="p-3 bg-[#1B1B1F] border border-[rgba(255,255,255,0.08)] rounded-xl font-bold focus:outline-none focus:border-[#FFD60A]" required />
+                        <div className="flex items-center gap-2">
+                            <label className="text-[10px] uppercase font-black text-zinc-500 whitespace-nowrap">XP REWARD:</label>
+                            <input type="number" value={rXp} onChange={e => setRXp(parseInt(e.target.value) || 0)} className="w-full p-3 bg-[#1B1B1F] border border-[rgba(255,255,255,0.08)] rounded-xl font-bold focus:outline-none focus:border-[#FFD60A]" required />
+                        </div>
                         <button disabled={loading} type="submit" className="bg-[#FFD60A] text-[#121212] font-black tracking-widest p-3 rounded-xl mt-2 active:scale-95 transition-transform">
                             {editRarityId ? 'UPDATE RARITY' : 'ADD RARITY'}
                         </button>
@@ -237,7 +264,10 @@ export default function AdminPage() {
                     <ul className="text-sm flex flex-col gap-2 max-h-48 overflow-auto pr-2 custom-scrollbar">
                         {rarities.map(r => (
                             <li key={r.id} className="flex justify-between items-center p-3 bg-[#0F1014] border border-[rgba(255,255,255,0.03)] rounded-xl hover:border-[#FFD60A]/30 transition-colors">
-                                <span className="font-bold">{r.name}</span>
+                                <div className="flex flex-col">
+                                    <span className="font-bold">{r.name}</span>
+                                    <span className="text-[9px] text-[#FFD60A] font-black tracking-widest mt-0.5">+{r.xp_reward || 0} XP</span>
+                                </div>
                                 <div className="flex gap-2">
                                     <button onClick={() => editRarity(r)} className="text-[#FFD60A] text-[10px] font-black tracking-widest px-2 py-1 bg-[#FFD60A]/10 rounded-md">EDIT</button>
                                     <button onClick={() => deleteRarity(r.id)} className="text-red-500 text-[10px] font-black tracking-widest px-2 py-1 bg-red-500/10 rounded-md">DEL</button>
@@ -284,6 +314,46 @@ export default function AdminPage() {
                             })}
                             <div className="col-span-2 md:col-span-4 lg:col-span-5 flex justify-end mt-4 pt-4 border-t border-[rgba(255,255,255,0.05)]">
                                 <button disabled={loading} type="submit" className="bg-[#FFD60A] text-[#121212] font-black tracking-widest px-8 py-3 rounded-xl active:scale-95 transition-transform hover:bg-[#FFE866]">SAVE CONFIGURATION</button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
+                {/* DAILY MISSION CONFIGURATOR */}
+                {dailyMission && (
+                    <div className="bg-[#1B1B1F] p-6 rounded-3xl shadow-lg border border-[rgba(255,255,255,0.08)] col-span-1 lg:col-span-3">
+                        <h2 className="text-lg font-bold mb-4 tracking-wide text-[#FFD60A]">🎯 DAILY MISSION</h2>
+                        <form onSubmit={handleUpdateMission} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)] md:col-span-2 lg:col-span-2">
+                                <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-2">Mission Title</label>
+                                <input type="text" value={dailyMission.title} onChange={e => setDailyMission({ ...dailyMission, title: e.target.value })} className="p-2 border-b-2 border-[rgba(255,255,255,0.1)] bg-transparent font-black text-base focus:outline-none focus:border-[#FFD60A] transition-colors" required />
+                            </div>
+                            <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)]">
+                                <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-2">Reward Label</label>
+                                <input type="text" value={dailyMission.reward_label} onChange={e => setDailyMission({ ...dailyMission, reward_label: e.target.value })} className="p-2 border-b-2 border-[rgba(255,255,255,0.1)] bg-transparent font-bold text-base focus:outline-none focus:border-[#FFD60A] transition-colors" required />
+                            </div>
+                            <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)] md:col-span-2 lg:col-span-3">
+                                <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-2">Description</label>
+                                <input type="text" value={dailyMission.description} onChange={e => setDailyMission({ ...dailyMission, description: e.target.value })} className="p-2 border-b-2 border-[rgba(255,255,255,0.1)] bg-transparent font-bold text-sm focus:outline-none focus:border-[#FFD60A] transition-colors" required />
+                            </div>
+                            <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)]">
+                                <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-2">Goal Type</label>
+                                <select value={dailyMission.goal_type} onChange={e => setDailyMission({ ...dailyMission, goal_type: e.target.value })} className="p-2 border-b-2 border-[rgba(255,255,255,0.1)] bg-[#0F1014] font-bold text-base focus:outline-none focus:border-[#FFD60A] transition-colors">
+                                    <option value="captures">Captures (unique lighters found)</option>
+                                    <option value="scans">Scans (total QR scans)</option>
+                                    <option value="cities">Cities (distinct cities)</option>
+                                </select>
+                            </div>
+                            <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)]">
+                                <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-2">Goal Count</label>
+                                <input type="number" min={1} value={dailyMission.goal_count} onChange={e => setDailyMission({ ...dailyMission, goal_count: parseInt(e.target.value) || 1 })} className="p-2 border-b-2 border-[rgba(255,255,255,0.1)] bg-transparent font-black text-lg focus:outline-none focus:border-[#FFD60A] transition-colors" required />
+                            </div>
+                            <div className="flex flex-col bg-[#0F1014] p-3 rounded-xl border border-[rgba(255,255,255,0.03)]">
+                                <label className="text-[9px] uppercase font-black tracking-widest text-[#FFD60A] mb-2">XP Reward</label>
+                                <input type="number" min={0} value={dailyMission.xp_reward} onChange={e => setDailyMission({ ...dailyMission, xp_reward: parseInt(e.target.value) || 0 })} className="p-2 border-b-2 border-[rgba(255,255,255,0.1)] bg-transparent font-black text-lg focus:outline-none focus:border-[#FFD60A] transition-colors" required />
+                            </div>
+                            <div className="col-span-1 md:col-span-2 lg:col-span-3 flex justify-end mt-4 pt-4 border-t border-[rgba(255,255,255,0.05)]">
+                                <button disabled={loading} type="submit" className="bg-[#FFD60A] text-[#121212] font-black tracking-widest px-8 py-3 rounded-xl active:scale-95 transition-transform hover:bg-[#FFE866]">SAVE MISSION</button>
                             </div>
                         </form>
                     </div>

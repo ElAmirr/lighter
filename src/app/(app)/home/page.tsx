@@ -130,6 +130,7 @@ const loadingMessages = [
 export default function HomePage() {
     const [feed, setFeed] = useState<any[]>([]);
     const [stats, setStats] = useState<any>({ todayCaptures: 0, activeHunters: 0, legendaryFound: 0, myMissionProgress: 0 });
+    const [collections, setCollections] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [newIds, setNewIds] = useState<Set<string>>(new Set());
     const [loadingMsg, setLoadingMsg] = useState(loadingMessages[0]);
@@ -142,6 +143,7 @@ export default function HomePage() {
 
             const safeFeed = Array.isArray(data.feed) ? data.feed : Array.isArray(data) ? data : [];
             if (data.stats) setStats(data.stats);
+            if (Array.isArray(data.collections)) setCollections(data.collections);
 
             if (prepend && latestIdRef.current && safeFeed.length > 0) {
                 const latestIdx = safeFeed.findIndex((f: any) => f.id === latestIdRef.current);
@@ -175,29 +177,48 @@ export default function HomePage() {
 
                 {/* Trending Collections */}
                 <div style={{ marginBottom: 24 }}>
-                    <div style={{ fontSize: 10, fontWeight: 900, color: 'var(--text-3)', letterSpacing: '0.1em', marginBottom: 12, paddingLeft: 4 }}>🔥 TRENDING EDITIONS</div>
+                    <div style={{ fontSize: 10, fontWeight: 900, color: 'var(--text-3)', letterSpacing: '0.1em', marginBottom: 12, paddingLeft: 4 }}>🔥 COLLECTION HUNT STATUS</div>
                     <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8, scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }} className="no-scrollbar">
-                        <div style={{ minWidth: 120, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16, padding: 12, flexShrink: 0 }}>
-                            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--bg-sub)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                                <Flame size={18} color="var(--accent)" />
-                            </div>
-                            <div style={{ fontSize: 13, fontWeight: 900, color: 'var(--text-1)' }}>Tunis</div>
-                            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)' }}>64% Found</div>
-                        </div>
-                        <div style={{ minWidth: 120, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16, padding: 12, flexShrink: 0 }}>
-                            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(155, 89, 182, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                                <Star size={18} color="#993556" />
-                            </div>
-                            <div style={{ fontSize: 13, fontWeight: 900, color: 'var(--text-1)' }}>Meme</div>
-                            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)' }}>82% Found</div>
-                        </div>
-                        <div style={{ minWidth: 120, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16, padding: 12, flexShrink: 0 }}>
-                            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(46, 204, 113, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                                <Leaf size={18} color="#3B6D11" />
-                            </div>
-                            <div style={{ fontSize: 13, fontWeight: 900, color: 'var(--text-1)' }}>Sfax</div>
-                            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)' }}>12% Found</div>
-                        </div>
+                        {collections.length === 0 && [0, 1, 2].map(i => (
+                            <div key={i} style={{ minWidth: 140, height: 96, background: 'var(--bg-card)', borderRadius: 16, border: '1px solid var(--border)', flexShrink: 0 }} className="skeleton" />
+                        ))}
+                        {collections.map((c: any) => {
+                            const edition = getEdition(c.name);
+                            const Icon = edition.icon;
+                            const pct = c.pct ?? 0;
+                            const isHot = pct >= 70;
+                            const statusColor = pct >= 90 ? '#ef4444' : pct >= 60 ? 'var(--accent)' : '#3b82f6';
+                            return (
+                                <div key={c.id} style={{ minWidth: 148, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16, padding: 12, flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
+                                    {/* Top row */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                                        {c.image_url ? (
+                                            <img src={c.image_url} style={{ width: 28, height: 28, borderRadius: 8, objectFit: 'cover' }} />
+                                        ) : (
+                                            <div style={{ width: 28, height: 28, borderRadius: 8, background: edition.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Icon size={16} color={edition.iconColor} />
+                                            </div>
+                                        )}
+                                        <div style={{ fontSize: 13, fontWeight: 900, color: 'var(--text-1)' }}>{c.name}</div>
+                                    </div>
+
+                                    {/* Progress bar */}
+                                    <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 4, marginBottom: 8, overflow: 'hidden' }}>
+                                        <div style={{ width: `${pct}%`, height: '100%', background: statusColor, borderRadius: 4, transition: 'width 800ms ease' }} />
+                                    </div>
+
+                                    {/* Stats row */}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div style={{ fontSize: 10, fontWeight: 800, color: statusColor }}>{pct}% Found</div>
+                                        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)' }}>{c.remaining} left</div>
+                                    </div>
+
+                                    {isHot && (
+                                        <div style={{ position: 'absolute', top: 6, right: 8, fontSize: 8, fontWeight: 900, color: '#ef4444', letterSpacing: '0.1em' }}>🔥 HOT</div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 
