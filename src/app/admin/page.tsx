@@ -601,7 +601,7 @@ export default function AdminPage() {
                 </div>
 
                 {/* Databases */}
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 pb-20">
+                <div className="flex flex-col gap-6 pb-20">
                     <div className="bg-[#1B1B1F] p-6 rounded-3xl shadow-lg border border-[rgba(255,255,255,0.08)] h-[600px] flex flex-col">
                         <h2 className="text-xl font-bold mb-4 tracking-wide">📦 Lighters Vault</h2>
                         <div className="flex-1 overflow-auto rounded-xl border border-[rgba(255,255,255,0.05)] custom-scrollbar">
@@ -645,74 +645,76 @@ export default function AdminPage() {
                             </table>
                         </div>
                     </div>
-                </div>
-                <div className="bg-[#1B1B1F] p-6 rounded-3xl shadow-lg border border-[rgba(255,255,255,0.08)] h-[600px] flex flex-col">
-                    <h2 className="text-xl font-bold mb-4 tracking-wide text-blue-400">👤 Members Database</h2>
-                    <div className="flex-1 overflow-auto rounded-xl border border-[rgba(255,255,255,0.05)] custom-scrollbar">
-                        <table className="w-full text-left text-sm whitespace-nowrap">
-                            <thead className="bg-[#0F1014] sticky top-0 z-10 shadow-md">
-                                <tr>
-                                    <th className="p-4 border-b border-[rgba(255,255,255,0.05)] text-[10px] tracking-widest text-zinc-500 uppercase">Username / ID</th>
-                                    <th className="p-4 border-b border-[rgba(255,255,255,0.05)] text-[10px] tracking-widest text-zinc-500 uppercase hidden md:table-cell">Email / Password</th>
-                                    <th className="p-4 border-b border-[rgba(255,255,255,0.05)] text-[10px] tracking-widest text-zinc-500 uppercase text-center hidden md:table-cell">Events</th>
-                                    <th className="p-4 border-b border-[rgba(255,255,255,0.05)] text-[10px] tracking-widest text-zinc-500 uppercase text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {users.map((u: any) => {
-                                    const isEditing = editingUserId === u.id;
-                                    return (
-                                        <tr key={u.id} className={`border-b border-[rgba(255,255,255,0.02)] last:border-b-0 hover:bg-[#0F1014] transition-colors ${isEditing ? 'bg-blue-500/5' : ''}`}>
-                                            <td className="p-3">
-                                                {isEditing ? (
-                                                    <div className="flex flex-col gap-1">
-                                                        <input type="text" value={editingUser.username} onChange={e => setEditingUser({ ...editingUser, username: e.target.value })} className="w-full bg-transparent border-b border-blue-500 font-bold text-white text-sm focus:outline-none" placeholder="Username" />
-                                                        <div className="text-[10px] font-mono text-zinc-500 mt-1">#{u.id.slice(0, 8)}</div>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <div className="font-bold flex gap-3 items-center text-zinc-100">
-                                                            <div className="w-8 h-8 rounded-full bg-zinc-800 border border-[rgba(255,255,255,0.1)] overflow-hidden bg-cover bg-center text-[10px] flex items-center justify-center" style={u.avatar_url ? { backgroundImage: 'url(' + u.avatar_url + ')' } : {}}>{!u.avatar_url && u.username.slice(0, 2).toUpperCase()}</div>
-                                                            {u.username}
+
+                    {/* Members Database - full width */}
+                    <div className="bg-[#1B1B1F] p-6 rounded-3xl shadow-lg border border-[rgba(255,255,255,0.08)] h-[600px] flex flex-col w-full">
+                        <h2 className="text-xl font-bold mb-4 tracking-wide text-blue-400">👤 Members Database</h2>
+                        <div className="flex-1 overflow-auto rounded-xl border border-[rgba(255,255,255,0.05)] custom-scrollbar">
+                            <table className="w-full text-left text-sm whitespace-nowrap">
+                                <thead className="bg-[#0F1014] sticky top-0 z-10 shadow-md">
+                                    <tr>
+                                        <th className="p-4 border-b border-[rgba(255,255,255,0.05)] text-[10px] tracking-widest text-zinc-500 uppercase">Username / ID</th>
+                                        <th className="p-4 border-b border-[rgba(255,255,255,0.05)] text-[10px] tracking-widest text-zinc-500 uppercase hidden md:table-cell">Email / Password</th>
+                                        <th className="p-4 border-b border-[rgba(255,255,255,0.05)] text-[10px] tracking-widest text-zinc-500 uppercase text-center hidden md:table-cell">Events</th>
+                                        <th className="p-4 border-b border-[rgba(255,255,255,0.05)] text-[10px] tracking-widest text-zinc-500 uppercase text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {users.map((u: any) => {
+                                        const isEditing = editingUserId === u.id;
+                                        return (
+                                            <tr key={u.id} className={`border-b border-[rgba(255,255,255,0.02)] last:border-b-0 hover:bg-[#0F1014] transition-colors ${isEditing ? 'bg-blue-500/5' : ''}`}>
+                                                <td className="p-3">
+                                                    {isEditing ? (
+                                                        <div className="flex flex-col gap-1">
+                                                            <input type="text" value={editingUser.username} onChange={e => setEditingUser({ ...editingUser, username: e.target.value })} className="w-full bg-transparent border-b border-blue-500 font-bold text-white text-sm focus:outline-none" placeholder="Username" />
+                                                            <div className="text-[10px] font-mono text-zinc-500 mt-1">#{u.id.slice(0, 8)}</div>
                                                         </div>
-                                                        <div className="text-[10px] font-mono text-zinc-500 mt-1 ml-11">#{u.id.slice(0, 8)}</div>
-                                                    </>
-                                                )}
-                                            </td>
-                                            <td className="p-3 font-semibold text-zinc-300 hidden md:table-cell">
-                                                {isEditing ? (
-                                                    <div className="flex flex-col gap-2">
-                                                        <input type="email" value={editingUser.email} onChange={e => setEditingUser({ ...editingUser, email: e.target.value })} className="w-full bg-transparent border-b border-blue-500 font-bold text-white text-sm focus:outline-none" placeholder="Email" />
-                                                        <input type="password" value={editingUser.newPassword} onChange={e => setEditingUser({ ...editingUser, newPassword: e.target.value })} className="w-full bg-transparent border-b border-blue-500 font-bold text-zinc-500 text-xs focus:outline-none" placeholder="New Password (optional)" />
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex flex-col">
-                                                        <span>{u.email}</span>
-                                                        <span className="text-[10px] text-zinc-500">*******</span>
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td className="p-3 text-center hidden md:table-cell">
-                                                <span className="bg-zinc-800 text-zinc-300 text-[10px] font-bold px-2 py-1 rounded-sm">{u.history_entries?.length || 0} Captures</span>
-                                            </td>
-                                            <td className="p-3 text-right">
-                                                {isEditing ? (
-                                                    <div className="flex gap-2 justify-end">
-                                                        <button onClick={() => handleUpdateUser(u.id)} className="text-blue-400 font-black text-xs hover:underline">SAVE</button>
-                                                        <button onClick={() => setEditingUserId(null)} className="text-zinc-500 font-bold text-xs hover:underline">CANCEL</button>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex gap-2 justify-end">
-                                                        <button onClick={() => { setEditingUserId(u.id); setEditingUser({ username: u.username, email: u.email, newPassword: '' }) }} className="px-3 py-1.5 bg-blue-500/10 text-blue-400 text-[10px] font-black tracking-widest rounded-lg hover:bg-blue-500/20 transition-colors">EDIT</button>
-                                                        <button onClick={() => handleDeleteUser(u.id)} className="px-3 py-1.5 bg-red-500/10 text-red-500 text-[10px] font-black tracking-widest rounded-lg hover:bg-red-500/20 transition-colors">DEL</button>
-                                                    </div>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    )
-                                })}
-                            </tbody>
-                        </table>
+                                                    ) : (
+                                                        <>
+                                                            <div className="font-bold flex gap-3 items-center text-zinc-100">
+                                                                <div className="w-8 h-8 rounded-full bg-zinc-800 border border-[rgba(255,255,255,0.1)] overflow-hidden bg-cover bg-center text-[10px] flex items-center justify-center" style={u.avatar_url ? { backgroundImage: 'url(' + u.avatar_url + ')' } : {}}>{!u.avatar_url && u.username.slice(0, 2).toUpperCase()}</div>
+                                                                {u.username}
+                                                            </div>
+                                                            <div className="text-[10px] font-mono text-zinc-500 mt-1 ml-11">#{u.id.slice(0, 8)}</div>
+                                                        </>
+                                                    )}
+                                                </td>
+                                                <td className="p-3 font-semibold text-zinc-300 hidden md:table-cell">
+                                                    {isEditing ? (
+                                                        <div className="flex flex-col gap-2">
+                                                            <input type="email" value={editingUser.email} onChange={e => setEditingUser({ ...editingUser, email: e.target.value })} className="w-full bg-transparent border-b border-blue-500 font-bold text-white text-sm focus:outline-none" placeholder="Email" />
+                                                            <input type="password" value={editingUser.newPassword} onChange={e => setEditingUser({ ...editingUser, newPassword: e.target.value })} className="w-full bg-transparent border-b border-blue-500 font-bold text-zinc-500 text-xs focus:outline-none" placeholder="New Password (optional)" />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-col">
+                                                            <span>{u.email}</span>
+                                                            <span className="text-[10px] text-zinc-500">*******</span>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="p-3 text-center hidden md:table-cell">
+                                                    <span className="bg-zinc-800 text-zinc-300 text-[10px] font-bold px-2 py-1 rounded-sm">{u.history_entries?.length || 0} Captures</span>
+                                                </td>
+                                                <td className="p-3 text-right">
+                                                    {isEditing ? (
+                                                        <div className="flex gap-2 justify-end">
+                                                            <button onClick={() => handleUpdateUser(u.id)} className="text-blue-400 font-black text-xs hover:underline">SAVE</button>
+                                                            <button onClick={() => setEditingUserId(null)} className="text-zinc-500 font-bold text-xs hover:underline">CANCEL</button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex gap-2 justify-end">
+                                                            <button onClick={() => { setEditingUserId(u.id); setEditingUser({ username: u.username, email: u.email, newPassword: '' }) }} className="px-3 py-1.5 bg-blue-500/10 text-blue-400 text-[10px] font-black tracking-widest rounded-lg hover:bg-blue-500/20 transition-colors">EDIT</button>
+                                                            <button onClick={() => handleDeleteUser(u.id)} className="px-3 py-1.5 bg-red-500/10 text-red-500 text-[10px] font-black tracking-widest rounded-lg hover:bg-red-500/20 transition-colors">DEL</button>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        )
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
