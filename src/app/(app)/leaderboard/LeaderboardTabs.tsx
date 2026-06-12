@@ -17,7 +17,7 @@ export default function LeaderboardTabs({ activeTab }: { activeTab: string }) {
     const tabs = [
         { id: 'captures', label: 'Captures' },
         { id: 'owned', label: 'Owned' },
-        { id: 'scans', label: 'Scans' },
+        { id: 'xp', label: 'Total XP' },
     ];
 
     return (

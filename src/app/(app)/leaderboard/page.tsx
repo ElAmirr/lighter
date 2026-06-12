@@ -57,14 +57,33 @@ export default async function LeaderboardPage({
             orderBy: { lighters: { _count: 'desc' } }
         });
         entries = topUsersRaw.map(u => ({ id: u.id, username: u.username, avatar_url: u.avatar_url, score: u._count.lighters }));
-    } else if (activeTab === 'scans') {
+    } else if (activeTab === 'xp') {
         const topUsersRaw = await prisma.user.findMany({
-            take: 30,
-            where: { scans: { some: {} } },
-            select: { id: true, username: true, avatar_url: true, _count: { select: { scans: true } } },
-            orderBy: { scans: { _count: 'desc' } }
+            where: { history_entries: { some: {} } },
+            select: {
+                id: true,
+                username: true,
+                avatar_url: true,
+                history_entries: {
+                    select: {
+                        lighter: {
+                            select: {
+                                rarity: { select: { xp_reward: true } }
+                            }
+                        }
+                    }
+                }
+            }
         });
-        entries = topUsersRaw.map(u => ({ id: u.id, username: u.username, avatar_url: u.avatar_url, score: u._count.scans }));
+
+        let usersWithXp = topUsersRaw.map((u: any) => {
+            const xp = u.history_entries.reduce((acc: number, h: any) => acc + (h.lighter?.rarity?.xp_reward || 0), 0);
+            return { id: u.id, username: u.username, avatar_url: u.avatar_url, score: xp };
+        });
+
+        // Sort descending by XP, then take top 30
+        usersWithXp.sort((a, b) => b.score - a.score);
+        entries = usersWithXp.slice(0, 30);
     }
 
     entries = entries.filter(e => e.score > 0);
@@ -92,10 +111,25 @@ export default async function LeaderboardPage({
                     myScore = me._count.lighters;
                     const r: any = await prisma.$queryRaw`SELECT COUNT(DISTINCT "current_owner_id")::int as rank FROM (SELECT "current_owner_id" FROM "Lighter" WHERE "current_owner_id" IS NOT NULL GROUP BY "current_owner_id" HAVING COUNT("id") > ${myScore}) as T;`;
                     myRank = (r[0]?.rank || 0) + 1;
-                } else {
-                    myScore = me._count.scans;
-                    const r: any = await prisma.$queryRaw`SELECT COUNT(DISTINCT "user_id")::int as rank FROM (SELECT "user_id" FROM "Scan" WHERE "user_id" IS NOT NULL GROUP BY "user_id" HAVING COUNT("id") > ${myScore}) as T;`;
-                    myRank = (r[0]?.rank || 0) + 1;
+                } else if (activeTab === 'xp') {
+                    // For XP rank, fetch all users with XP, sort, and find current user
+                    const allRanks = await prisma.user.findMany({
+                        where: { history_entries: { some: {} } },
+                        select: {
+                            id: true,
+                            history_entries: { select: { lighter: { select: { rarity: { select: { xp_reward: true } } } } } }
+                        }
+                    });
+                    const rankedList = allRanks.map((u: any) => ({
+                        id: u.id,
+                        xp: u.history_entries.reduce((acc: number, h: any) => acc + (h.lighter?.rarity?.xp_reward || 0), 0)
+                    })).sort((a, b) => b.xp - a.xp);
+
+                    const pIndex = rankedList.findIndex(x => x.id === currentUser);
+                    if (pIndex >= 0) {
+                        myRank = pIndex + 1;
+                        myScore = rankedList[pIndex].xp;
+                    }
                 }
             }
         }
