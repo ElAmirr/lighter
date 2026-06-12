@@ -10,7 +10,6 @@ import { clsx } from 'clsx';
 import ProfilePictureUpload from '@/components/ProfilePictureUpload';
 import LogoutButton from './LogoutButton';
 import { Flame, MapPin, Zap, Crown, Globe, Star, Award, Circle, Droplet, Leaf } from 'lucide-react';
-import RecentActivity from './RecentActivity';
 
 const IconMap: Record<string, any> = {
     Flame, MapPin, Zap, Crown, Globe, Star, Award, Circle, Droplet, Leaf
