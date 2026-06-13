@@ -146,13 +146,14 @@ async function shareCapture(opts: Parameters<typeof generateShareCard>[0]) {
 interface Props {
     lighterId: string;
     lighterName?: string;
+    lighterImage?: string;
     collection?: string;
     isLoggedIn: boolean;
     alreadyOwns: boolean;
     ownerIndex: number;
 }
 
-export default function CaptureClientButton({ lighterId, lighterName = 'Lighter', collection = 'Default', isLoggedIn, alreadyOwns, ownerIndex }: Props) {
+export default function CaptureClientButton({ lighterId, lighterName = 'Lighter', lighterImage, collection = 'Default', isLoggedIn, alreadyOwns, ownerIndex }: Props) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -299,16 +300,28 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                 padding: '32px 24px', textAlign: 'center',
                 animation: 'fade-scale-in 300ms ease-out forwards',
             }}>
-                {/* Edition circle */}
-                <div style={{
-                    width: 120, height: 120, borderRadius: '50%',
-                    background: ed.bg,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    marginBottom: 28,
-                    boxShadow: `0 0 0 12px ${ed.bg}80, 0 8px 40px ${ed.accent}30`,
-                }}>
-                    <EdIcon size={56} color={ed.accent} strokeWidth={1.5} />
-                </div>
+                {lighterImage ? (
+                    <div style={{
+                        width: 160, height: 200, borderRadius: 20,
+                        background: 'var(--bg-card)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        marginBottom: 28, overflow: 'hidden',
+                        boxShadow: `0 8px 50px ${ed.accent}30`,
+                        border: `1px solid rgba(255,255,255,0.08)`
+                    }}>
+                        <img src={lighterImage} alt="Captured Lighter" style={{ width: '100%', height: '100%', objectFit: 'contain', margin: '10px' }} />
+                    </div>
+                ) : (
+                    <div style={{
+                        width: 120, height: 120, borderRadius: '50%',
+                        background: ed.bg,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        marginBottom: 28,
+                        boxShadow: `0 0 0 12px ${ed.bg}80, 0 8px 40px ${ed.accent}30`,
+                    }}>
+                        <EdIcon size={56} color={ed.accent} strokeWidth={1.5} />
+                    </div>
+                )}
 
                 {/* Count-up owner number */}
                 <div style={{ fontSize: 80, fontWeight: 900, color: 'var(--accent)', lineHeight: 1, marginBottom: 8 }}>

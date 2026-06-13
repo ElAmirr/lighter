@@ -106,6 +106,7 @@ export default async function LighterProfile({ params }: { params: Promise<{ id:
                         lighterId={lighter.id}
                         lighterName={lighter.name}
                         collection={lighter.collection?.name || 'Default'}
+                        lighterImage={heroImage || undefined}
                         isLoggedIn={!!currentUser}
                         alreadyOwns={alreadyOwns}
                         ownerIndex={lighter.history_entries.length + 1}
