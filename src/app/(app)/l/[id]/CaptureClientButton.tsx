@@ -66,6 +66,7 @@ async function generateShareCard(opts: {
     ownerNumber: number;
     lighterName: string;
     lighterId: string;
+    lighterImage?: string;
     collection: string;
     cityName: string;
 }) {
@@ -73,48 +74,77 @@ async function generateShareCard(opts: {
     canvas.width = 1080;
     canvas.height = 1080;
     const ctx = canvas.getContext('2d')!;
-    const ed = EDITIONS[opts.collection] || EDITIONS.Default;
 
     // Background
-    ctx.fillStyle = ed.bg;
+    ctx.fillStyle = '#0F1014';
     ctx.fillRect(0, 0, 1080, 1080);
 
-    // Logo
-    ctx.font = 'bold 64px Arial';
-    ctx.fillStyle = '#1A1A1A';
-    ctx.textAlign = 'center';
-    ctx.fillText('DA', 440, 120);
-    ctx.fillStyle = '#D85A30';
-    ctx.fillText('V', 540 + 28, 120);
-    ctx.fillStyle = '#1A1A1A';
-    ctx.fillText('AY', 640, 120);
+    // Decorative grid/border
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(40, 40, 1000, 1000);
 
-    // Collection label
-    ctx.font = 'bold 28px Arial';
-    ctx.fillStyle = ed.accent;
-    ctx.fillText(`${opts.collection.toUpperCase()} COLLECTION`, 540, 180);
+    // Logo
+    ctx.font = 'bold 48px Arial';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'left';
+    ctx.fillText('DAVAY', 80, 110);
+
+    ctx.fillStyle = '#FFD60A';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText(opts.cityName.toUpperCase(), 1000, 110);
 
     // Big owner number
-    ctx.font = 'black 280px Arial';
-    ctx.fillStyle = ed.accent;
-    ctx.fillText(`#${opts.ownerNumber}`, 540, 560);
+    ctx.textAlign = 'center';
+    ctx.font = '900 240px Arial';
+    ctx.fillStyle = opts.ownerNumber === 1 ? '#FFD60A' : '#FFFFFF';
+    ctx.fillText(opts.ownerNumber === 1 ? '#001' : `#${opts.ownerNumber}`, 540, 360);
 
-    // "owner of" text
-    ctx.font = '500 44px Arial';
-    ctx.fillStyle = '#1A1A1A';
-    ctx.fillText(`owner of ${opts.lighterName}`, 540, 640);
+    ctx.font = 'bold 40px Arial';
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.fillText(opts.ownerNumber === 1 ? 'ORIGIN OWNER' : 'OWNER', 540, 440);
 
-    // City + date
-    ctx.font = '32px Arial';
-    ctx.fillStyle = '#888';
+    // Image (if available) or fallback box
+    if (opts.lighterImage) {
+        try {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = opts.lighterImage as string;
+            });
+            // Draw image contained in 400x400 box at the center
+            const maxW = 400, maxH = 400;
+            const scale = Math.min(maxW / img.width, maxH / img.height);
+            const w = img.width * scale;
+            const h = img.height * scale;
+            ctx.drawImage(img, 540 - w / 2, 680 - h / 2, w, h);
+        } catch {
+            ctx.fillStyle = 'rgba(255,255,255,0.02)';
+            ctx.fillRect(340, 480, 400, 400);
+        }
+    } else {
+        ctx.fillStyle = 'rgba(255,255,255,0.02)';
+        ctx.fillRect(340, 480, 400, 400);
+    }
+
+    // Name and ID block
     ctx.textAlign = 'left';
-    ctx.fillText(`📍 ${opts.cityName}  ·  ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`, 80, 980);
+    ctx.font = 'bold 44px Arial';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(opts.lighterName, 80, 960);
+
+    ctx.font = '32px monospace';
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillText(`#${opts.lighterId.slice(0, 8).toUpperCase()}`, 80, 1010);
 
     // Watermark
     ctx.textAlign = 'right';
-    ctx.fillStyle = ed.accent;
-    ctx.font = 'bold 32px Arial';
-    ctx.fillText('davay.tn', 1000, 980);
+    ctx.fillStyle = '#FFD60A';
+    ctx.font = 'bold 36px Arial';
+    ctx.fillText('davay.tn', 1000, 1010);
 
     return canvas;
 }
@@ -262,7 +292,7 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
 
                 {/* Share button */}
                 <button
-                    onClick={() => shareCapture({ ownerNumber: finalOwner, lighterName, lighterId, collection, cityName })}
+                    onClick={() => shareCapture({ ownerNumber: finalOwner, lighterName, lighterId, collection, cityName, lighterImage })}
                     style={{
                         width: '100%', maxWidth: 320, padding: '16px 0',
                         background: '#FFD60A', color: '#0F1014',
@@ -303,11 +333,8 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                 {lighterImage ? (
                     <div style={{
                         width: 160, height: 200, borderRadius: 20,
-                        background: 'var(--bg-card)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         marginBottom: 28, overflow: 'hidden',
-                        boxShadow: `0 8px 50px ${ed.accent}30`,
-                        border: `1px solid rgba(255,255,255,0.08)`
                     }}>
                         <img src={lighterImage} alt="Captured Lighter" style={{ width: '100%', height: '100%', objectFit: 'contain', margin: '10px' }} />
                     </div>
@@ -342,7 +369,7 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
 
                 {/* Share button */}
                 <button
-                    onClick={() => shareCapture({ ownerNumber: finalOwner, lighterName, lighterId, collection, cityName })}
+                    onClick={() => shareCapture({ ownerNumber: finalOwner, lighterName, lighterId, collection, cityName, lighterImage })}
                     style={{
                         width: '100%', maxWidth: 320, padding: '16px 0',
                         background: 'var(--accent)', color: '#121212',
