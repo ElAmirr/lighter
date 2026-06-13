@@ -271,8 +271,20 @@ export default function CaptureClientButton({ lighterId, lighterName = 'Lighter'
                 <div style={{
                     fontSize: 13, fontWeight: 700, letterSpacing: '0.2em',
                     textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)',
-                    marginBottom: 40,
+                    marginBottom: 32,
                 }}>You are the origin</div>
+
+                {lighterImage && (
+                    <div style={{
+                        width: 160, height: 200, borderRadius: 20,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        marginBottom: 32, overflow: 'hidden',
+                        boxShadow: `0 8px 50px rgba(255, 214, 10, 0.15)`,
+                        border: `1px solid rgba(255, 214, 10, 0.15)`
+                    }}>
+                        <img src={lighterImage} alt="Captured Lighter" style={{ width: '100%', height: '100%', objectFit: 'contain', margin: '10px' }} />
+                    </div>
+                )}
 
                 {/* Lighter name block */}
                 <div style={{
