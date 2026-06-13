@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
             take: 50,
             where: todayOnly ? { captured_at: { gte: todayStart } } : undefined,
             include: {
-                owner: { select: { username: true, avatar_url: true } },
+                owner: { select: { id: true, username: true, avatar_url: true } },
                 stolen_from: { select: { username: true } },
                 lighter: {
                     include: {
@@ -47,6 +47,31 @@ export async function GET(req: NextRequest) {
             }
         });
 
+        // Compute XP and Level for feed owners
+        const ownerIds = Array.from(new Set(history.map(h => h.owner.id)));
+        const xpMap = new Map<string, number>();
+        if (ownerIds.length > 0) {
+            const xpEntries = await prisma.ownershipHistory.findMany({
+                where: { owner_id: { in: ownerIds } },
+                select: { owner_id: true, lighter: { select: { rarity: { select: { xp_reward: true } } } } }
+            });
+            for (const entry of xpEntries) {
+                const current = xpMap.get(entry.owner_id) || 0;
+                xpMap.set(entry.owner_id, current + (entry.lighter?.rarity?.xp_reward || 0));
+            }
+        }
+
+        const levelSchedule = await prisma.levelConfig.findMany({ orderBy: { xp_required: 'asc' } });
+        const userLevels = new Map<string, number>();
+        for (const ownerId of ownerIds) {
+            const xp = xpMap.get(ownerId) || 0;
+            let level = 1;
+            for (const lv of levelSchedule) {
+                if (xp >= lv.xp_required) level = lv.level;
+            }
+            userLevels.set(ownerId, level);
+        }
+
         const rankMap = new Map<string, number>();
         const feed = history.map((h) => {
             const key = h.lighter_id;
@@ -56,6 +81,7 @@ export async function GET(req: NextRequest) {
                 id: h.id,
                 username: h.owner.username,
                 user_avatar: h.owner.avatar_url,
+                level: userLevels.get(h.owner.id) || 1,
                 lighter_id: h.lighter_id,
                 lighter_name: h.lighter.name,
                 collection: h.lighter.collection?.name || 'Default',

@@ -37,9 +37,9 @@ function FeedCard({ item, isNew }: { item: any; isNew?: boolean }) {
     // Derived values from item
     const isStolen = !!item.stolen_from;
 
-    // Mock levels and distance based on ID length to make it look active
-    const level = Math.max(1, Math.floor((item.scan_count || 1) * 3 + (item.lighter_id.charCodeAt(2) % 5)));
+    // Mock distance (temporarily kept or calculated)
     const distance = (item.scan_count || 1) * 12 + (item.lighter_id.charCodeAt(1) % 50);
+    const level = item.level || 1;
 
     return (
         <div style={{
